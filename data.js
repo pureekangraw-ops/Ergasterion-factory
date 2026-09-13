@@ -1,7 +1,7 @@
 window.OWNER_SEAL_EXPECTED={
   ownerId:"BIG",
   logicVersion:"owner-logic-seal-v1",
-  sourceCommit:"69fc323e912c2fd4d65ab12e93175aec850da20b",
+  sourceCommit:"c0a659487c5ac53b5e28a92376e221c51d919266",
   integrityDigest:"proof:mimir-v1-owner-seal-contract-v1",
   signer:"BIG / Owner"
 };
@@ -25,7 +25,7 @@ window.MIMIR_REGISTRY=[{
   logicSeal:{
     ownerId:"BIG",
     logicVersion:"owner-logic-seal-v1",
-    sourceCommit:"69fc323e912c2fd4d65ab12e93175aec850da20b",
+    sourceCommit:"c0a659487c5ac53b5e28a92376e221c51d919266",
     integrityDigest:"proof:mimir-v1-owner-seal-contract-v1",
     signer:"BIG / Owner",
     verificationState:"VERIFIED",
