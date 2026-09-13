@@ -48,6 +48,14 @@ function out(r,status,waitReason){
 }
 
 function queryMimir(q){
+  const surfaceNeed=text(q.surface).trim().toLowerCase();
+  const pool=surfaceNeed?R.filter(r=>{
+    const recordSurface=text(r.surface).trim().toLowerCase();
+    return recordSurface.includes(surfaceNeed)||surfaceNeed.includes(recordSurface);
+  }):R;
+
+  if(!pool.length)return {matches:[],status:"WAIT",waitReason:"UNKNOWN",route:null,evidence:null};
+
   const terms=[q.intent,q.requestedResult,q.surface]
     .filter(Boolean)
     .join(" ")
@@ -55,7 +63,7 @@ function queryMimir(q){
     .split(/\s+/)
     .filter(t=>t.length>2);
 
-  const ranked=R.map(r=>({r,score:terms.filter(t=>recordHaystack(r).includes(t)).length}))
+  const ranked=pool.map(r=>({r,score:terms.filter(t=>recordHaystack(r).includes(t)).length}))
     .filter(x=>x.score>0)
     .sort((a,b)=>b.score-a.score);
 
