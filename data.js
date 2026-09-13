@@ -1,3 +1,11 @@
+window.OWNER_SEAL_EXPECTED={
+  ownerId:"BIG",
+  logicVersion:"owner-logic-seal-v1",
+  sourceCommit:"c0a659487c5ac53b5e28a92376e221c51d919266",
+  integrityDigest:"proof:mimir-v1-owner-seal-contract-v1",
+  signer:"BIG / Owner"
+};
+
 window.MIMIR_REGISTRY=[{
   id:"github-chatgpt-connector",
   name:"GitHub",
@@ -13,5 +21,15 @@ window.MIMIR_REGISTRY=[{
   blockReason:"",
   verifiedAt:"2026-09-13",
   modifiedAt:"2026-09-13",
-  source:"Live connector observations in this build room"
+  source:"Live connector observations in this build room",
+  logicSeal:{
+    ownerId:"BIG",
+    logicVersion:"owner-logic-seal-v1",
+    sourceCommit:"c0a659487c5ac53b5e28a92376e221c51d919266",
+    integrityDigest:"proof:mimir-v1-owner-seal-contract-v1",
+    signer:"BIG / Owner",
+    verificationState:"VERIFIED",
+    verifiedAt:"2026-09-13",
+    proofBoundary:"Static mobile proof only; not cryptographic authenticity"
+  }
 }];
