@@ -1,0 +1,1 @@
+window.MIMIR_REGISTRY=[{id:"github-chatgpt-connector",name:"GitHub",type:"Connector",capability:["repository file operations"],surface:"ChatGPT GitHub connector",permission:"Allowed",callableActions:["fetch_file","create_file","update_file"],availability:"Available",route:"GO -> MIMIR -> GitHub",verifiedAt:"2026-09-13",source:"Live connector check"}];
