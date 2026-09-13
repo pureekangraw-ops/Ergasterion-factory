@@ -24,7 +24,8 @@ function verifyLogicSeal(record){
   if(seal.verificationState==="MISMATCH")return {trusted:false,waitReason:"SEAL_MISMATCH"};
   if(seal.verificationState!=="VERIFIED")return {trusted:false,waitReason:"SEAL_UNKNOWN"};
   const expectedKeys=["ownerId","logicVersion","sourceCommit","integrityDigest","signer"];
-  if(expectedKeys.some(k=>EXPECTED[k]&&seal[k]!==EXPECTED[k]))return {trusted:false,waitReason:"SEAL_MISMATCH"};
+if(expectedKeys.some(k=>!EXPECTED[k]))return {trusted:false,waitReason:"SEAL_EXPECTED_MISSING"};
+if(expectedKeys.some(k=>seal[k]!==EXPECTED[k]))return {trusted:false,waitReason:"SEAL_MISMATCH"};
   return {trusted:true,waitReason:null};
 }
 
