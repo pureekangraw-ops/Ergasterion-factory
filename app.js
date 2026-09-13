@@ -84,6 +84,13 @@ $("#waitProbe").addEventListener("click",()=>{
   $("#surface").value="ChatGPT GitHub connector";
   run();
 });
+$("#unknownProbe").addEventListener("click",()=>{
+  $("#intent").value="build spreadsheet report";
+  $("#result").value="create a spreadsheet";
+  $("#action").value="create_spreadsheet";
+  $("#surface").value="Spreadsheet app";
+  run();
+});
 
 render();
 run();
