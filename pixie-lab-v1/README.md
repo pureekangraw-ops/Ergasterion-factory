@@ -6,6 +6,7 @@ A thin, expandable Lab core for the `Go-Calalog-` repurpose. This branch continu
 
 - Real lifecycle gates: room cleanup uses `ARCHIVE → ZERO → STERILIZE → VERIFY_CLEAN → LOAD_CLEAN_SEED → READY`; cycle uses `ZERO → STERILIZE → TEST → DEBUG → IMPROVE → RETEST → CANNON → LEARN`; no direct `CLEAN` shortcut.
 - Sterilization/cleanup adapter contract with evidence. Missing, failed, or unprovable proof becomes `UNKNOWN`/quarantined rather than a fake pass.
+- Evidence trust is provider-injected and fail-closed: caller observations are unverified, trusted adapters/stores issue signed records, and persistence re-verifies them with a host-supplied stable verifier.
 - Door Guard exact match on `artifactId + logicId + version + target`, plus official seal status.
 - Golden Case lifecycle: `GOLDEN_CANDIDATE → VERIFY_REPLAY → GOLDEN_ACTIVE → REGRESSION_CASE`, with replay count and regression records.
 - Full Matrix lifecycle: `READY_TO_RUN → RUNNING → TRIAGE → TEST_PASS/TEST_FAIL/INCONCLUSIVE/READY_CANDIDATE/NEEDS_FIX`; required `UNRUN`, `UNKNOWN`, `FAIL`, and `INCONCLUSIVE` rows cannot pass.
@@ -25,6 +26,7 @@ The core is intentionally local and deterministic. A host application still need
 
 - A real persistence implementation (the included memory adapter is only a seam/test double).
 - Concrete cleanup/sterilization adapters and evidence stores.
+- A stable EvidenceTrustProvider/signing key managed by the host; the core contains no generated or embedded production trust secret.
 - Production test runners for categories marked contract-only.
 - A host scheduler/worker for long-running replay, regression, and cross-room checks.
 - UI or API bindings for Room Reports, Board projections, and Candidate Passports.
