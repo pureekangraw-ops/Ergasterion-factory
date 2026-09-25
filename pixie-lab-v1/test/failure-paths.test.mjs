@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   createCycle, applyCycleAction, createSterilizationAdapter, runSterilization,
-  createEvidence, createArtifact, verifyDoorGuard, createTestMatrix, updateMatrixStatus,
+  createEvidenceTrustProvider, createVerifiedEvidence, createArtifact, verifyDoorGuard, createTestMatrix, updateMatrixStatus,
   createTestRun, rerunTestRun, startMatrix, createTestType, createTestTypeRegistry, executeTestType,
   createGoldenCase, replayGoldenCase, createCandidatePassport, createRoomReport,
   createMasterSelfTest, evaluateMasterGate, detectContradictions, createMemoryPersistence,
@@ -11,8 +11,14 @@ import {
 import { PixieLab } from '../pixie-lab/service.mjs';
 
 const now = () => '2026-09-25T00:00:00.000Z';
+const trust = createEvidenceTrustProvider({
+  providerId: 'FAILURE-TEST',
+  sign: (payload) => `failure-test:${JSON.stringify(payload)}`,
+  verify: (payload, proofValue) => proofValue === `failure-test:${JSON.stringify(payload)}`,
+});
+const verified = (input) => createVerifiedEvidence(input, { trustProvider: trust });
 const baseCycle = () => createCycle({ cycleId: 'C', subjectRef: 'S', roomId: 'ROOM-A', sessionId: 'SESSION-A', logicVersion: '1.0.0', now });
-const pass = (action, result) => ({ action, result, evidenceStatus: 'PASS', evidenceRefs: [`E-${action}`], evidence: [createEvidence({ evidenceId: `E-${action}`, kind: 'cycle-proof', status: 'PASS', sourceRef: `fixture://E-${action}` })], now });
+const pass = (action, result) => ({ action, result, evidenceStatus: 'PASS', evidenceRefs: [`E-${action}`], evidence: [verified({ evidenceId: `E-${action}`, kind: 'cycle-proof', status: 'PASS', sourceRef: `fixture://E-${action}` })], now });
 
 test('lifecycle cannot skip ZERO or STERILIZE and proof is mandatory', () => {
   assert.throws(() => applyCycleAction(baseCycle(), { action: 'TEST', result: 'TEST_PASS', now }), /LIFECYCLE_ORDER_REQUIRED/);
@@ -27,7 +33,7 @@ test('cleanup adapter produces PASS, FAIL, or UNKNOWN and never fakes sterile', 
   assert.deepEqual(runSterilization({ adapter: null, now }), { status: 'UNKNOWN', evidenceStatus: 'UNKNOWN', evidenceRefs: [], reason: 'STERILIZATION_ADAPTER_UNAVAILABLE', at: now() });
   const failAdapter = createSterilizationAdapter({ adapterId: 'A', name: 'fail', sterilize: () => ({ status: 'CONTAMINATED', evidenceStatus: 'FAIL' }) });
   assert.equal(runSterilization({ adapter: failAdapter, now }).evidenceStatus, 'FAIL');
-  const evidence = createEvidence({ evidenceId: 'STERILE-E', kind: 'wipe-log', status: 'PASS', sourceRef: 'fixture://wipe' });
+  const evidence = verified({ evidenceId: 'STERILE-E', kind: 'wipe-log', status: 'PASS', sourceRef: 'fixture://wipe' });
   const passAdapter = createSterilizationAdapter({ adapterId: 'B', name: 'pass', sterilize: () => ({ status: 'STERILE', evidence: [evidence] }) });
   assert.equal(runSterilization({ adapter: passAdapter, now }).evidenceStatus, 'PASS');
 });
