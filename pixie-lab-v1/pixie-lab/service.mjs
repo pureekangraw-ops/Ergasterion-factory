@@ -6,7 +6,7 @@ import {
   createBugCapsule, createGoAttention, updateGoAttention, createGoldenCase, replayGoldenCase,
   createRegressionAlert, createLabMemoryAsset, createArtifact, verifyDoorGuard,
   createCandidatePassport, createRoomReport, projectPixieBoard, detectContradictions,
-  createMasterSelfTest, evaluateMasterGate, createAccessGrant, importSnapshot,
+  createMasterSelfTest, evaluateMasterGate, createAccessGrant, importSnapshot, isVerifiedEvidenceRecord,
   createCannonProfile, createCannonRun, createFactorySimulation, advanceFactorySimulation,
   createLearningProposal, promoteLearningProposal, createWarp, createGuideAnswer, assertNoModes,
   assertNoExternalAuthority, createMemoryPersistence,
@@ -64,7 +64,31 @@ export class PixieLab {
     const session = { sessionId: required(sessionId, 'sessionId'), roomId, purpose: required(purpose, 'purpose'), activityType: required(activityType, 'activityType'), sourceType: required(sourceType, 'sourceType'), subjectRef: text(subjectRef) || null, status: 'ACTIVE', createdAt: this.now() };
     this.state.sessions.push(session); Object.assign(room, { status: 'RESERVED', activeSessionId: session.sessionId, updatedAt: this.now() }); this.assertHealthy(); return clone(session);
   }
-  closeSession(sessionId) { const session = this.session(sessionId); if (!session) throw new Error('SESSION_NOT_FOUND'); session.status = 'CLOSED'; const room = this.room(session.roomId); if (room) Object.assign(room, { status: 'CLEAN', activeSessionId: null, currentCycleId: null, updatedAt: this.now() }); this.assertHealthy(); return clone(session); }
+  closeSession(sessionId) {
+    const session = this.session(sessionId); if (!session) throw new Error('SESSION_NOT_FOUND');
+    session.status = 'CLOSED';
+    const room = this.room(session.roomId);
+    if (room) {
+      Object.assign(room, { status: 'ARCHIVE', lifecycleStage: 'ARCHIVE', lifecycleHistory: [...(room.lifecycleHistory || []), 'ARCHIVE'], activeSessionId: null, currentCycleId: null, updatedAt: this.now() });
+    }
+    this.assertHealthy(); return clone(session);
+  }
+
+  advanceRoomLifecycle(roomId, { stage, result = 'PASS', evidence = [], seedRef = null } = {}) {
+    const room = this.room(roomId); if (!room) throw new Error('ROOM_NOT_FOUND');
+    const current = room.lifecycleStage || room.status; const next = text(stage).toUpperCase();
+    const order = { ARCHIVE: 'ZERO', ZERO: 'STERILIZE', STERILIZE: 'VERIFY_CLEAN', VERIFY_CLEAN: 'LOAD_CLEAN_SEED', LOAD_CLEAN_SEED: 'READY' };
+    if (next !== order[current]) throw new Error(`ROOM_LIFECYCLE_ORDER_REQUIRED:${order[current] || 'READY'}`);
+    const proof = evidence.filter((item) => isVerifiedEvidenceRecord(item));
+    const normalizedResult = text(result).toUpperCase();
+    const success = normalizedResult === 'PASS' && proof.length > 0 && (next !== 'LOAD_CLEAN_SEED' || Boolean(seedRef));
+    if (!success) {
+      Object.assign(room, { status: 'QUARANTINED', lifecycleStage: 'QUARANTINED', quarantineReason: normalizedResult === 'PASS' ? 'UNVERIFIED_EVIDENCE_OR_SEED' : normalizedResult, lifecycleHistory: [...(room.lifecycleHistory || []), 'QUARANTINED'], updatedAt: this.now() });
+      this.assertHealthy(); return clone(room);
+    }
+    Object.assign(room, { status: next, lifecycleStage: next, cleanSeedRef: next === 'LOAD_CLEAN_SEED' ? seedRef : room.cleanSeedRef || null, lifecycleHistory: [...(room.lifecycleHistory || []), next], updatedAt: this.now() });
+    this.assertHealthy(); return clone(room);
+  }
 
   startCycle({ cycleId, subjectRef, roomId, sessionId, logicVersion, fixtureRef, snapshotRef = null, baselineHash, initiatedBy } = {}) {
     const session = this.session(sessionId); if (!session || session.roomId !== roomId || session.status !== 'ACTIVE') throw new Error('SESSION_SCOPE_INVALID');
@@ -96,11 +120,12 @@ export class PixieLab {
   updateAttention(attentionId, status, evidenceRefs = []) { const index = this.state.attentions.findIndex((attention) => attention.attentionId === attentionId); if (index < 0) throw new Error('ATTENTION_NOT_FOUND'); this.state.attentions[index] = updateGoAttention(this.state.attentions[index], { status, evidenceRefs, now: this.now }); return clone(this.state.attentions[index]); }
 
   addGoldenCase(input) { const golden = createGoldenCase({ ...input, now: this.now }); this.state.goldenCases.push(golden); return clone(golden); }
-  replayGolden(goldenCaseId, input) { const index = this.state.goldenCases.findIndex((golden) => golden.goldenCaseId === goldenCaseId); if (index < 0) throw new Error('GOLDEN_NOT_FOUND'); const next = replayGoldenCase(this.state.goldenCases[index], { ...input, now: this.now }); this.state.goldenCases[index] = next; if (next.status === 'REGRESSION_ALERT') this.state.regressionAlerts.push(createRegressionAlert({ alertId: `ALERT-${input.runId}`, goldenCaseId, ...input, expected: next.expected, observed: input.observed, now: this.now })); return clone(next); }
+  replayGolden(goldenCaseId, input) { const index = this.state.goldenCases.findIndex((golden) => golden.goldenCaseId === goldenCaseId); if (index < 0) throw new Error('GOLDEN_NOT_FOUND'); const next = replayGoldenCase(this.state.goldenCases[index], { ...input, now: this.now }); this.state.goldenCases[index] = next; if (next.status === 'REGRESSION_CASE') this.state.regressionAlerts.push(createRegressionAlert({ alertId: `ALERT-${input.runId}`, goldenCaseId, ...input, expected: next.expected, observed: input.observed, now: this.now })); return clone(next); }
   addRegressionAlert(input) { const alert = createRegressionAlert({ ...input, now: this.now }); this.state.regressionAlerts.push(alert); return clone(alert); }
-  debug(input = {}) { const debug = { debugId: required(input.debugId, 'debugId'), bugId: required(input.bugId, 'bugId'), status: 'OPEN', steps: [], regressionRunRefs: [], goldenCaseRefs: [], createdAt: this.now() }; this.state.debugSessions.push(debug); return clone(debug); }
-  debugStep(debugId, step = {}) { const debug = this.state.debugSessions.find((item) => item.debugId === debugId); if (!debug) throw new Error('DEBUG_NOT_FOUND'); debug.steps.push({ stepId: required(step.stepId, 'stepId'), action: required(step.action, 'action'), evidenceRefs: step.evidenceRefs || [], observed: clone(step.observed ?? null), at: this.now() }); if (step.regressionRunId) debug.regressionRunRefs.push(step.regressionRunId); if (step.goldenCaseId) debug.goldenCaseRefs.push(step.goldenCaseId); debug.status = 'IN_PROGRESS'; return clone(debug); }
-  completeDebug(debugId, { result = 'DEBUG_COMPLETE', regressionRunRefs = [], goldenCaseRefs = [] } = {}) { const debug = this.state.debugSessions.find((item) => item.debugId === debugId); if (!debug) throw new Error('DEBUG_NOT_FOUND'); if (result !== 'DEBUG_COMPLETE') throw new Error('DEBUG_REQUIRES_COMPLETE_RESULT'); debug.status = 'COMPLETE'; debug.result = result; debug.regressionRunRefs = [...new Set([...debug.regressionRunRefs, ...regressionRunRefs])]; debug.goldenCaseRefs = [...new Set([...debug.goldenCaseRefs, ...goldenCaseRefs])]; debug.completedAt = this.now(); return clone(debug); }
+  debug(input = {}) { const debug = { debugId: required(input.debugId, 'debugId'), bugId: required(input.bugId, 'bugId'), status: 'OPEN', confidence: 'SUSPECTED', steps: [], regressionRunRefs: [], goldenCaseRefs: [], createdAt: this.now() }; this.state.debugSessions.push(debug); return clone(debug); }
+  debugStep(debugId, step = {}) { const debug = this.state.debugSessions.find((item) => item.debugId === debugId); if (!debug) throw new Error('DEBUG_NOT_FOUND'); debug.steps.push({ stepId: required(step.stepId, 'stepId'), action: required(step.action, 'action'), evidenceRefs: step.evidenceRefs || [], observed: clone(step.observed ?? null), at: this.now() });
+  if (step.confidence) { const confidence = text(step.confidence).toUpperCase(); if (!['SUSPECTED', 'SUPPORTED', 'CONFIRMED'].includes(confidence)) throw new Error('DEBUG_CONFIDENCE_INVALID'); debug.confidence = confidence; } if (step.regressionRunId) debug.regressionRunRefs.push(step.regressionRunId); if (step.goldenCaseId) debug.goldenCaseRefs.push(step.goldenCaseId); debug.status = 'IN_PROGRESS'; return clone(debug); }
+  completeDebug(debugId, { result = 'DEBUG_COMPLETE', regressionRunRefs = [], goldenCaseRefs = [] } = {}) { const debug = this.state.debugSessions.find((item) => item.debugId === debugId); if (!debug) throw new Error('DEBUG_NOT_FOUND'); if (result !== 'DEBUG_COMPLETE') throw new Error('DEBUG_REQUIRES_COMPLETE_RESULT'); debug.status = 'COMPLETE'; debug.confidence = 'CONFIRMED'; debug.result = result; debug.regressionRunRefs = [...new Set([...debug.regressionRunRefs, ...regressionRunRefs])]; debug.goldenCaseRefs = [...new Set([...debug.goldenCaseRefs, ...goldenCaseRefs])]; debug.completedAt = this.now(); return clone(debug); }
 
   proposeLearning(input) { const proposal = createLearningProposal({ ...input, now: this.now }); this.state.memory.push(proposal); return clone(proposal); }
   promoteLearning(proposalId) { const index = this.state.memory.findIndex((asset) => asset.proposalId === proposalId || asset.memoryId === proposalId); if (index < 0) throw new Error('LEARNING_PROPOSAL_NOT_FOUND'); this.state.memory[index] = promoteLearningProposal(this.state.memory[index], { promotedBy: PIXIE_ID, now: this.now }); return clone(this.state.memory[index]); }
@@ -110,7 +135,14 @@ export class PixieLab {
   importSnapshot(input) { const snapshot = importSnapshot({ ...input, now: this.now }); this.state.snapshots.push(snapshot); return clone(snapshot); }
   addArtifact(input) { const artifact = createArtifact({ ...input, now: this.now }); this.state.artifacts.push(artifact); return clone(artifact); }
   doorGuard(artifactId, ownerSeal) { return verifyDoorGuard({ artifact: this.state.artifacts.find((item) => item.artifactId === artifactId), ownerSeal }); }
-  candidatePassport(artifactId) { const artifact = this.state.artifacts.find((item) => item.artifactId === artifactId); if (!artifact) throw new Error('ARTIFACT_NOT_FOUND'); const passport = createCandidatePassport({ passportId: `PASSPORT-${artifactId}`, artifact, runs: this.state.testRuns, matrixStatus: this.state.matrices.find((m) => m.matrixId === artifact.matrixRef)?.overallStatus, now: this.now }); this.state.passports.push(passport); return clone(passport); }
+  candidatePassport(artifactId) {
+    const artifact = this.state.artifacts.find((item) => item.artifactId === artifactId); if (!artifact) throw new Error('ARTIFACT_NOT_FOUND');
+    if (!artifact.matrixRef) throw new Error('ARTIFACT_MATRIX_REF_REQUIRED');
+    const matrix = this.state.matrices.find((item) => item.matrixId === artifact.matrixRef); if (!matrix) throw new Error('MATRIX_NOT_FOUND');
+    const sourceRunRefs = artifact.testRunRefs.filter((runId) => this.state.testRuns.some((run) => run.runId === runId));
+    const passport = createCandidatePassport({ passportId: `PASSPORT-${artifactId}`, artifact, matrixRef: matrix.matrixId, sourceRunRefs, evidenceRefs: artifact.evidenceRefs, matrixStatus: matrix.overallStatus, now: this.now });
+    this.state.passports.push(passport); return clone(passport);
+  }
 
   addFactorySimulation(input) { const simulation = createFactorySimulation({ ...input, now: this.now }); this.state.factorySimulations.push(simulation); return clone(simulation); }
   advanceFactorySimulation(simulationId, input) { const index = this.state.factorySimulations.findIndex((simulation) => simulation.simulationId === simulationId); if (index < 0) throw new Error('FACTORY_SIMULATION_NOT_FOUND'); this.state.factorySimulations[index] = advanceFactorySimulation(this.state.factorySimulations[index], { ...input, now: this.now }); return clone(this.state.factorySimulations[index]); }
