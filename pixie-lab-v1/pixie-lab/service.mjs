@@ -31,10 +31,11 @@ function seedRegistry() {
 }
 
 export class PixieLab {
-  constructor({ labId = 'PIXIE-LAB', now = nowIso, persistence = null } = {}) {
+  constructor({ labId = 'PIXIE-LAB', now = nowIso, persistence = null, evidenceVerifier = null } = {}) {
     this.labId = labId;
     this.now = now;
     this.persistence = persistence || createMemoryPersistence();
+    this.evidenceVerifier = evidenceVerifier;
     this.testTypes = seedRegistry();
     this.state = {
       labId, pixieId: PIXIE_ID, rooms: createDefaultRooms({ now }).map(clone), roomReports: [], sessions: [], cycles: [],
@@ -87,7 +88,11 @@ export class PixieLab {
       CLEAN_AGAIN: 'ZERO',
     };
     if (next !== order[current]) throw new Error(`ROOM_LIFECYCLE_ORDER_REQUIRED:${order[current] || 'READY'}`);
-    const proof = evidence.filter((item) => isVerifiedEvidenceRecord(item));
+    const proof = evidence.flatMap((item) => {
+      if (isVerifiedEvidenceRecord(item)) return [item];
+      const restored = verifyEvidenceRecord(item, { trustProvider: this.evidenceVerifier });
+      return restored ? [restored] : [];
+    });
     const normalizedResult = text(result).toUpperCase();
     const success = normalizedResult === 'PASS' && proof.length > 0 && (next !== 'LOAD_CLEAN_SEED' || Boolean(seedRef));
     if (!success) {
@@ -104,10 +109,11 @@ export class PixieLab {
     const cycle = createCycle({ cycleId, subjectRef, roomId, sessionId, logicVersion, initiatedBy: initiatedBy || session.roomId.replace('ROOM-', 'PIXIE-'), supervisedBy: PIXIE_ID, isolation, now: this.now });
     this.state.cycles.push(cycle); Object.assign(this.room(roomId), { status: 'RUNNING', currentCycleId: cycle.cycleId, updatedAt: this.now() }); this.assertHealthy(); return clone(cycle);
   }
-  cycleAction(cycleId, input) { const current = this.cycle(cycleId); if (!current) throw new Error('CYCLE_NOT_FOUND'); const next = applyCycleAction(current, { ...input, now: this.now }); this.state.cycles[this.state.cycles.findIndex((cycle) => cycle.cycleId === cycleId)] = next; const room = this.room(next.roomId); if (room) Object.assign(room, { status: next.state === 'QUARANTINED' ? 'QUARANTINED' : 'RUNNING', updatedAt: this.now() }); this.assertHealthy(); return clone(next); }
+  cycleAction(cycleId, input) { const current = this.cycle(cycleId); if (!current) throw new Error('CYCLE_NOT_FOUND'); const next = applyCycleAction(current, { ...input, evidenceVerifier: this.evidenceVerifier, now: this.now }); this.state.cycles[this.state.cycles.findIndex((cycle) => cycle.cycleId === cycleId)] = next; const room = this.room(next.roomId); if (room) Object.assign(room, { status: next.state === 'QUARANTINED' ? 'QUARANTINED' : 'RUNNING', updatedAt: this.now() }); this.assertHealthy(); return clone(next); }
 
   recordEvidence(input) { const evidence = createEvidence({ ...input, capturedAt: input.capturedAt || this.now() }); this.state.evidence.push(evidence); return clone(evidence); }
-  sterilize(input) { const result = runSterilization({ ...input, now: this.now }); this.state.evidence.push(...(result.evidence || [])); return clone(result); }
+  acceptVerifiedEvidence(value) { const evidence = verifyEvidenceRecord(value, { trustProvider: this.evidenceVerifier }); if (!evidence) throw new Error('EVIDENCE_VERIFICATION_FAILED'); this.state.evidence.push(evidence); return clone(evidence); }
+  sterilize(input) { const result = runSterilization({ ...input, evidenceVerifier: this.evidenceVerifier, now: this.now }); this.state.evidence.push(...(result.evidence || [])); return clone(result); }
 
   addMatrix(input) { const matrix = createTestMatrix({ ...input, now: this.now }); this.state.matrices.push(matrix); this.assertHealthy(); return clone(matrix); }
   startMatrix(matrixId) { const index = this.state.matrices.findIndex((matrix) => matrix.matrixId === matrixId); if (index < 0) throw new Error('MATRIX_NOT_FOUND'); this.state.matrices[index] = startMatrix(this.state.matrices[index]); return clone(this.state.matrices[index]); }
@@ -165,7 +171,7 @@ export class PixieLab {
     if (canonical) {
       this.state = clone(canonical);
       this.state.evidence = (this.state.evidence || []).flatMap((value) => {
-        const restored = verifyEvidenceRecord(value, { trustedBy: 'PIXIE_PERSISTENCE' });
+        const restored = verifyEvidenceRecord(value, { trustProvider: this.evidenceVerifier });
         return restored ? [restored] : [];
       });
     }
