@@ -29,9 +29,9 @@ test('cycle records ZERO and STERILIZE before testing', () => {
     cycleId: 'CYCLE-1', subjectRef: 'FEATURE-1', roomId: 'ROOM-A',
     sessionId: 'SESSION-1', logicVersion: '1.0.0', isolation, now: fixedNow,
   });
-  cycle = applyCycleAction(cycle, { action: 'ZERO', result: 'ZERO_CONFIRMED', evidenceStatus: 'PASS', evidenceRefs: ['ZERO-EVIDENCE'], now: fixedNow });
+  cycle = applyCycleAction(cycle, { action: 'ZERO', result: 'ZERO_CONFIRMED', evidenceStatus: 'PASS', evidenceRefs: ['ZERO-EVIDENCE'], evidence: [{ evidenceId: 'ZERO-EVIDENCE', status: 'PASS' }], now: fixedNow });
   assert.equal(cycle.nextAction, 'STERILIZE');
-  cycle = applyCycleAction(cycle, { action: 'STERILIZE', result: 'STERILE', evidenceStatus: 'PASS', evidenceRefs: ['STERILE-EVIDENCE'], now: fixedNow });
+  cycle = applyCycleAction(cycle, { action: 'STERILIZE', result: 'STERILE', evidenceStatus: 'PASS', evidenceRefs: ['STERILE-EVIDENCE'], evidence: [{ evidenceId: 'STERILE-EVIDENCE', status: 'PASS' }], now: fixedNow });
   assert.equal(cycle.nextAction, 'TEST');
   assert.equal(cycle.state, 'STERILE');
 });
@@ -41,12 +41,12 @@ test('contamination quarantines the cycle and clean again returns to ZERO', () =
     cycleId: 'CYCLE-2', subjectRef: 'FEATURE-2', roomId: 'ROOM-B',
     sessionId: 'SESSION-2', logicVersion: '1.0.0', now: fixedNow,
   });
-  cycle = applyCycleAction(cycle, { action: 'ZERO', result: 'ZERO_CONFIRMED', evidenceStatus: 'PASS', evidenceRefs: ['ZERO-EVIDENCE'], now: fixedNow });
+  cycle = applyCycleAction(cycle, { action: 'ZERO', result: 'ZERO_CONFIRMED', evidenceStatus: 'PASS', evidenceRefs: ['ZERO-EVIDENCE'], evidence: [{ evidenceId: 'ZERO-EVIDENCE', status: 'PASS' }], now: fixedNow });
   cycle = applyCycleAction(cycle, { action: 'STERILIZE', result: 'CONTAMINATED', now: fixedNow });
   assert.equal(cycle.state, 'QUARANTINED');
   cycle = applyCycleAction(cycle, { action: 'CLEAN_AGAIN', result: 'ZERO_CONFIRMED', now: fixedNow });
   assert.equal(cycle.stage, 'ZERO');
-  cycle = applyCycleAction(cycle, { action: 'ZERO', result: 'ZERO_CONFIRMED', evidenceStatus: 'PASS', evidenceRefs: ['ZERO-EVIDENCE'], now: fixedNow });
+  cycle = applyCycleAction(cycle, { action: 'ZERO', result: 'ZERO_CONFIRMED', evidenceStatus: 'PASS', evidenceRefs: ['ZERO-EVIDENCE'], evidence: [{ evidenceId: 'ZERO-EVIDENCE', status: 'PASS' }], now: fixedNow });
   assert.equal(cycle.stage, 'STERILIZE');
 });
 
@@ -195,8 +195,8 @@ test('PixieLab service completes the local core cycle without modes', async () =
   const lab = new PixieLab({ now: fixedNow });
   lab.startSession({ roomId: 'ROOM-A', sessionId: 'SESSION-A', purpose: 'FEATURE_TEST', activityType: 'FEATURE_CHECK' });
   lab.startCycle({ cycleId: 'CYCLE-A', subjectRef: 'FEATURE-A', roomId: 'ROOM-A', sessionId: 'SESSION-A', logicVersion: '1.0.0', fixtureRef: 'FIXTURE-A', baselineHash: 'sha256:a' });
-  lab.cycleAction('CYCLE-A', { action: 'ZERO', result: 'ZERO_CONFIRMED', evidenceStatus: 'PASS', evidenceRefs: ['ZERO-A'] });
-  lab.cycleAction('CYCLE-A', { action: 'STERILIZE', result: 'STERILE', evidenceStatus: 'PASS', evidenceRefs: ['STERILE-A'] });
+  lab.cycleAction('CYCLE-A', { action: 'ZERO', result: 'ZERO_CONFIRMED', evidenceStatus: 'PASS', evidenceRefs: ['ZERO-A'], evidence: [{ evidenceId: 'ZERO-A', status: 'PASS' }] });
+  lab.cycleAction('CYCLE-A', { action: 'STERILIZE', result: 'STERILE', evidenceStatus: 'PASS', evidenceRefs: ['STERILE-A'], evidence: [{ evidenceId: 'STERILE-A', status: 'PASS' }] });
   lab.cycleAction('CYCLE-A', { action: 'TEST', result: 'TEST_PASS' });
   const matrix = lab.addMatrix({ matrixId: 'MATRIX-A', subjectRef: 'FEATURE-A', logicVersion: '1.0.0', rows: [{ testTypeId: 'regression', caseRefs: ['GOLDEN-A'] }] });
   lab.updateMatrix(matrix.matrixId, { regression: 'TEST_PASS' });
