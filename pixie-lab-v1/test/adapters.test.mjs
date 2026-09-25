@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { createCycle, applyCycleAction, createTestType, createTestTypeRegistry } from '../pixie-lab/core.mjs';
 import { createJsonFilePersistence, createEvidenceStore, createEvidenceBackedSterilizer, createRunnerHost, createReplayQueue } from '../pixie-lab/adapters.mjs';
 import { PixieLab } from '../pixie-lab/service.mjs';
-import { createEvidence, createArtifact, createTestRun, createTestMatrix } from '../pixie-lab/core.mjs';
+import { createEvidence, createArtifact, createTestRun, createTestMatrix, isVerifiedEvidenceRecord, verifyEvidenceRecord } from '../pixie-lab/core.mjs';
 
 const now = () => '2026-09-25T00:00:00.000Z';
 
@@ -30,6 +30,22 @@ test('room lifecycle fail or unknown quarantines without a CLEAN shortcut', () =
   const room = lab.advanceRoomLifecycle('ROOM-B', { stage: 'ZERO', result: 'UNKNOWN', evidence: [] });
   assert.equal(room.status, 'QUARANTINED');
   assert.equal(room.lifecycleStage, 'QUARANTINED');
+});
+
+test('quarantined room recovers through CLEAN_AGAIN before returning READY', () => {
+  const lab = new PixieLab({ now });
+  lab.startSession({ roomId: 'ROOM-C', sessionId: 'S-3', purpose: 'X', activityType: 'CHECK' });
+  lab.closeSession('S-3');
+  const proof = (id) => createEvidence({ evidenceId: id, kind: 'room-proof', status: 'PASS', sourceRef: `fixture://${id}` });
+  assert.equal(lab.advanceRoomLifecycle('ROOM-C', { stage: 'ZERO', result: 'FAIL', evidence: [] }).status, 'QUARANTINED');
+  assert.equal(lab.advanceRoomLifecycle('ROOM-C', { stage: 'CLEAN_AGAIN', evidence: [proof('CLEAN-AGAIN')] }).lifecycleStage, 'CLEAN_AGAIN');
+  lab.advanceRoomLifecycle('ROOM-C', { stage: 'ZERO', evidence: [proof('ZERO-2')] });
+  lab.advanceRoomLifecycle('ROOM-C', { stage: 'STERILIZE', evidence: [proof('STERILE-2')] });
+  lab.advanceRoomLifecycle('ROOM-C', { stage: 'VERIFY_CLEAN', evidence: [proof('VERIFY-2')] });
+  lab.advanceRoomLifecycle('ROOM-C', { stage: 'LOAD_CLEAN_SEED', seedRef: 'seed://clean-2', evidence: [proof('SEED-2')] });
+  const ready = lab.advanceRoomLifecycle('ROOM-C', { stage: 'READY', evidence: [proof('READY-2')] });
+  assert.equal(ready.status, 'READY');
+  assert.deepEqual(ready.lifecycleHistory.slice(-7), ['QUARANTINED', 'CLEAN_AGAIN', 'ZERO', 'STERILIZE', 'VERIFY_CLEAN', 'LOAD_CLEAN_SEED', 'READY']);
 });
 
 test('service Candidate Passport carries actual run lineage, matrix status, and evidence refs', () => {
@@ -65,6 +81,42 @@ test('evidence store keeps explicit statuses', async () => {
   const store = createEvidenceStore();
   await store.appendEvidence({ evidenceId: 'E-1', kind: 'probe', status: 'UNKNOWN', sourceRef: 'fixture://missing' });
   assert.equal((await store.listEvidence())[0].status, 'UNKNOWN');
+});
+
+test('trusted evidence survives structured clone and evidence-store listing', async () => {
+  const store = createEvidenceStore();
+  const created = await store.appendEvidence({ evidenceId: 'E-DURABLE', kind: 'probe', status: 'PASS', sourceRef: 'fixture://durable' });
+  const cloned = structuredClone(created);
+  const listed = (await store.listEvidence())[0];
+  assert.equal(isVerifiedEvidenceRecord(created), true);
+  assert.equal(isVerifiedEvidenceRecord(cloned), true);
+  assert.equal(isVerifiedEvidenceRecord(listed), true);
+  assert.equal(store.verifyEvidence(listed).evidenceId, 'E-DURABLE');
+  assert.equal(isVerifiedEvidenceRecord({ status: 'PASS' }), false);
+});
+
+test('recordEvidence return can be reused as later lifecycle proof', () => {
+  const lab = new PixieLab({ now });
+  lab.startSession({ roomId: 'ROOM-A', sessionId: 'S-EVIDENCE', purpose: 'X', activityType: 'CHECK' });
+  lab.closeSession('S-EVIDENCE');
+  const evidence = lab.recordEvidence({ evidenceId: 'E-RECORDED', kind: 'room-proof', status: 'PASS', sourceRef: 'fixture://recorded' });
+  assert.equal(isVerifiedEvidenceRecord(evidence), true);
+  const room = lab.advanceRoomLifecycle('ROOM-A', { stage: 'ZERO', evidence: [evidence] });
+  assert.equal(room.lifecycleStage, 'ZERO');
+});
+
+test('persisted evidence rehydrates only through the trusted verification path', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'pixie-evidence-'));
+  const path = join(dir, 'evidence.json');
+  const persistence = createJsonFilePersistence({ filePath: path });
+  const trusted = createEvidence({ evidenceId: 'E-PERSISTED', kind: 'probe', status: 'PASS', sourceRef: 'fixture://persisted' });
+  await persistence.save({ evidence: [structuredClone(trusted), { status: 'PASS' }] });
+  const persisted = await persistence.load();
+  const restored = verifyEvidenceRecord(persisted.evidence[0], { trustedBy: 'PIXIE_PERSISTENCE' });
+  const forged = verifyEvidenceRecord(persisted.evidence[1], { trustedBy: 'PIXIE_PERSISTENCE' });
+  assert.equal(isVerifiedEvidenceRecord(restored), true);
+  assert.equal(restored.evidenceId, 'E-PERSISTED');
+  assert.equal(forged, null);
 });
 
 test('evidence-backed sterilizer cannot invent PASS without probe evidence', () => {
