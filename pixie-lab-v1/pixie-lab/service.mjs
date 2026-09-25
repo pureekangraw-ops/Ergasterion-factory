@@ -6,7 +6,7 @@ import {
   createBugCapsule, createGoAttention, updateGoAttention, createGoldenCase, replayGoldenCase,
   createRegressionAlert, createLabMemoryAsset, createArtifact, verifyDoorGuard,
   createCandidatePassport, createRoomReport, projectPixieBoard, detectContradictions,
-  createMasterSelfTest, evaluateMasterGate, createAccessGrant, importSnapshot, isVerifiedEvidenceRecord,
+  createMasterSelfTest, evaluateMasterGate, createAccessGrant, importSnapshot, isVerifiedEvidenceRecord, verifyEvidenceRecord,
   createCannonProfile, createCannonRun, createFactorySimulation, advanceFactorySimulation,
   createLearningProposal, promoteLearningProposal, createWarp, createGuideAnswer, assertNoModes,
   assertNoExternalAuthority, createMemoryPersistence,
@@ -77,7 +77,15 @@ export class PixieLab {
   advanceRoomLifecycle(roomId, { stage, result = 'PASS', evidence = [], seedRef = null } = {}) {
     const room = this.room(roomId); if (!room) throw new Error('ROOM_NOT_FOUND');
     const current = room.lifecycleStage || room.status; const next = text(stage).toUpperCase();
-    const order = { ARCHIVE: 'ZERO', ZERO: 'STERILIZE', STERILIZE: 'VERIFY_CLEAN', VERIFY_CLEAN: 'LOAD_CLEAN_SEED', LOAD_CLEAN_SEED: 'READY' };
+    const order = {
+      ARCHIVE: 'ZERO',
+      ZERO: 'STERILIZE',
+      STERILIZE: 'VERIFY_CLEAN',
+      VERIFY_CLEAN: 'LOAD_CLEAN_SEED',
+      LOAD_CLEAN_SEED: 'READY',
+      QUARANTINED: 'CLEAN_AGAIN',
+      CLEAN_AGAIN: 'ZERO',
+    };
     if (next !== order[current]) throw new Error(`ROOM_LIFECYCLE_ORDER_REQUIRED:${order[current] || 'READY'}`);
     const proof = evidence.filter((item) => isVerifiedEvidenceRecord(item));
     const normalizedResult = text(result).toUpperCase();
@@ -152,7 +160,17 @@ export class PixieLab {
   masterGate() { const contradictions = detectContradictions(this.state.roomReports); this.state.contradictions = contradictions; return evaluateMasterGate({ selfTest: this.state.selfTests.at(-1), crossRoom: this.state.crossRoomChecks, contradictions, criticalUnknowns: this.state.roomReports.flatMap((report) => report.unknowns || []).filter((value) => text(value).toLowerCase().includes('critical')) }); }
 
   async persist() { await this.persistence.save(clone(this.state)); return { status: 'PERSISTED', revision: this.now() }; }
-  async rebuildBoard() { const canonical = await this.persistence.load(); if (canonical) this.state = clone(canonical); return this.board(); }
+  async rebuildBoard() {
+    const canonical = await this.persistence.load();
+    if (canonical) {
+      this.state = clone(canonical);
+      this.state.evidence = (this.state.evidence || []).flatMap((value) => {
+        const restored = verifyEvidenceRecord(value, { trustedBy: 'PIXIE_PERSISTENCE' });
+        return restored ? [restored] : [];
+      });
+    }
+    return this.board();
+  }
   board() { return projectPixieBoard({ rooms: this.state.rooms, roomReports: this.state.roomReports, activeSessions: this.state.sessions.filter((session) => session.status === 'ACTIVE'), tests: [...this.testTypes.values()], matrices: this.state.matrices, runs: this.state.testRuns, bugs: this.state.bugs, goldenCases: this.state.goldenCases, attentions: this.state.attentions, unknowns: this.state.roomReports.flatMap((report) => report.unknowns), artifacts: this.state.artifacts, proposals: this.state.proposals, passports: this.state.passports, regressionAlerts: this.state.regressionAlerts, now: this.now }); }
   guide(question) { const board = this.board(); const q = text(question).toLowerCase(); if (q.includes('unknown')) return createGuideAnswer({ question, answer: `${board.unknowns.length} unknown item(s)`, traceRefs: board.roomReports.map((report) => `report://${report.roomId}`), unknowns: board.unknowns }); if (q.includes('room') || q.includes('ห้อง')) return createGuideAnswer({ question, answer: `${board.rooms.length} room(s), ${board.activeSessions.length} active session(s)`, traceRefs: board.rooms.map((room) => `room://${room.roomId}`) }); if (q.includes('ready')) return createGuideAnswer({ question, answer: `${board.artifacts.filter((artifact) => artifact.status === 'READY_CANDIDATE').length} READY_CANDIDATE artifact(s)`, traceRefs: board.artifacts.map((artifact) => `artifact://${artifact.artifactId}`) }); if (q.includes('bug') || q.includes('บั๊ก')) return createGuideAnswer({ question, answer: `${board.bugs.length} bug capsule(s)`, traceRefs: board.bugs.map((bug) => `bug://${bug.bugId}`) }); return createGuideAnswer({ question, answer: 'UNKNOWN', traceRefs: ['pixie-board://PIXIE-BOARD'], unknowns: ['QUERY_NOT_IMPLEMENTED_IN_V1'] }); }
   warp(input) { return createWarp({ ...input, now: this.now }); }
