@@ -21,8 +21,10 @@ export const RUN_STATUSES = Object.freeze(['UNRUN', 'RUNNING', 'PASS', 'FAIL', '
 export const PROPOSAL_STATUSES = Object.freeze(['PROPOSED', 'ACCEPTED', 'REJECTED', 'REQUEST_MORE_EVIDENCE', 'EXPANDED_TO_CROSS_ROOM', 'EXPANDED_TO_LAB_WIDE', 'QUEUED']);
 export const ARTIFACT_STATUSES = Object.freeze(['EXPERIMENTAL', 'READY_CANDIDATE']);
 export const EVIDENCE_STATUSES = Object.freeze(['PASS', 'FAIL', 'UNKNOWN']);
-export const GOLDEN_STATUSES = Object.freeze(['GOLDEN_ACTIVE', 'REPLAYING', 'GOLDEN_PASS', 'REGRESSION_ALERT', 'RETIRED']);
-export const MATRIX_STATUSES = Object.freeze(['DRAFT', 'READY', 'RUNNING', 'PASS', 'FAIL', 'UNKNOWN', 'INCONCLUSIVE']);
+export const GOLDEN_STATUSES = Object.freeze(['GOLDEN_CANDIDATE', 'VERIFY_REPLAY', 'GOLDEN_ACTIVE', 'REGRESSION_CASE', 'RETIRED']);
+export const MATRIX_STATUSES = Object.freeze(['READY_TO_RUN', 'RUNNING', 'TRIAGE', 'TEST_PASS', 'TEST_FAIL', 'INCONCLUSIVE', 'READY_CANDIDATE', 'NEEDS_FIX']);
+export const DEBUG_CONFIDENCE = Object.freeze(['SUSPECTED', 'SUPPORTED', 'CONFIRMED']);
+export const ROOM_LIFECYCLE_STAGES = Object.freeze(['ARCHIVE', 'ZERO', 'STERILIZE', 'VERIFY_CLEAN', 'LOAD_CLEAN_SEED', 'READY', 'QUARANTINED']);
 
 export const TEST_CATEGORIES = Object.freeze([
   'FUNCTIONAL', 'INTEGRATION', 'CONTRACT', 'REGRESSION', 'GOLDEN',
@@ -40,22 +42,26 @@ const iso = () => new Date().toISOString();
 const requireText = (value, label) => { const result = text(value); if (!result) throw new Error(`${label} is required`); return result; };
 const ref = (value) => text(value) || null;
 const freeze = (value) => Object.freeze(clone(value));
+const verifiedEvidenceRecords = new WeakSet();
 const upper = (value) => text(value).toUpperCase();
 const statusOr = (value, fallback = 'UNKNOWN') => upper(value || fallback);
 const proofStatus = ({ evidenceStatus, evidenceRefs = [], evidence = [] } = {}) => {
   const explicit = upper(evidenceStatus);
-  const values = evidence.map((item) => upper(item?.status));
+  const trusted = evidence.filter((item) => isVerifiedEvidenceRecord(item));
+  const values = trusted.map((item) => upper(item.status));
   if (values.includes('FAIL') || explicit === 'FAIL') return 'FAIL';
-  if (!values.length || values.includes('UNKNOWN') || evidenceRefs.length && !values.includes('PASS')) return 'UNKNOWN';
-  if (explicit === 'PASS' && values.every((value) => value === 'PASS')) return 'PASS';
-  return values.every((value) => value === 'PASS') ? 'PASS' : 'UNKNOWN';
+  if (!trusted.length || values.includes('UNKNOWN') || evidenceRefs.length && !values.includes('PASS')) return 'UNKNOWN';
+  return (!explicit || explicit === 'PASS') && values.every((value) => value === 'PASS') ? 'PASS' : 'UNKNOWN';
 };
 
 export function createEvidence({ evidenceId, kind, status = 'UNKNOWN', sourceRef, capturedAt = iso(), details = null } = {}) {
   const normalized = upper(status);
   if (!EVIDENCE_STATUSES.includes(normalized)) throw new Error(`Unknown evidence status: ${status}`);
-  return freeze({ evidenceId: requireText(evidenceId, 'evidenceId'), kind: requireText(kind, 'kind'), status: normalized, sourceRef: ref(sourceRef), capturedAt, details: clone(details) });
+  const record = Object.freeze({ evidenceId: requireText(evidenceId, 'evidenceId'), kind: requireText(kind, 'kind'), status: normalized, sourceRef: requireText(sourceRef, 'sourceRef'), capturedAt, verifiedAt: capturedAt, details: clone(details) });
+  verifiedEvidenceRecords.add(record);
+  return record;
 }
+export function isVerifiedEvidenceRecord(value) { return Boolean(value && typeof value === 'object' && verifiedEvidenceRecords.has(value) && value.evidenceId && value.kind && value.sourceRef && value.verifiedAt && EVIDENCE_STATUSES.includes(value.status)); }
 
 export function createSterilizationAdapter({ adapterId, name, clean, sterilize, evidencePolicy = 'required' } = {}) {
   return Object.freeze({ adapterId: requireText(adapterId, 'adapterId'), name: requireText(name, 'name'), clean: typeof clean === 'function' ? clean : null, sterilize: typeof sterilize === 'function' ? sterilize : null, evidencePolicy: requireText(evidencePolicy, 'evidencePolicy') });
@@ -73,7 +79,7 @@ export function runSterilization({ adapter, context = {}, now = iso } = {}) {
 
 export function createRoom({ roomId, roomPixieId, now = iso } = {}) {
   const id = requireText(roomId, 'roomId');
-  return freeze({ roomId: id, roomPixieId: requireText(roomPixieId || `PIXIE-${id.replace(/^ROOM-/, '')}`, 'roomPixieId'), status: 'CLEAN', assignedPurpose: null, activeSessionId: null, currentCycleId: null, updatedAt: now() });
+  return freeze({ roomId: id, roomPixieId: requireText(roomPixieId || `PIXIE-${id.replace(/^ROOM-/, '')}`, 'roomPixieId'), status: 'READY', lifecycleStage: 'READY', lifecycleHistory: ['READY'], assignedPurpose: null, activeSessionId: null, currentCycleId: null, updatedAt: now() });
 }
 export function createDefaultRooms({ now = iso } = {}) { return ROOM_IDS.map((roomId) => createRoom({ roomId, now })); }
 
@@ -146,18 +152,18 @@ export async function executeTestType(registry, testTypeId, context = {}) {
 }
 
 export function createTestMatrix({ matrixId, subjectRef, logicVersion, roomId = null, rows = [], now = iso } = {}) {
-  return freeze({ matrixId: requireText(matrixId, 'matrixId'), subjectRef: requireText(subjectRef, 'subjectRef'), logicVersion: requireText(logicVersion, 'logicVersion'), roomId: ref(roomId), rows: clone(rows).map((row) => ({ testTypeId: requireText(row.testTypeId, 'row.testTypeId'), caseRefs: unique(row.caseRefs), status: ['PENDING', ''].includes(text(row.status).toUpperCase()) ? 'UNRUN' : upper(row.status), required: row.required !== false })), overallStatus: 'DRAFT', lifecycle: 'DRAFT', createdAt: now(), updatedAt: now() });
+  return freeze({ matrixId: requireText(matrixId, 'matrixId'), subjectRef: requireText(subjectRef, 'subjectRef'), logicVersion: requireText(logicVersion, 'logicVersion'), roomId: ref(roomId), rows: clone(rows).map((row) => ({ testTypeId: requireText(row.testTypeId, 'row.testTypeId'), caseRefs: unique(row.caseRefs), status: ['PENDING', ''].includes(text(row.status).toUpperCase()) ? 'UNRUN' : upper(row.status), required: row.required !== false })), overallStatus: 'INCONCLUSIVE', lifecycle: 'READY_TO_RUN', createdAt: now(), updatedAt: now() });
 }
 export function matrixStatus(matrix, rowStatuses = {}) {
   const rows = matrix.rows.map((row) => ({ ...row, status: upper(rowStatuses[row.testTypeId] || row.status || 'UNRUN') }));
   const required = rows.filter((row) => row.required); const statuses = required.map((row) => row.status);
-  let overall = 'UNKNOWN';
-  if (!required.length || statuses.some((s) => ['UNRUN', 'UNKNOWN', 'INCONCLUSIVE'].includes(s))) overall = required.length ? (statuses.includes('UNRUN') ? 'INCONCLUSIVE' : 'UNKNOWN') : 'UNKNOWN';
-  else if (statuses.some((s) => ['FAIL', 'TEST_FAIL', 'NEEDS_FIX'].includes(s))) overall = 'FAIL';
-  else if (statuses.every((s) => ['PASS', 'TEST_PASS', 'CANNON_PASS'].includes(s))) overall = 'PASS';
+  let overall = 'INCONCLUSIVE';
+  if (!required.length || statuses.some((s) => ['UNRUN', 'UNKNOWN', 'INCONCLUSIVE'].includes(s))) overall = 'INCONCLUSIVE';
+  else if (statuses.some((s) => ['FAIL', 'TEST_FAIL', 'NEEDS_FIX'].includes(s))) overall = statuses.includes('NEEDS_FIX') ? 'NEEDS_FIX' : 'TEST_FAIL';
+  else if (statuses.every((s) => ['PASS', 'TEST_PASS', 'CANNON_PASS'].includes(s))) overall = 'TEST_PASS';
   return { rows, overall };
 }
-export function updateMatrixStatus(matrix, rowStatuses = {}) { const next = clone(matrix); const result = matrixStatus(next, rowStatuses); next.rows = result.rows; next.overallStatus = result.overall; next.lifecycle = result.overall === 'PASS' ? 'PASS' : result.overall === 'FAIL' ? 'FAIL' : result.overall === 'UNKNOWN' ? 'BLOCKED' : 'RUNNING'; next.updatedAt = iso(); return freeze(next); }
+export function updateMatrixStatus(matrix, rowStatuses = {}) { const next = clone(matrix); const result = matrixStatus(next, rowStatuses); next.rows = result.rows; next.overallStatus = result.overall; next.lifecycle = result.overall === 'TEST_PASS' ? 'READY_CANDIDATE' : ['TEST_FAIL', 'NEEDS_FIX'].includes(result.overall) ? 'TRIAGE' : 'TRIAGE'; next.updatedAt = iso(); return freeze(next); }
 export function startMatrix(matrix) { return freeze({ ...clone(matrix), lifecycle: 'RUNNING', overallStatus: 'INCONCLUSIVE', updatedAt: iso() }); }
 
 export function createTestRun({ runId, runClass = 'ROOM_TEST_RUN', initiatedBy, executedBy, scope, purpose, roomId = null, sourceRoomRefs = [], matrixRef = null, testTypeId, caseRef = null, fixtureRef = null, snapshotRef = null, logicVersion, expected, observed, status = 'UNRUN', evidenceRefs = [], bugCapsuleRef = null, unknowns = [], rerunOf = null, immutable = true, now = iso } = {}) {
@@ -174,16 +180,16 @@ export function createBugCapsule({ bugId, runId, roomId, logicVersion, fixtureRe
 export function createGoAttention({ attentionId, bugId, roomId, reason, evidenceRefs = [], relatedRefs = [], now = iso } = {}) { return freeze({ attentionId: requireText(attentionId, 'attentionId'), bugId: requireText(bugId, 'bugId'), roomId: requireText(roomId, 'roomId'), reason: requireText(reason, 'reason'), evidenceRefs: unique(evidenceRefs), relatedRefs: unique(relatedRefs), status: 'OPEN', createdAt: now(), updatedAt: now() }); }
 export function updateGoAttention(attention, { status, evidenceRefs = [], now = iso } = {}) { const allowed = ['OPEN', 'SEEN_BY_GO', 'FIXING', 'RETEST', 'CLOSED']; if (!allowed.includes(status)) throw new Error(`Unknown GO ATTENTION status: ${status}`); return freeze({ ...clone(attention), status, evidenceRefs: unique([...attention.evidenceRefs, ...evidenceRefs]), updatedAt: now() }); }
 
-export function createGoldenCase({ goldenCaseId, sourceBugId, sourceRunId, inputRef, expected, fixedObserved, replayRecipe, logicVersions = [], evidenceRefs = [], status = 'GOLDEN_ACTIVE', now = iso } = {}) { if (!GOLDEN_STATUSES.includes(status)) throw new Error(`Unknown golden status: ${status}`); return freeze({ goldenCaseId: requireText(goldenCaseId, 'goldenCaseId'), sourceBugId: requireText(sourceBugId, 'sourceBugId'), sourceRunId: requireText(sourceRunId, 'sourceRunId'), inputRef: requireText(inputRef, 'inputRef'), expected: clone(expected ?? null), fixedObserved: clone(fixedObserved ?? null), replayRecipe: requireText(replayRecipe, 'replayRecipe'), logicVersions: unique(logicVersions), evidenceRefs: unique(evidenceRefs), status, replayCount: 0, lastReplay: null, createdAt: now() }); }
-export function replayGoldenCase(golden, { runId, logicVersion, observed, evidenceRefs = [], now = iso } = {}) { const passed = JSON.stringify(observed) === JSON.stringify(golden.expected); const status = passed ? 'GOLDEN_PASS' : 'REGRESSION_ALERT'; return freeze({ ...clone(golden), status, replayCount: golden.replayCount + 1, lastReplay: { runId: requireText(runId, 'runId'), logicVersion: requireText(logicVersion, 'logicVersion'), observed: clone(observed), evidenceRefs: unique(evidenceRefs), status, at: now() } }); }
+export function createGoldenCase({ goldenCaseId, sourceBugId, sourceRunId, inputRef, expected, fixedObserved, replayRecipe, logicVersions = [], evidenceRefs = [], status = 'GOLDEN_CANDIDATE', now = iso } = {}) { if (!GOLDEN_STATUSES.includes(status)) throw new Error(`Unknown golden status: ${status}`); return freeze({ goldenCaseId: requireText(goldenCaseId, 'goldenCaseId'), lifecycle: ['GOLDEN_CANDIDATE'], sourceBugId: requireText(sourceBugId, 'sourceBugId'), sourceRunId: requireText(sourceRunId, 'sourceRunId'), inputRef: requireText(inputRef, 'inputRef'), expected: clone(expected ?? null), fixedObserved: clone(fixedObserved ?? null), replayRecipe: requireText(replayRecipe, 'replayRecipe'), logicVersions: unique(logicVersions), evidenceRefs: unique(evidenceRefs), status, replayCount: 0, lastReplay: null, createdAt: now() }); }
+export function replayGoldenCase(golden, { runId, logicVersion, observed, evidenceRefs = [], now = iso } = {}) { const passed = JSON.stringify(observed) === JSON.stringify(golden.expected); const status = passed ? 'GOLDEN_ACTIVE' : 'REGRESSION_CASE'; const lifecycle = [...(golden.lifecycle || ['GOLDEN_CANDIDATE']), 'VERIFY_REPLAY', status]; return freeze({ ...clone(golden), status, lifecycle, replayCount: golden.replayCount + 1, lastReplay: { runId: requireText(runId, 'runId'), logicVersion: requireText(logicVersion, 'logicVersion'), observed: clone(observed), evidenceRefs: unique(evidenceRefs), status, at: now() } }); }
 export function createRegressionAlert({ alertId, goldenCaseId, runId, logicVersion, expected, observed, evidenceRefs = [], now = iso } = {}) { return freeze({ alertId: requireText(alertId, 'alertId'), goldenCaseId: requireText(goldenCaseId, 'goldenCaseId'), runId: requireText(runId, 'runId'), logicVersion: requireText(logicVersion, 'logicVersion'), expected: clone(expected), observed: clone(observed), evidenceRefs: unique(evidenceRefs), severity: 'CRITICAL', status: 'OPEN', createdAt: now() }); }
 
 export function createLabMemoryAsset({ memoryId, assetType, sourceCycleId, sourceRunRefs = [], evidenceRefs = [], content, status = 'CANDIDATE', now = iso } = {}) { return freeze({ memoryId: requireText(memoryId, 'memoryId'), assetType: requireText(assetType, 'assetType'), sourceCycleId: requireText(sourceCycleId, 'sourceCycleId'), sourceRunRefs: unique(sourceRunRefs), evidenceRefs: unique(evidenceRefs), content: clone(content ?? null), status, createdAt: now() }); }
-export function createArtifact({ artifactId, logicId, version, target, sourceRoomRefs = [], testRunRefs = [], evidenceRefs = [], provenance, status = 'EXPERIMENTAL', now = iso } = {}) { if (!ARTIFACT_STATUSES.includes(status)) throw new Error(`Invalid artifact status: ${status}`); return freeze({ artifactId: requireText(artifactId, 'artifactId'), logicId: requireText(logicId, 'logicId'), version: requireText(version, 'version'), target: requireText(target, 'target'), sourceRoomRefs: unique(sourceRoomRefs), testRunRefs: unique(testRunRefs), evidenceRefs: unique(evidenceRefs), provenance: clone(provenance ?? { pixieId: PIXIE_ID }), status, createdAt: now() }); }
+export function createArtifact({ artifactId, logicId, version, target, matrixRef = null, sourceRoomRefs = [], testRunRefs = [], evidenceRefs = [], provenance, status = 'EXPERIMENTAL', now = iso } = {}) { if (!ARTIFACT_STATUSES.includes(status)) throw new Error(`Invalid artifact status: ${status}`); return freeze({ artifactId: requireText(artifactId, 'artifactId'), logicId: requireText(logicId, 'logicId'), version: requireText(version, 'version'), target: requireText(target, 'target'), matrixRef: ref(matrixRef), sourceRoomRefs: unique(sourceRoomRefs), testRunRefs: unique(testRunRefs), evidenceRefs: unique(evidenceRefs), provenance: clone(provenance ?? { pixieId: PIXIE_ID }), status, createdAt: now() }); }
 export function verifyDoorGuard({ artifact, ownerSeal } = {}) { if (!artifact) return { status: 'STOP', reason: 'ARTIFACT_MISSING' }; if (!ownerSeal) return { status: 'STOP', reason: 'OWNER_SEAL_MISSING' }; for (const field of ['artifactId', 'logicId', 'version', 'target']) if (ownerSeal[field] !== artifact[field]) return { status: 'STOP', reason: `OWNER_SEAL_MISMATCH:${field}` }; if (ownerSeal.status !== 'OFFICIAL') return { status: 'STOP', reason: 'OWNER_SEAL_NOT_OFFICIAL' }; return { status: 'ALLOW_EXIT', reason: null, artifactRef: artifact.artifactId }; }
 
-export function createCandidatePassport({ passportId, artifactId, artifact, sourceRunRefs = [], evidenceRefs = [], matrixStatus = 'UNKNOWN', now = iso } = {}) { return freeze({ passportId: requireText(passportId, 'passportId'), projectionOnly: true, approval: 'NOT_AN_APPROVAL', artifactId: requireText(artifactId || artifact?.artifactId, 'artifactId'), artifact: clone(artifact ?? null), sourceRunRefs: unique(sourceRunRefs), evidenceRefs: unique(evidenceRefs), matrixStatus: upper(matrixStatus), generatedAt: now() }); }
-export function projectCandidatePassport({ artifact, runs = [], matrix, evidenceRefs = [], now = iso } = {}) { return createCandidatePassport({ passportId: `PASSPORT-${artifact?.artifactId || 'UNKNOWN'}`, artifact, artifactId: artifact?.artifactId, sourceRunRefs: runs.map((run) => run.runId), evidenceRefs, matrixStatus: matrix?.overallStatus || 'UNKNOWN', now }); }
+export function createCandidatePassport({ passportId, artifactId, artifact, matrixRef, sourceRunRefs = [], evidenceRefs = [], matrixStatus = 'UNKNOWN', now = iso } = {}) { return freeze({ passportId: requireText(passportId, 'passportId'), projectionOnly: true, approval: 'NOT_AN_APPROVAL', artifactId: requireText(artifactId || artifact?.artifactId, 'artifactId'), artifact: clone(artifact ?? null), matrixRef: requireText(matrixRef || artifact?.matrixRef, 'matrixRef'), sourceRunRefs: unique(sourceRunRefs), evidenceRefs: unique(evidenceRefs), matrixStatus: upper(matrixStatus), generatedAt: now() }); }
+export function projectCandidatePassport({ artifact, runs = [], matrix, evidenceRefs = [], now = iso } = {}) { return createCandidatePassport({ passportId: `PASSPORT-${artifact?.artifactId || 'UNKNOWN'}`, artifact, artifactId: artifact?.artifactId, matrixRef: matrix?.matrixId || artifact?.matrixRef, sourceRunRefs: runs.map((run) => run.runId), evidenceRefs, matrixStatus: matrix?.overallStatus || 'UNKNOWN', now }); }
 
 export function createRoomReport({ roomId, roomPixieId, roomStatus, activeSubject, currentTest, latestResult, bugSummary = {}, goAttention = [], unknowns = [], importantEvidenceRefs = [], readyCandidates = [], nextAction = null, now = iso } = {}) { return freeze({ roomId: requireText(roomId, 'roomId'), roomPixieId: requireText(roomPixieId, 'roomPixieId'), roomStatus: requireText(roomStatus, 'roomStatus'), activeSubject: ref(activeSubject), currentTest: ref(currentTest), latestResult: ref(latestResult), bugSummary: clone(bugSummary), goAttention: unique(goAttention), unknowns: unique(unknowns), importantEvidenceRefs: unique(importantEvidenceRefs), readyCandidates: unique(readyCandidates), nextAction: ref(nextAction), reportedAt: now() }); }
 export function detectContradictions(reports = []) { const bySubject = new Map(); for (const report of reports) { const key = report.activeSubject || report.roomId; const value = report.latestResult || report.roomStatus; if (!bySubject.has(key)) bySubject.set(key, []); bySubject.get(key).push({ roomId: report.roomId, value }); } return [...bySubject.entries()].flatMap(([subjectRef, values]) => new Set(values.map((item) => item.value)).size > 1 ? [{ subjectRef, values, severity: 'CRITICAL', status: 'OPEN' }] : []); }
