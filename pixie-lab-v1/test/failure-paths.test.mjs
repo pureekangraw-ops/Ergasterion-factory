@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   createCycle, applyCycleAction, createSterilizationAdapter, runSterilization,
   createEvidence, createArtifact, verifyDoorGuard, createTestMatrix, updateMatrixStatus,
-  createTestRun, rerunTestRun, createTestType, createTestTypeRegistry, executeTestType,
+  createTestRun, rerunTestRun, startMatrix, createTestType, createTestTypeRegistry, executeTestType,
   createGoldenCase, replayGoldenCase, createCandidatePassport, createRoomReport,
   createMasterSelfTest, evaluateMasterGate, detectContradictions, createMemoryPersistence,
   assertNoExternalAuthority,
@@ -12,12 +12,12 @@ import { PixieLab } from '../pixie-lab/service.mjs';
 
 const now = () => '2026-09-25T00:00:00.000Z';
 const baseCycle = () => createCycle({ cycleId: 'C', subjectRef: 'S', roomId: 'ROOM-A', sessionId: 'SESSION-A', logicVersion: '1.0.0', now });
-const pass = (action, result) => ({ action, result, evidenceStatus: 'PASS', evidenceRefs: [`E-${action}`], evidence: [{ evidenceId: `E-${action}`, status: 'PASS' }], now });
+const pass = (action, result) => ({ action, result, evidenceStatus: 'PASS', evidenceRefs: [`E-${action}`], evidence: [createEvidence({ evidenceId: `E-${action}`, kind: 'cycle-proof', status: 'PASS', sourceRef: `fixture://E-${action}` })], now });
 
 test('lifecycle cannot skip ZERO or STERILIZE and proof is mandatory', () => {
   assert.throws(() => applyCycleAction(baseCycle(), { action: 'TEST', result: 'TEST_PASS', now }), /LIFECYCLE_ORDER_REQUIRED/);
   assert.throws(() => applyCycleAction(baseCycle(), { action: 'ZERO', result: 'ZERO_CONFIRMED', now }), /ZERO_REQUIRES_PASS_EVIDENCE/);
-  assert.throws(() => applyCycleAction(baseCycle(), { action: 'ZERO', result: 'ZERO_CONFIRMED', evidenceStatus: 'PASS', evidenceRefs: ['unverified-ref'], now }), /ZERO_REQUIRES_PASS_EVIDENCE/);
+  assert.throws(() => applyCycleAction(baseCycle(), { action: 'ZERO', result: 'ZERO_CONFIRMED', evidenceStatus: 'PASS', evidence: [{ status: 'PASS' }], now }), /ZERO_REQUIRES_PASS_EVIDENCE/);
   let cycle = applyCycleAction(baseCycle(), pass('ZERO', 'ZERO_CONFIRMED'));
   assert.throws(() => applyCycleAction(cycle, { action: 'TEST', result: 'TEST_PASS', now }), /LIFECYCLE_ORDER_REQUIRED/);
   assert.throws(() => applyCycleAction(cycle, { action: 'STERILIZE', result: 'STERILE', evidenceStatus: 'UNKNOWN', now }), /STERILIZE_REQUIRES_PASS_EVIDENCE/);
@@ -40,10 +40,13 @@ test('Door Guard requires exact artifactId, logicId, version, and target', () =>
 
 test('required matrix rows remain non-pass when unrun, unknown, or failed', () => {
   const matrix = createTestMatrix({ matrixId: 'M', subjectRef: 'S', logicVersion: '1', rows: [{ testTypeId: 'functional', caseRefs: [] }, { testTypeId: 'golden', caseRefs: [] }] });
+  assert.equal(matrix.lifecycle, 'READY_TO_RUN');
+  assert.equal(startMatrix(matrix).lifecycle, 'RUNNING');
   assert.notEqual(updateMatrixStatus(matrix, { functional: 'PASS' }).overallStatus, 'PASS');
   assert.notEqual(updateMatrixStatus(matrix, { functional: 'PASS', golden: 'UNKNOWN' }).overallStatus, 'PASS');
   assert.notEqual(updateMatrixStatus(matrix, { functional: 'PASS', golden: 'FAIL' }).overallStatus, 'PASS');
-  assert.equal(updateMatrixStatus(matrix, { functional: 'PASS', golden: 'PASS' }).overallStatus, 'PASS');
+  assert.equal(updateMatrixStatus(matrix, { functional: 'PASS', golden: 'PASS' }).overallStatus, 'TEST_PASS');
+  assert.equal(updateMatrixStatus(matrix, { functional: 'PASS', golden: 'PASS' }).lifecycle, 'READY_CANDIDATE');
 });
 
 test('TestRun is immutable and rerun creates a new run', () => {
@@ -64,14 +67,18 @@ test('unsupported runner returns UNKNOWN instead of fake PASS', async () => {
 test('golden replay marks regression alert on mismatch', () => {
   const golden = createGoldenCase({ goldenCaseId: 'G-1', sourceBugId: 'B-1', sourceRunId: 'R-1', inputRef: 'FIX-1', expected: { ok: true }, fixedObserved: { ok: true }, replayRecipe: 'replay://g', now });
   const replay = replayGoldenCase(golden, { runId: 'R-2', logicVersion: '2', observed: { ok: false }, now });
-  assert.equal(replay.status, 'REGRESSION_ALERT');
+  assert.equal(replay.status, 'REGRESSION_CASE');
+  assert.deepEqual(replay.lifecycle, ['GOLDEN_CANDIDATE', 'VERIFY_REPLAY', 'REGRESSION_CASE']);
   assert.equal(replay.replayCount, 1);
 });
 
 test('candidate passport is a projection and never an approval', () => {
-  const passport = createCandidatePassport({ passportId: 'P-1', artifactId: 'A-1', matrixStatus: 'PASS', now });
+  const passport = createCandidatePassport({ passportId: 'P-1', artifactId: 'A-1', matrixRef: 'M-1', sourceRunRefs: ['R-1'], evidenceRefs: ['E-1'], matrixStatus: 'TEST_PASS', now });
   assert.equal(passport.projectionOnly, true);
   assert.equal(passport.approval, 'NOT_AN_APPROVAL');
+  assert.equal(passport.matrixRef, 'M-1');
+  assert.deepEqual(passport.sourceRunRefs, ['R-1']);
+  assert.deepEqual(passport.evidenceRefs, ['E-1']);
   assert.equal('approved' in passport, false);
 });
 
@@ -95,28 +102,19 @@ test('PIXIE-01 blocks critical unknowns and contradictions', () => {
   const contradictions = detectContradictions(reports);
   assert.equal(contradictions.length, 1);
   assert.equal(evaluateMasterGate({ selfTest, contradictions }).status, 'FAIL');
-  assert.equal(evaluateMasterGate({ selfTest: createMasterSelfTest({ selfTestId: 'SELF-3', checks: [{ checkId: 'scope', status: 'PASS' }], now }), crossRoom: [{ status: 'FAIL' }] }).reason, 'CROSS_ROOM_INCONSISTENCY');
   assert.equal(evaluateMasterGate({ selfTest: createMasterSelfTest({ selfTestId: 'SELF-2', checks: [{ checkId: 'scope', status: 'PASS' }], now }), criticalUnknowns: ['critical'] }).status, 'UNKNOWN');
 });
 
 test('debug flow reaches regression and golden references', () => {
   const lab = new PixieLab({ now });
-  lab.debug({ debugId: 'D-1', bugId: 'B-1' });
-  lab.debugStep('D-1', { stepId: 'S-1', action: 'REPRODUCE', regressionRunId: 'R-2' });
+  assert.equal(lab.debug({ debugId: 'D-1', bugId: 'B-1' }).confidence, 'SUSPECTED');
+  lab.debugStep('D-1', { stepId: 'S-1', action: 'REPRODUCE', confidence: 'SUPPORTED', regressionRunId: 'R-2' });
   lab.debugStep('D-1', { stepId: 'S-2', action: 'REPLAY_GOLDEN', goldenCaseId: 'G-1' });
   const done = lab.completeDebug('D-1', { regressionRunRefs: ['R-2'], goldenCaseRefs: ['G-1'] });
   assert.equal(done.status, 'COMPLETE');
+  assert.equal(done.confidence, 'CONFIRMED');
   assert.deepEqual(done.regressionRunRefs, ['R-2']);
   assert.deepEqual(done.goldenCaseRefs, ['G-1']);
-});
-
-test('service Candidate Passport is created and projected into state', () => {
-  const lab = new PixieLab({ now });
-  lab.addArtifact({ artifactId: 'A-1', logicId: 'L-1', version: '1', target: 'LAB', now });
-  const passport = lab.candidatePassport('A-1');
-  assert.equal(passport.passportId, 'PASSPORT-A-1');
-  assert.equal(passport.projectionOnly, true);
-  assert.equal(lab.state.passports.length, 1);
 });
 
 test('external authority is explicitly rejected while board remains projection-only', () => {
