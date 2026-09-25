@@ -60,6 +60,14 @@ export function createEvidenceTrustProvider({ providerId, sign = null, verify } 
   });
 }
 
+export function createEvidenceVerifier(trustProvider) {
+  if (!trustProvider?.providerId || typeof trustProvider.verify !== 'function') throw new Error('Evidence verifier requires a trust provider');
+  return createEvidenceTrustProvider({
+    providerId: trustProvider.providerId,
+    verify: (payload, proof) => trustProvider.verify(payload, proof),
+  });
+}
+
 export function createEvidence({ evidenceId, kind, status = 'UNKNOWN', sourceRef, capturedAt = iso(), details = null } = {}) {
   const normalized = upper(status);
   if (!EVIDENCE_STATUSES.includes(normalized)) throw new Error(`Unknown evidence status: ${status}`);
@@ -89,13 +97,13 @@ export function createVerifiedEvidence(
     capturedAt,
     details,
   });
+  const signedPayload = { ...payload, verifiedAt };
   const record = Object.freeze({
-    ...payload,
-    verifiedAt,
+    ...signedPayload,
     verification: {
       scheme: EVIDENCE_TRUST_SCHEME,
       providerId: trustProvider.providerId,
-      proof: trustProvider.sign(payload),
+      proof: trustProvider.sign(signedPayload),
     },
     trust: 'VERIFIED',
   });
@@ -120,7 +128,7 @@ const hasDurableEvidenceProof = (value, trustProvider) => {
   if (!hasValidEvidenceShape(value) || !trustProvider?.providerId || typeof trustProvider.verify !== 'function') return false;
   if (value.verification.providerId !== trustProvider.providerId) return false;
   try {
-    return trustProvider.verify(evidencePayload(value), value.verification.proof);
+    return trustProvider.verify({ ...evidencePayload(value), verifiedAt: value.verifiedAt }, value.verification.proof);
   } catch {
     return false;
   }
@@ -155,8 +163,10 @@ const proofStatus = ({ evidenceStatus, evidenceRefs = [], evidence = [], evidenc
   const explicit = upper(evidenceStatus);
   const trusted = evidence.filter((item) => isVerifiedEvidenceRecord(item, { trustProvider: evidenceVerifier }));
   const values = trusted.map((item) => upper(item.status));
+  const refs = unique(evidenceRefs);
+  const trustedIds = new Set(trusted.map((item) => text(item.evidenceId)));
   if (values.includes('FAIL') || explicit === 'FAIL') return 'FAIL';
-  if (!trusted.length || values.includes('UNKNOWN') || evidenceRefs.length && !values.includes('PASS')) return 'UNKNOWN';
+  if (!trusted.length || values.includes('UNKNOWN') || refs.some((refId) => !trustedIds.has(refId))) return 'UNKNOWN';
   return (!explicit || explicit === 'PASS') && values.every((value) => value === 'PASS') ? 'PASS' : 'UNKNOWN';
 };
 
@@ -169,9 +179,10 @@ export function runSterilization({ adapter, context = {}, evidenceVerifier = nul
   let result;
   try { result = adapter.sterilize(clone(context)); } catch (error) { return freeze({ status: 'FAIL', evidenceStatus: 'FAIL', evidenceRefs: [], reason: 'STERILIZATION_ADAPTER_ERROR', error: error.message, at: now() }); }
   const evidence = Array.isArray(result?.evidence) ? result.evidence : [];
-  const evidenceStatus = proofStatus({ evidenceStatus: result?.evidenceStatus, evidence, evidenceVerifier });
+  const evidenceRefs = unique(result?.evidenceRefs || evidence.map((item) => item.evidenceId));
+  const evidenceStatus = proofStatus({ evidenceStatus: result?.evidenceStatus, evidenceRefs, evidence, evidenceVerifier });
   const status = upper(result?.status || (evidenceStatus === 'PASS' ? 'STERILE' : evidenceStatus));
-  return freeze({ ...clone(result), status, evidenceStatus, evidenceRefs: unique(result?.evidenceRefs || evidence.map((item) => item.evidenceId)), at: now() });
+  return freeze({ ...clone(result), status, evidenceStatus, evidenceRefs, at: now() });
 }
 
 export function createRoom({ roomId, roomPixieId, now = iso } = {}) {
