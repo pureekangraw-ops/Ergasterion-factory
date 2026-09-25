@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createCycle, applyCycleAction, createTestType, createTestTypeRegistry } from '../pixie-lab/core.mjs';
 import { createJsonFilePersistence, createEvidenceStore, createEvidenceBackedSterilizer, createRunnerHost, createReplayQueue } from '../pixie-lab/adapters.mjs';
+import { PixieLab } from '../pixie-lab/service.mjs';
 
 const now = () => '2026-09-25T00:00:00.000Z';
 
@@ -20,6 +21,18 @@ test('JSON persistence adapter writes and reloads canonical Lab state', async ()
   await persistence.save({ labId: 'PIXIE-LAB', runs: [{ runId: 'R-1' }] });
   assert.deepEqual(await persistence.load(), { labId: 'PIXIE-LAB', runs: [{ runId: 'R-1' }] });
   assert.match(await readFile(path, 'utf8'), /PIXIE-LAB/);
+});
+
+
+test('PixieLab rebuilds Board through the JSON persistence adapter end-to-end', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'pixie-e2e-'));
+  const persistence = createJsonFilePersistence({ filePath: join(dir, 'lab.json') });
+  const first = new PixieLab({ persistence, now: () => '2026-09-25T00:00:00.000Z' });
+  first.addRoomReport({ roomId: 'ROOM-A', roomPixieId: 'PIXIE-A', roomStatus: 'RUNNING', activeSubject: 'S', unknowns: ['critical-storage'] });
+  await first.persist();
+  const rebuilt = new PixieLab({ persistence, now: () => '2026-09-25T00:00:00.000Z' });
+  const board = await rebuilt.rebuildBoard();
+  assert.deepEqual(board.unknowns, ['critical-storage']);
 });
 
 test('evidence store keeps explicit statuses', async () => {
