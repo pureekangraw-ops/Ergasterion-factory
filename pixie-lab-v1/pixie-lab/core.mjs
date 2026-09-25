@@ -45,9 +45,9 @@ const statusOr = (value, fallback = 'UNKNOWN') => upper(value || fallback);
 const proofStatus = ({ evidenceStatus, evidenceRefs = [], evidence = [] } = {}) => {
   if (EVIDENCE_STATUSES.includes(upper(evidenceStatus))) return upper(evidenceStatus);
   if (!evidenceRefs.length && !evidence.length) return 'UNKNOWN';
-  const values = evidence.map((item) => upper(item?.status)).concat(evidenceRefs.length ? 'PASS' : []);
+  const values = evidence.map((item) => upper(item?.status));
   if (values.includes('FAIL')) return 'FAIL';
-  if (!values.length || values.includes('UNKNOWN')) return 'UNKNOWN';
+  if (!values.length || values.includes('UNKNOWN') || evidenceRefs.length) return 'UNKNOWN';
   return 'PASS';
 };
 
@@ -126,7 +126,8 @@ export function applyCycleAction(cycle, { action, result, actor, expected, obser
 }
 
 export function createTestType({ testTypeId, name, category, inputContract, runner, runnerInterface = null, expectedContract, severity = 'MEDIUM', replayable = true, requiresGrant = false, evidencePolicy, runnerStatus = 'CONTRACT_ONLY' } = {}) {
-  return freeze({ testTypeId: requireText(testTypeId, 'testTypeId'), name: requireText(name, 'name'), category: requireText(category, 'category'), inputContract: clone(inputContract ?? { source: 'LAB_FIXTURE' }), runner: ref(runner), runnerInterface: runnerInterface && typeof runnerInterface.run === 'function' ? { name: text(runnerInterface.name) || 'anonymous', run: runnerInterface.run } : null, expectedContract: requireText(expectedContract, 'expectedContract'), severity: requireText(severity, 'severity'), replayable: Boolean(replayable), requiresGrant: Boolean(requiresGrant), evidencePolicy: requireText(evidencePolicy, 'evidencePolicy'), runnerStatus: requireText(runnerStatus, 'runnerStatus') });
+  const normalizedRunner = runnerInterface && typeof runnerInterface.run === 'function' ? { name: text(runnerInterface.name) || 'anonymous', run: runnerInterface.run } : null;
+  return Object.freeze({ testTypeId: requireText(testTypeId, 'testTypeId'), name: requireText(name, 'name'), category: requireText(category, 'category'), inputContract: clone(inputContract ?? { source: 'LAB_FIXTURE' }), runner: ref(runner), runnerInterface: normalizedRunner, expectedContract: requireText(expectedContract, 'expectedContract'), severity: requireText(severity, 'severity'), replayable: Boolean(replayable), requiresGrant: Boolean(requiresGrant), evidencePolicy: requireText(evidencePolicy, 'evidencePolicy'), runnerStatus: requireText(runnerStatus, 'runnerStatus') });
 }
 export function createTestTypeRegistry({ testTypes = [] } = {}) { const registry = new Map(); for (const type of testTypes) registerTestType(registry, type); return registry; }
 export function registerTestType(registry, testType) {
@@ -134,7 +135,8 @@ export function registerTestType(registry, testType) {
   if (!testType?.testTypeId) throw new Error('testType.testTypeId is required');
   if (!TEST_CATEGORIES.includes(testType.category)) throw new Error(`Unsupported test category: ${testType.category}`);
   if (registry.has(testType.testTypeId)) throw new Error(`Duplicate test type: ${testType.testTypeId}`);
-  const value = freeze({ ...clone(testType), executionKind: testType.executionKind || (testType.requiresGrant ? 'GRANTED_SNAPSHOT' : 'LAB_FIXTURE'), runnerStatus: testType.runnerStatus || 'CONTRACT_ONLY', runnerInterface: testType.runnerInterface && typeof testType.runnerInterface.run === 'function' ? { name: text(testType.runnerInterface.name) || 'anonymous', run: testType.runnerInterface.run } : null });
+  const { runnerInterface, ...serializableType } = testType;
+  const value = Object.freeze({ ...clone(serializableType), executionKind: testType.executionKind || (testType.requiresGrant ? 'GRANTED_SNAPSHOT' : 'LAB_FIXTURE'), runnerStatus: testType.runnerStatus || 'CONTRACT_ONLY', runnerInterface: runnerInterface && typeof runnerInterface.run === 'function' ? { name: text(runnerInterface.name) || 'anonymous', run: runnerInterface.run } : null });
   registry.set(testType.testTypeId, value); return value;
 }
 export async function executeTestType(registry, testTypeId, context = {}) {
