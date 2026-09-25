@@ -5,7 +5,7 @@ A thin, expandable Lab core for the `Go-Calalog-` repurpose. This branch continu
 ## Implemented in this branch
 
 - Real lifecycle gate: `ZERO → STERILIZE → TEST → DEBUG → IMPROVE → RETEST → CANNON → LEARN`; no direct `CLEAN` shortcut.
-- Sterilization/cleanup adapter contract with evidence. Missing, failed, or unprovable proof becomes `UNKNOWN`/quarantined rather than a fake pass.
+- Sterilization/cleanup adapter contract with evidence. Only verified PASS evidence objects can pass; missing, failed, or unprovable proof becomes `UNKNOWN`/quarantined rather than a fake pass.
 - Door Guard exact match on `artifactId + logicId + version + target`, plus official seal status.
 - Golden Case lifecycle, replay count, mismatch detection, and `REGRESSION_ALERT` records.
 - Full Matrix lifecycle. Required `UNRUN`, `UNKNOWN`, `FAIL`, and `INCONCLUSIVE` rows cannot produce overall `PASS`.
@@ -38,4 +38,4 @@ No external write, delete, share, merge, deploy, or production-control authority
 npm test
 ```
 
-The suite includes the original core coverage, failure-path tests in `test/failure-paths.test.mjs`, and adapter tests in `test/adapters.test.mjs`.
+The suite includes the original core coverage, failure-path tests in `test/failure-paths.test.mjs`, adapter tests in `test/adapters.test.mjs`, and a JSON-persistence Board-rebuild E2E case.
