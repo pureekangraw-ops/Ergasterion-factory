@@ -94,7 +94,7 @@ export class PixieLab {
       return restored ? [restored] : [];
     });
     const normalizedResult = text(result).toUpperCase();
-    const success = normalizedResult === 'PASS' && proof.length > 0 && (next !== 'LOAD_CLEAN_SEED' || Boolean(seedRef));
+    const success = normalizedResult === 'PASS' && proof.length > 0 && proof.every((item) => text(item.status).toUpperCase() === 'PASS') && (next !== 'LOAD_CLEAN_SEED' || Boolean(seedRef));
     if (!success) {
       Object.assign(room, { status: 'QUARANTINED', lifecycleStage: 'QUARANTINED', quarantineReason: normalizedResult === 'PASS' ? 'UNVERIFIED_EVIDENCE_OR_SEED' : normalizedResult, lifecycleHistory: [...(room.lifecycleHistory || []), 'QUARANTINED'], updatedAt: this.now() });
       this.assertHealthy(); return clone(room);
