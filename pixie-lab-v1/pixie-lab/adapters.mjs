@@ -1,6 +1,6 @@
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
-import { createEvidence, createSterilizationAdapter, executeTestType } from './core.mjs';
+import { createEvidence, createSterilizationAdapter, executeTestType, verifyEvidenceRecord } from './core.mjs';
 
 const clone = (value) => value == null ? value : structuredClone(value);
 const text = (value) => String(value ?? '').trim();
@@ -37,6 +37,9 @@ export function createEvidenceStore({ append, list } = {}) {
     async listEvidence() {
       const external = typeof list === 'function' ? await list() : values;
       return clone(external || values);
+    },
+    verifyEvidence(value) {
+      return verifyEvidenceRecord(value, { trustedBy: 'PIXIE_EVIDENCE_STORE' });
     },
   });
 }
