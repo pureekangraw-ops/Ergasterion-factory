@@ -38,4 +38,4 @@ No external write, delete, share, merge, deploy, or production-control authority
 npm test
 ```
 
-The suite includes the original core coverage plus failure-path tests in `test/failure-paths.test.mjs`.
+The suite includes the original core coverage, failure-path tests in `test/failure-paths.test.mjs`, and adapter tests in `test/adapters.test.mjs`.
