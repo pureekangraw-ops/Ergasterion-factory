@@ -1,5 +1,3 @@
-import { createHmac, randomBytes } from 'node:crypto';
-
 export const PIXIE_ID = 'PIXIE-01';
 export const ROOM_IDS = Object.freeze(['ROOM-A', 'ROOM-B', 'ROOM-C']);
 
@@ -45,39 +43,22 @@ const requireText = (value, label) => { const result = text(value); if (!result)
 const ref = (value) => text(value) || null;
 const freeze = (value) => Object.freeze(clone(value));
 const verifiedEvidenceRecords = new WeakSet();
-const evidenceTrustKey = randomBytes(32);
-const EVIDENCE_TRUST_SCHEME = 'PIXIE_EVIDENCE_HMAC_V1';
+const EVIDENCE_TRUST_SCHEME = 'PIXIE_EVIDENCE_PROVIDER_V1';
 const upper = (value) => text(value).toUpperCase();
 const statusOr = (value, fallback = 'UNKNOWN') => upper(value || fallback);
 const evidencePayload = ({ evidenceId, kind, status, sourceRef, capturedAt, details }) => ({
   evidenceId, kind, status, sourceRef, capturedAt, details: clone(details),
 });
-const evidenceProof = (payload) => createHmac('sha256', evidenceTrustKey)
-  .update(JSON.stringify(payload))
-  .digest('hex');
-const hasValidEvidenceShape = (value) => Boolean(
-  value
-  && typeof value === 'object'
-  && value.evidenceId
-  && value.kind
-  && value.sourceRef
-  && value.verifiedAt
-  && EVIDENCE_STATUSES.includes(upper(value.status)),
-);
-const hasDurableEvidenceProof = (value) => {
-  if (!hasValidEvidenceShape(value)) return false;
-  const payload = evidencePayload(value);
-  return value.verification?.scheme === EVIDENCE_TRUST_SCHEME
-    && value.verification.proof === evidenceProof(payload);
-};
-const proofStatus = ({ evidenceStatus, evidenceRefs = [], evidence = [] } = {}) => {
-  const explicit = upper(evidenceStatus);
-  const trusted = evidence.filter((item) => isVerifiedEvidenceRecord(item));
-  const values = trusted.map((item) => upper(item.status));
-  if (values.includes('FAIL') || explicit === 'FAIL') return 'FAIL';
-  if (!trusted.length || values.includes('UNKNOWN') || evidenceRefs.length && !values.includes('PASS')) return 'UNKNOWN';
-  return (!explicit || explicit === 'PASS') && values.every((value) => value === 'PASS') ? 'PASS' : 'UNKNOWN';
-};
+
+export function createEvidenceTrustProvider({ providerId, sign = null, verify } = {}) {
+  const id = requireText(providerId, 'providerId');
+  if (typeof verify !== 'function') throw new Error('Evidence trust provider requires verify');
+  return Object.freeze({
+    providerId: id,
+    sign: typeof sign === 'function' ? (payload) => requireText(sign(clone(payload)), 'proof') : null,
+    verify: (payload, proof) => Boolean(verify(clone(payload), proof)),
+  });
+}
 
 export function createEvidence({ evidenceId, kind, status = 'UNKNOWN', sourceRef, capturedAt = iso(), details = null } = {}) {
   const normalized = upper(status);
@@ -90,48 +71,105 @@ export function createEvidence({ evidenceId, kind, status = 'UNKNOWN', sourceRef
     capturedAt,
     details,
   });
+  return Object.freeze({ ...payload, verifiedAt: null, verification: null, trust: 'UNVERIFIED' });
+}
+
+export function createVerifiedEvidence(
+  { evidenceId, kind, status = 'UNKNOWN', sourceRef, capturedAt = iso(), details = null } = {},
+  { trustProvider, verifiedAt = capturedAt } = {},
+) {
+  if (!trustProvider?.providerId || typeof trustProvider.sign !== 'function') throw new Error('EVIDENCE_SIGNER_REQUIRED');
+  const normalized = upper(status);
+  if (!EVIDENCE_STATUSES.includes(normalized)) throw new Error(`Unknown evidence status: ${status}`);
+  const payload = evidencePayload({
+    evidenceId: requireText(evidenceId, 'evidenceId'),
+    kind: requireText(kind, 'kind'),
+    status: normalized,
+    sourceRef: requireText(sourceRef, 'sourceRef'),
+    capturedAt,
+    details,
+  });
   const record = Object.freeze({
     ...payload,
-    verifiedAt: capturedAt,
-    verification: { scheme: EVIDENCE_TRUST_SCHEME, proof: evidenceProof(payload) },
+    verifiedAt,
+    verification: {
+      scheme: EVIDENCE_TRUST_SCHEME,
+      providerId: trustProvider.providerId,
+      proof: trustProvider.sign(payload),
+    },
+    trust: 'VERIFIED',
   });
   verifiedEvidenceRecords.add(record);
   return record;
 }
-export function rehydrateEvidenceRecord(value, { trustedBy = 'PIXIE_EVIDENCE_STORE' } = {}) {
-  if (!['PIXIE_EVIDENCE_STORE', 'PIXIE_PERSISTENCE'].includes(trustedBy) || !hasDurableEvidenceProof(value)) {
-    throw new Error('EVIDENCE_REHYDRATION_REJECTED');
+
+const hasValidEvidenceShape = (value) => Boolean(
+  value
+  && typeof value === 'object'
+  && value.evidenceId
+  && value.kind
+  && value.sourceRef
+  && value.verifiedAt
+  && EVIDENCE_STATUSES.includes(upper(value.status))
+  && value.verification?.scheme === EVIDENCE_TRUST_SCHEME
+  && value.verification?.providerId
+  && value.verification?.proof,
+);
+
+const hasDurableEvidenceProof = (value, trustProvider) => {
+  if (!hasValidEvidenceShape(value) || !trustProvider?.providerId || typeof trustProvider.verify !== 'function') return false;
+  if (value.verification.providerId !== trustProvider.providerId) return false;
+  try {
+    return trustProvider.verify(evidencePayload(value), value.verification.proof);
+  } catch {
+    return false;
   }
+};
+
+export function rehydrateEvidenceRecord(value, { trustProvider } = {}) {
+  if (!hasDurableEvidenceProof(value, trustProvider)) throw new Error('EVIDENCE_REHYDRATION_REJECTED');
   const record = Object.freeze({
     ...evidencePayload(value),
     verifiedAt: value.verifiedAt,
     verification: { ...value.verification },
+    trust: 'VERIFIED',
   });
   verifiedEvidenceRecords.add(record);
   return record;
 }
-export function verifyEvidenceRecord(value, options = {}) {
-  try { return rehydrateEvidenceRecord(value, options); }
+
+export function verifyEvidenceRecord(value, { trustProvider } = {}) {
+  try { return rehydrateEvidenceRecord(value, { trustProvider }); }
   catch { return null; }
 }
-export function isVerifiedEvidenceRecord(value) {
+
+export function isVerifiedEvidenceRecord(value, { trustProvider } = {}) {
   return Boolean(
     value
     && typeof value === 'object'
-    && (verifiedEvidenceRecords.has(value) || hasDurableEvidenceProof(value)),
+    && (verifiedEvidenceRecords.has(value) || hasDurableEvidenceProof(value, trustProvider)),
   );
 }
+
+const proofStatus = ({ evidenceStatus, evidenceRefs = [], evidence = [], evidenceVerifier = null } = {}) => {
+  const explicit = upper(evidenceStatus);
+  const trusted = evidence.filter((item) => isVerifiedEvidenceRecord(item, { trustProvider: evidenceVerifier }));
+  const values = trusted.map((item) => upper(item.status));
+  if (values.includes('FAIL') || explicit === 'FAIL') return 'FAIL';
+  if (!trusted.length || values.includes('UNKNOWN') || evidenceRefs.length && !values.includes('PASS')) return 'UNKNOWN';
+  return (!explicit || explicit === 'PASS') && values.every((value) => value === 'PASS') ? 'PASS' : 'UNKNOWN';
+};
 
 export function createSterilizationAdapter({ adapterId, name, clean, sterilize, evidencePolicy = 'required' } = {}) {
   return Object.freeze({ adapterId: requireText(adapterId, 'adapterId'), name: requireText(name, 'name'), clean: typeof clean === 'function' ? clean : null, sterilize: typeof sterilize === 'function' ? sterilize : null, evidencePolicy: requireText(evidencePolicy, 'evidencePolicy') });
 }
 
-export function runSterilization({ adapter, context = {}, now = iso } = {}) {
+export function runSterilization({ adapter, context = {}, evidenceVerifier = null, now = iso } = {}) {
   if (!adapter?.sterilize) return freeze({ status: 'UNKNOWN', evidenceStatus: 'UNKNOWN', evidenceRefs: [], reason: 'STERILIZATION_ADAPTER_UNAVAILABLE', at: now() });
   let result;
   try { result = adapter.sterilize(clone(context)); } catch (error) { return freeze({ status: 'FAIL', evidenceStatus: 'FAIL', evidenceRefs: [], reason: 'STERILIZATION_ADAPTER_ERROR', error: error.message, at: now() }); }
   const evidence = Array.isArray(result?.evidence) ? result.evidence : [];
-  const evidenceStatus = proofStatus({ evidenceStatus: result?.evidenceStatus, evidence });
+  const evidenceStatus = proofStatus({ evidenceStatus: result?.evidenceStatus, evidence, evidenceVerifier });
   const status = upper(result?.status || (evidenceStatus === 'PASS' ? 'STERILE' : evidenceStatus));
   return freeze({ ...clone(result), status, evidenceStatus, evidenceRefs: unique(result?.evidenceRefs || evidence.map((item) => item.evidenceId)), at: now() });
 }
@@ -175,12 +213,12 @@ function transitionFor(action, result, current) {
   return { stage: current.stage, state: current.state, nextAction: current.nextAction };
 }
 
-export function applyCycleAction(cycle, { action, result, actor, expected, observed, fixtureRef, snapshotRef, logicVersion, evidenceRefs = [], changeRefs = [], testRunRefs = [], evidenceStatus, evidence = [], now = iso } = {}) {
+export function applyCycleAction(cycle, { action, result, actor, expected, observed, fixtureRef, snapshotRef, logicVersion, evidenceRefs = [], changeRefs = [], testRunRefs = [], evidenceStatus, evidence = [], evidenceVerifier = null, now = iso } = {}) {
   const current = clone(cycle); const actionName = requireText(action, 'action').toUpperCase(); const resultName = requireText(result, 'result').toUpperCase();
   if (!CYCLE_ACTIONS.includes(actionName)) throw new Error(`Unknown cycle action: ${action}`);
-  if (['ZERO', 'STERILIZE'].includes(actionName) && proofStatus({ evidenceStatus, evidenceRefs, evidence }) !== 'PASS' && ['ZERO_CONFIRMED', 'STERILE'].includes(resultName)) throw new Error(`${actionName}_REQUIRES_PASS_EVIDENCE`);
+  if (['ZERO', 'STERILIZE'].includes(actionName) && proofStatus({ evidenceStatus, evidenceRefs, evidence, evidenceVerifier }) !== 'PASS' && ['ZERO_CONFIRMED', 'STERILE'].includes(resultName)) throw new Error(`${actionName}_REQUIRES_PASS_EVIDENCE`);
   const transition = transitionFor(actionName, resultName, current); const timestamp = now();
-  current.steps.push({ action: actionName, actor: requireText(actor || current.initiatedBy, 'actor'), result: resultName, expected: clone(expected ?? null), observed: clone(observed ?? null), fixtureRef: ref(fixtureRef), snapshotRef: ref(snapshotRef), logicVersion: text(logicVersion) || current.logicVersion, evidenceStatus: proofStatus({ evidenceStatus, evidenceRefs, evidence }), evidenceRefs: unique(evidenceRefs), changeRefs: unique(changeRefs), testRunRefs: unique(testRunRefs), at: timestamp });
+  current.steps.push({ action: actionName, actor: requireText(actor || current.initiatedBy, 'actor'), result: resultName, expected: clone(expected ?? null), observed: clone(observed ?? null), fixtureRef: ref(fixtureRef), snapshotRef: ref(snapshotRef), logicVersion: text(logicVersion) || current.logicVersion, evidenceStatus: proofStatus({ evidenceStatus, evidenceRefs, evidence, evidenceVerifier }), evidenceRefs: unique(evidenceRefs), changeRefs: unique(changeRefs), testRunRefs: unique(testRunRefs), at: timestamp });
   Object.assign(current, transition, { updatedAt: timestamp });
   if (transition.safetyPath === 'QUARANTINED') current.quarantineReason = text(transition.blockedReason || resultName);
   if (actionName === 'DEBUG') current.debugRefs = unique([...current.debugRefs, ...changeRefs, ...testRunRefs]);
