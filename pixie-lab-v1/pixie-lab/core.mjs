@@ -1,3 +1,5 @@
+import { createHmac, randomBytes } from 'node:crypto';
+
 export const PIXIE_ID = 'PIXIE-01';
 export const ROOM_IDS = Object.freeze(['ROOM-A', 'ROOM-B', 'ROOM-C']);
 
@@ -24,7 +26,7 @@ export const EVIDENCE_STATUSES = Object.freeze(['PASS', 'FAIL', 'UNKNOWN']);
 export const GOLDEN_STATUSES = Object.freeze(['GOLDEN_CANDIDATE', 'VERIFY_REPLAY', 'GOLDEN_ACTIVE', 'REGRESSION_CASE', 'RETIRED']);
 export const MATRIX_STATUSES = Object.freeze(['READY_TO_RUN', 'RUNNING', 'TRIAGE', 'TEST_PASS', 'TEST_FAIL', 'INCONCLUSIVE', 'READY_CANDIDATE', 'NEEDS_FIX']);
 export const DEBUG_CONFIDENCE = Object.freeze(['SUSPECTED', 'SUPPORTED', 'CONFIRMED']);
-export const ROOM_LIFECYCLE_STAGES = Object.freeze(['ARCHIVE', 'ZERO', 'STERILIZE', 'VERIFY_CLEAN', 'LOAD_CLEAN_SEED', 'READY', 'QUARANTINED']);
+export const ROOM_LIFECYCLE_STAGES = Object.freeze(['ARCHIVE', 'ZERO', 'STERILIZE', 'VERIFY_CLEAN', 'LOAD_CLEAN_SEED', 'READY', 'QUARANTINED', 'CLEAN_AGAIN']);
 
 export const TEST_CATEGORIES = Object.freeze([
   'FUNCTIONAL', 'INTEGRATION', 'CONTRACT', 'REGRESSION', 'GOLDEN',
@@ -43,8 +45,31 @@ const requireText = (value, label) => { const result = text(value); if (!result)
 const ref = (value) => text(value) || null;
 const freeze = (value) => Object.freeze(clone(value));
 const verifiedEvidenceRecords = new WeakSet();
+const evidenceTrustKey = randomBytes(32);
+const EVIDENCE_TRUST_SCHEME = 'PIXIE_EVIDENCE_HMAC_V1';
 const upper = (value) => text(value).toUpperCase();
 const statusOr = (value, fallback = 'UNKNOWN') => upper(value || fallback);
+const evidencePayload = ({ evidenceId, kind, status, sourceRef, capturedAt, details }) => ({
+  evidenceId, kind, status, sourceRef, capturedAt, details: clone(details),
+});
+const evidenceProof = (payload) => createHmac('sha256', evidenceTrustKey)
+  .update(JSON.stringify(payload))
+  .digest('hex');
+const hasValidEvidenceShape = (value) => Boolean(
+  value
+  && typeof value === 'object'
+  && value.evidenceId
+  && value.kind
+  && value.sourceRef
+  && value.verifiedAt
+  && EVIDENCE_STATUSES.includes(upper(value.status)),
+);
+const hasDurableEvidenceProof = (value) => {
+  if (!hasValidEvidenceShape(value)) return false;
+  const payload = evidencePayload(value);
+  return value.verification?.scheme === EVIDENCE_TRUST_SCHEME
+    && value.verification.proof === evidenceProof(payload);
+};
 const proofStatus = ({ evidenceStatus, evidenceRefs = [], evidence = [] } = {}) => {
   const explicit = upper(evidenceStatus);
   const trusted = evidence.filter((item) => isVerifiedEvidenceRecord(item));
@@ -57,11 +82,45 @@ const proofStatus = ({ evidenceStatus, evidenceRefs = [], evidence = [] } = {}) 
 export function createEvidence({ evidenceId, kind, status = 'UNKNOWN', sourceRef, capturedAt = iso(), details = null } = {}) {
   const normalized = upper(status);
   if (!EVIDENCE_STATUSES.includes(normalized)) throw new Error(`Unknown evidence status: ${status}`);
-  const record = Object.freeze({ evidenceId: requireText(evidenceId, 'evidenceId'), kind: requireText(kind, 'kind'), status: normalized, sourceRef: requireText(sourceRef, 'sourceRef'), capturedAt, verifiedAt: capturedAt, details: clone(details) });
+  const payload = evidencePayload({
+    evidenceId: requireText(evidenceId, 'evidenceId'),
+    kind: requireText(kind, 'kind'),
+    status: normalized,
+    sourceRef: requireText(sourceRef, 'sourceRef'),
+    capturedAt,
+    details,
+  });
+  const record = Object.freeze({
+    ...payload,
+    verifiedAt: capturedAt,
+    verification: { scheme: EVIDENCE_TRUST_SCHEME, proof: evidenceProof(payload) },
+  });
   verifiedEvidenceRecords.add(record);
   return record;
 }
-export function isVerifiedEvidenceRecord(value) { return Boolean(value && typeof value === 'object' && verifiedEvidenceRecords.has(value) && value.evidenceId && value.kind && value.sourceRef && value.verifiedAt && EVIDENCE_STATUSES.includes(value.status)); }
+export function rehydrateEvidenceRecord(value, { trustedBy = 'PIXIE_EVIDENCE_STORE' } = {}) {
+  if (!['PIXIE_EVIDENCE_STORE', 'PIXIE_PERSISTENCE'].includes(trustedBy) || !hasDurableEvidenceProof(value)) {
+    throw new Error('EVIDENCE_REHYDRATION_REJECTED');
+  }
+  const record = Object.freeze({
+    ...evidencePayload(value),
+    verifiedAt: value.verifiedAt,
+    verification: { ...value.verification },
+  });
+  verifiedEvidenceRecords.add(record);
+  return record;
+}
+export function verifyEvidenceRecord(value, options = {}) {
+  try { return rehydrateEvidenceRecord(value, options); }
+  catch { return null; }
+}
+export function isVerifiedEvidenceRecord(value) {
+  return Boolean(
+    value
+    && typeof value === 'object'
+    && (verifiedEvidenceRecords.has(value) || hasDurableEvidenceProof(value)),
+  );
+}
 
 export function createSterilizationAdapter({ adapterId, name, clean, sterilize, evidencePolicy = 'required' } = {}) {
   return Object.freeze({ adapterId: requireText(adapterId, 'adapterId'), name: requireText(name, 'name'), clean: typeof clean === 'function' ? clean : null, sterilize: typeof sterilize === 'function' ? sterilize : null, evidencePolicy: requireText(evidencePolicy, 'evidencePolicy') });
