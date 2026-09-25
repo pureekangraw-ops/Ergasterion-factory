@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
   createCycle, applyCycleAction, createTestType, createTestTypeRegistry,
-  createVerifiedEvidence, isVerifiedEvidenceRecord, verifyEvidenceRecord,
+  createVerifiedEvidence, createEvidenceVerifier, isVerifiedEvidenceRecord, verifyEvidenceRecord,
 } from '../pixie-lab/core.mjs';
 import {
   createJsonFilePersistence, createEvidenceStore, createEvidenceBackedSterilizer,
@@ -23,7 +23,7 @@ const proof = (id, provider = trust()) => createVerifiedEvidence(
 
 test('closeSession enters ARCHIVE and requires the full clean-room lifecycle', () => {
   const provider = trust();
-  const lab = new PixieLab({ now, evidenceVerifier: provider });
+  const lab = new PixieLab({ now, evidenceVerifier: createEvidenceVerifier(provider) });
   lab.startSession({ roomId: 'ROOM-A', sessionId: 'S-1', purpose: 'X', activityType: 'CHECK' });
   lab.closeSession('S-1');
   assert.equal(lab.room('ROOM-A').status, 'ARCHIVE');
@@ -45,7 +45,7 @@ test('room lifecycle fail or unknown quarantines without a CLEAN shortcut', () =
 
 test('quarantined room recovers through CLEAN_AGAIN before returning READY', () => {
   const provider = trust();
-  const lab = new PixieLab({ now, evidenceVerifier: provider });
+  const lab = new PixieLab({ now, evidenceVerifier: createEvidenceVerifier(provider) });
   lab.startSession({ roomId: 'ROOM-C', sessionId: 'S-3', purpose: 'X', activityType: 'CHECK' });
   lab.closeSession('S-3');
   assert.equal(lab.advanceRoomLifecycle('ROOM-C', { stage: 'ZERO', result: 'FAIL', evidence: [] }).status, 'QUARANTINED');
@@ -89,7 +89,7 @@ test('JSON persistence adapter writes and reloads canonical Lab state', async ()
 
 test('untrusted recordEvidence PASS cannot certify itself', () => {
   const provider = trust();
-  const lab = new PixieLab({ now, evidenceVerifier: provider });
+  const lab = new PixieLab({ now, evidenceVerifier: createEvidenceVerifier(provider) });
   lab.startSession({ roomId: 'ROOM-A', sessionId: 'S-UNTRUSTED', purpose: 'X', activityType: 'CHECK' });
   lab.closeSession('S-UNTRUSTED');
   const observation = lab.recordEvidence({ evidenceId: 'E-OBS', kind: 'caller-observation', status: 'PASS', sourceRef: 'caller://self' });
@@ -98,11 +98,41 @@ test('untrusted recordEvidence PASS cannot certify itself', () => {
   assert.equal(room.status, 'QUARANTINED');
 });
 
+test('verified FAIL evidence cannot advance a room lifecycle', () => {
+  const provider = trust();
+  const failProof = createVerifiedEvidence(
+    { evidenceId: 'E-FAIL', kind: 'probe', status: 'FAIL', sourceRef: 'probe://failed' },
+    { trustProvider: provider },
+  );
+  const lab = new PixieLab({ now, evidenceVerifier: createEvidenceVerifier(provider) });
+  lab.startSession({ roomId: 'ROOM-A', sessionId: 'S-FAIL-PROOF', purpose: 'X', activityType: 'CHECK' });
+  lab.closeSession('S-FAIL-PROOF');
+  assert.equal(lab.advanceRoomLifecycle('ROOM-A', { stage: 'ZERO', evidence: [failProof] }).status, 'QUARANTINED');
+});
+
+test('evidenceRefs must match the verified evidence IDs', () => {
+  const provider = trust();
+  const cycle = createCycle({ cycleId: 'REF-C', subjectRef: 'S', roomId: 'ROOM-A', sessionId: 'S', logicVersion: '1', now });
+  const real = proof('E-REAL', provider);
+  assert.throws(
+    () => applyCycleAction(cycle, {
+      action: 'ZERO',
+      result: 'ZERO_CONFIRMED',
+      evidenceStatus: 'PASS',
+      evidenceRefs: ['E-FAKE'],
+      evidence: [real],
+      evidenceVerifier: createEvidenceVerifier(provider),
+      now,
+    }),
+    /ZERO_REQUIRES_PASS_EVIDENCE/,
+  );
+});
+
 test('trusted evidence store can issue PASS that satisfies lifecycle proof', async () => {
   const provider = trust();
   const store = createEvidenceStore({ trustProvider: provider });
   const signed = await store.appendEvidence({ evidenceId: 'E-STORE', kind: 'probe', status: 'PASS', sourceRef: 'probe://zero' });
-  const lab = new PixieLab({ now, evidenceVerifier: provider });
+  const lab = new PixieLab({ now, evidenceVerifier: createEvidenceVerifier(provider) });
   lab.startSession({ roomId: 'ROOM-B', sessionId: 'S-STORE', purpose: 'X', activityType: 'CHECK' });
   lab.closeSession('S-STORE');
   assert.equal(lab.advanceRoomLifecycle('ROOM-B', { stage: 'ZERO', evidence: [signed] }).lifecycleStage, 'ZERO');
@@ -117,12 +147,14 @@ test('evidence trust survives a simulated process restart with the same provider
   const store = createEvidenceStore({ trustProvider: providerBeforeRestart });
   const signed = await store.appendEvidence({ evidenceId: 'E-PERSISTED', kind: 'probe', status: 'PASS', sourceRef: 'probe://persisted' });
 
-  const first = new PixieLab({ now, persistence, evidenceVerifier: providerBeforeRestart });
+  const first = new PixieLab({ now, persistence, evidenceVerifier: createEvidenceVerifier(providerBeforeRestart) });
   first.acceptVerifiedEvidence(signed);
   await first.persist();
 
   const providerAfterRestart = trust();
-  const rebuilt = new PixieLab({ now, persistence, evidenceVerifier: providerAfterRestart });
+  const verifierAfterRestart = createEvidenceVerifier(providerAfterRestart);
+  assert.equal(verifierAfterRestart.sign, null);
+  const rebuilt = new PixieLab({ now, persistence, evidenceVerifier: verifierAfterRestart });
   await rebuilt.rebuildBoard();
   assert.equal(rebuilt.state.evidence.length, 1);
   assert.equal(rebuilt.state.evidence[0].evidenceId, 'E-PERSISTED');
@@ -139,6 +171,9 @@ test('wrong provider and tampered payload both fail verification', async () => {
   const tampered = structuredClone(signed);
   tampered.status = 'FAIL';
   assert.equal(verifyEvidenceRecord(tampered, { trustProvider: provider }), null);
+  const timeTampered = structuredClone(signed);
+  timeTampered.verifiedAt = '2099-01-01T00:00:00.000Z';
+  assert.equal(verifyEvidenceRecord(timeTampered, { trustProvider: provider }), null);
   assert.equal(isVerifiedEvidenceRecord({ status: 'PASS' }, { trustProvider: provider }), false);
 });
 
