@@ -6,7 +6,7 @@ A thin, expandable Lab core for the `Go-Calalog-` repurpose. This branch continu
 
 - Real lifecycle gates: room cleanup uses `ARCHIVE → ZERO → STERILIZE → VERIFY_CLEAN → LOAD_CLEAN_SEED → READY`; cycle uses `ZERO → STERILIZE → TEST → DEBUG → IMPROVE → RETEST → CANNON → LEARN`; no direct `CLEAN` shortcut.
 - Sterilization/cleanup adapter contract with evidence. Missing, failed, or unprovable proof becomes `UNKNOWN`/quarantined rather than a fake pass.
-- Evidence trust is provider-injected and fail-closed: caller observations are unverified, trusted adapters/stores issue signed records, and persistence re-verifies them with a host-supplied stable verifier.
+- Evidence trust is provider-injected and fail-closed: caller observations are unverified, trusted adapters/stores hold the signer, PixieLab can receive a verifier-only view, and persistence re-verifies durable records after restart.
 - Door Guard exact match on `artifactId + logicId + version + target`, plus official seal status.
 - Golden Case lifecycle: `GOLDEN_CANDIDATE → VERIFY_REPLAY → GOLDEN_ACTIVE → REGRESSION_CASE`, with replay count and regression records.
 - Full Matrix lifecycle: `READY_TO_RUN → RUNNING → TRIAGE → TEST_PASS/TEST_FAIL/INCONCLUSIVE/READY_CANDIDATE/NEEDS_FIX`; required `UNRUN`, `UNKNOWN`, `FAIL`, and `INCONCLUSIVE` rows cannot pass.
