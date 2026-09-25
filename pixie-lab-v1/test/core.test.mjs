@@ -5,11 +5,19 @@ import {
   createTestType, createTestMatrix, updateMatrixStatus, createTestRun,
   createTestProposal, decideTestProposal, createBugCapsule, createGoAttention,
   updateGoAttention, createGoldenCase, createLabMemoryAsset, createArtifact,
-  verifyDoorGuard, createRoomReport, projectPixieBoard, createEvidence, replayGoldenCase,
+  verifyDoorGuard, createRoomReport, projectPixieBoard, createEvidenceTrustProvider, createVerifiedEvidence, replayGoldenCase,
 } from '../pixie-lab/core.mjs';
 
 const fixedNow = () => '2026-09-25T00:00:00.000Z';
-const proof = (id) => createEvidence({ evidenceId: id, kind: 'fixture-proof', status: 'PASS', sourceRef: `fixture://${id}` });
+const trust = createEvidenceTrustProvider({
+  providerId: 'CORE-TEST',
+  sign: (payload) => `core-test:${JSON.stringify(payload)}`,
+  verify: (payload, proofValue) => proofValue === `core-test:${JSON.stringify(payload)}`,
+});
+const proof = (id) => createVerifiedEvidence(
+  { evidenceId: id, kind: 'fixture-proof', status: 'PASS', sourceRef: `fixture://${id}` },
+  { trustProvider: trust },
+);
 
 test('Pixie Lab has one board and no mode field', () => {
   const rooms = createDefaultRooms({ now: fixedNow });
