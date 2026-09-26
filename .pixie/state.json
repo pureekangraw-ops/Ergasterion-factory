@@ -40,6 +40,19 @@
       "activeSessionId": "S-ENTRY-FALSE-GREEN-001",
       "currentCycleId": null,
       "updatedAt": "2026-09-26T05:01:02.145Z"
+    },
+    {
+      "roomId": "ROOM-D",
+      "roomPixieId": "PIXIE-D",
+      "status": "READY",
+      "lifecycleStage": "READY",
+      "lifecycleHistory": [
+        "READY"
+      ],
+      "assignedPurpose": "INSPECT_DEBUG",
+      "activeSessionId": null,
+      "currentCycleId": null,
+      "updatedAt": "2026-09-26T07:46:07.990Z"
     }
   ],
   "roomReports": [],
@@ -176,5 +189,59 @@
       "at": "2026-09-26T06:19:39.285Z"
     }
   ],
-  "contradictions": []
+  "contradictions": [],
+  "logicDrafts": [
+    {
+      "draftId": "DRAFT-GOHUB-ENTRY-SELFHEAL-001",
+      "logicId": "GOHUB-PUBLIC-ENTRY-SELFHEAL",
+      "sourceRef": "github://pureekangraw-ops/standard-/go-hub-public-entry-watch",
+      "sourceVersion": "LAB-COPY-1",
+      "labOwned": true,
+      "status": "DRAFT",
+      "original": {
+        "probe": {
+          "attemptsBeforeRepair": 4,
+          "requiredSignals": [
+            "HTTP_200",
+            "TITLE_GO_HUB",
+            "CENTRE_VISIBLE"
+          ]
+        },
+        "repair": {
+          "action": "WRANGLER_REDEPLOY_ONCE",
+          "maxRepairs": 1,
+          "verifyAttempts": 8
+        },
+        "checks": [
+          "BACKEND_HEALTH",
+          "PUBLIC_ENTRY"
+        ],
+        "note": "  baseline copy for PIXIE Logic Workbench  "
+      },
+      "workingCopy": {
+        "probe": {
+          "attemptsBeforeRepair": 4,
+          "requiredSignals": [
+            "HTTP_200",
+            "TITLE_GO_HUB",
+            "CENTRE_VISIBLE"
+          ]
+        },
+        "repair": {
+          "action": "WRANGLER_REDEPLOY_ONCE",
+          "maxRepairs": 1,
+          "verifyAttempts": 8
+        },
+        "checks": [
+          "BACKEND_HEALTH",
+          "PUBLIC_ENTRY"
+        ],
+        "note": "  baseline copy for PIXIE Logic Workbench  "
+      },
+      "edits": [],
+      "createdAt": "2026-09-26T07:46:07.991Z",
+      "updatedAt": "2026-09-26T07:46:07.991Z"
+    }
+  ],
+  "factoryHandoffs": []
 }
