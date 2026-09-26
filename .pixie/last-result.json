@@ -1,56 +1,19 @@
 {
-  "requestId": "PIXIE-ENTRY-LAB-20260926-CROSS-001",
-  "command": "cross_room",
+  "requestId": "PIXIE-ENTRY-LAB-20260926-MASTER-001",
+  "command": "master_gate",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "cross_room",
-    "mutated": true,
+    "command": "master_gate",
+    "mutated": false,
     "result": {
-      "checkId": "CROSS-2026-09-26T05:01:50.066Z",
-      "subjectRef": "fixture://go-hub-public-entry/self-heal-v1",
       "status": "FAIL",
-      "observations": [
-        {
-          "roomId": "ROOM-A",
-          "status": "PASS",
-          "observed": {
-            "backendHealth": "PASS",
-            "userEntry": "PASS",
-            "httpStatus": 200,
-            "hasGoHubTitle": true,
-            "hasCentre": true
-          }
-        },
-        {
-          "roomId": "ROOM-B",
-          "status": "FAIL",
-          "observed": {
-            "backendHealth": "FAIL",
-            "userEntry": "FAIL",
-            "httpStatus": 404,
-            "hasGoHubTitle": false,
-            "hasCentre": false
-          }
-        },
-        {
-          "roomId": "ROOM-C",
-          "status": "FAIL",
-          "observed": {
-            "backendHealth": "PASS",
-            "userEntry": "FAIL",
-            "httpStatus": 404,
-            "hasGoHubTitle": false,
-            "hasCentre": false
-          }
-        }
-      ],
-      "at": "2026-09-26T05:01:50.066Z"
+      "reason": "CROSS_ROOM_INCONSISTENCY"
     }
   },
   "error": null,
-  "completedAt": "2026-09-26T05:01:50.094Z"
+  "completedAt": "2026-09-26T05:02:25.370Z"
 }
