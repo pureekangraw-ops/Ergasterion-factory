@@ -9,7 +9,7 @@ const requireObject = (value, label = 'args') => {
 
 export const PIXIE_COMMANDS = Object.freeze([
   'status', 'ask',
-  'start_session', 'close_session',
+  'start_session', 'archive_session', 'close_session', 'clean_room',
   'start_cycle', 'cycle_action',
   'add_matrix', 'start_matrix', 'update_matrix',
   'add_test_run', 'rerun_test_run',
@@ -25,7 +25,7 @@ export const PIXIE_COMMANDS = Object.freeze([
 ]);
 
 const MUTATING = new Set([
-  'start_session', 'close_session',
+  'start_session', 'archive_session', 'close_session', 'clean_room',
   'start_cycle', 'cycle_action',
   'add_matrix', 'start_matrix', 'update_matrix',
   'add_test_run', 'rerun_test_run',
@@ -73,8 +73,14 @@ export function createPixieCommander({ persistence, evidenceVerifier = null, now
       case 'start_session':
         result = lab.startSession(args);
         break;
+      case 'archive_session':
+        result = lab.archiveSession(args.sessionId, { archiveId: args.archiveId, note: args.note });
+        break;
       case 'close_session':
         result = lab.closeSession(args.sessionId);
+        break;
+      case 'clean_room':
+        result = lab.cleanRoom(args.roomId, { reason: args.reason, seedRef: args.seedRef });
         break;
       case 'start_cycle':
         result = lab.startCycle(args);
