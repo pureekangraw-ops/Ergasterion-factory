@@ -1,0 +1,12 @@
+{
+  "name": "pixie-lab",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "npm --prefix pixie-lab-v1 test",
+    "pixie": "node pixie-lab-v1/cli.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
