@@ -62,3 +62,28 @@ PIXIE LAB now separates experimentation from investigation:
 - **Debug → Factory handoff** — the Lab can simulate/prepare a handoff from ROOM-D, but the command is intentionally not exposed on PIXIE's owner/CLI allowlist. The real Factory path lives in GO Hub, which re-reads the live Centre Pass and accepts only ACTIVE `MAINTENANCE` or `EMERGENCY` Factory-scoped authority. A normal WORK/READ Pass is not sufficient.
 
 PIXIE still has no direct merge, deploy, delete, share, or production-control authority. A debug handoff is `NOT_AN_APPROVAL` and host execution remains governed.
+
+
+## Visual Workbench — GO image support desk
+
+The Visual Workbench prepares visual work for GO without becoming an image generator or production authority.
+
+Flow:
+
+`SCAN → EDIT/LAYER → RENDER PACKET → VERIFY`
+
+- Source references and the original visual spec are locked; edits affect only a Lab-owned working spec.
+- SCAN stores observations, evidence refs, and UNKNOWNs. Missing evidence stays UNKNOWN instead of being guessed.
+- EDIT/LAYER uses the same bounded draft operations as a controlled workbench: SET, DELETE, APPEND, TRIM_TEXT, and REPLACE_TEXT.
+- RENDER PACKET collects intent, requested result, must-keep/remove items, copy, constraints, evidence refs, and unresolved UNKNOWNs for GO's external image tool.
+- PIXIE never invokes image generation directly. Every render packet is `NOT_AN_APPROVAL`, has `externalExecutionRequired: true`, and carries no image-generation or production authority.
+- VERIFY consumes explicit checks against the observed result. A claimed PASS without evidence is downgraded to UNKNOWN.
+
+Commands:
+
+- `visual_create`
+- `visual_scan`
+- `visual_edit`
+- `visual_compare`
+- `visual_render_packet`
+- `visual_verify`
