@@ -5,16 +5,23 @@
     {
       "roomId": "ROOM-A",
       "roomPixieId": "PIXIE-A",
-      "status": "ARCHIVE",
-      "lifecycleStage": "ARCHIVE",
+      "status": "READY",
+      "lifecycleStage": "READY",
       "lifecycleHistory": [
         "READY",
-        "ARCHIVE"
+        "ARCHIVE",
+        "ZERO",
+        "STERILIZE",
+        "VERIFY_CLEAN",
+        "LOAD_CLEAN_SEED",
+        "READY"
       ],
       "assignedPurpose": null,
       "activeSessionId": null,
       "currentCycleId": null,
-      "updatedAt": "2026-09-26T07:52:17.754Z"
+      "updatedAt": "2026-09-26T08:09:39.860Z",
+      "cleanSeedRef": "pixie-clean-seed://ROOM-A/2026-09-26T08:09:39.860Z",
+      "quarantineReason": null
     },
     {
       "roomId": "ROOM-B",
@@ -261,5 +268,44 @@
       "updatedAt": "2026-09-26T07:47:18.989Z"
     }
   ],
-  "factoryHandoffs": []
+  "factoryHandoffs": [],
+  "visualDrafts": [],
+  "visualRenderPackets": [],
+  "visualVerifications": [],
+  "archives": [],
+  "cleanRuns": [
+    {
+      "cleanId": "CLEAN-ROOM-A-2026-09-26T08:09:39.860Z",
+      "roomId": "ROOM-A",
+      "status": "PASS",
+      "cleanupKind": "LAB_TRANSIENT_RESET",
+      "reason": "OWNER_REQUESTED_CLEAN_BUTTON_TEST",
+      "stages": [
+        "ZERO",
+        "STERILIZE",
+        "VERIFY_CLEAN",
+        "LOAD_CLEAN_SEED",
+        "READY"
+      ],
+      "discardedSessionIds": [],
+      "discardedCycleIds": [],
+      "clearedRoomReports": 0,
+      "archiveCreated": false,
+      "cleanSeedRef": "pixie-clean-seed://ROOM-A/2026-09-26T08:09:39.860Z",
+      "before": {
+        "status": "ARCHIVE",
+        "lifecycleStage": "ARCHIVE",
+        "activeSessionId": null,
+        "currentCycleId": null
+      },
+      "after": {
+        "status": "READY",
+        "lifecycleStage": "READY",
+        "activeSessionId": null,
+        "currentCycleId": null
+      },
+      "startedAt": "2026-09-26T08:09:39.860Z",
+      "completedAt": "2026-09-26T08:09:39.860Z"
+    }
+  ]
 }
