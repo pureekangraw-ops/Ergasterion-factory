@@ -37,3 +37,17 @@ The command layer is an explicit allowlist over the existing `PixieLab` service.
 ## Reality boundary
 
 The included CLI is a host/local command surface. It does not itself create a remote transport into GO Hub and it does not bypass PIXIE authority boundaries.
+
+
+## Experiment Lab zones
+
+PIXIE LAB now separates experimentation from investigation:
+
+- `ROOM-A`, `ROOM-B`, `ROOM-C` — ordinary isolated experiment rooms.
+- `ROOM-D` — dedicated inspection/debug room.
+- **Logic Workbench** — creates Lab-owned drafts and safely edits the working copy with SET, DELETE, APPEND, TRIM_TEXT, and REPLACE_TEXT while preserving the source snapshot.
+- **Example Zone** — reusable fixtures for healthy public entry, 404, false-green, recovered entry, and critical-unknown behavior.
+- **Experiment-aware Master Gate** — evaluates the latest relevant cross-room result for the requested experiment/subject. Historical FAIL evidence is retained for learning but does not permanently poison a recovered experiment.
+- **Debug → Factory handoff** — the Lab can simulate/prepare a handoff from ROOM-D, but the command is intentionally not exposed on PIXIE's owner/CLI allowlist. The real Factory path lives in GO Hub, which re-reads the live Centre Pass and accepts only ACTIVE `MAINTENANCE` or `EMERGENCY` Factory-scoped authority. A normal WORK/READ Pass is not sufficient.
+
+PIXIE still has no direct merge, deploy, delete, share, or production-control authority. A debug handoff is `NOT_AN_APPROVAL` and host execution remains governed.

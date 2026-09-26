@@ -1,5 +1,5 @@
 export const PIXIE_ID = 'PIXIE-01';
-export const ROOM_IDS = Object.freeze(['ROOM-A', 'ROOM-B', 'ROOM-C']);
+export const ROOM_IDS = Object.freeze(['ROOM-A', 'ROOM-B', 'ROOM-C', 'ROOM-D']);
 
 export const CYCLE_ACTIONS = Object.freeze([
   'ZERO', 'STERILIZE', 'TEST', 'DEBUG', 'IMPROVE', 'CANNON', 'LEARN',
@@ -33,7 +33,7 @@ export const TEST_CATEGORIES = Object.freeze([
 ]);
 export const ACCESS_TYPES = Object.freeze(['READ', 'COPY', 'SNAPSHOT', 'IMPORT']);
 export const FACTORY_SIMULATION_STAGES = Object.freeze(['PLAN', 'BUILD', 'ASSEMBLY', 'MERGE', 'CHECK', 'OUTPUT']);
-export const LAB_WARP_TARGETS = Object.freeze(['LAB', 'ROOM', 'ROOM_REPORT', 'SESSION', 'TEST_MATRIX', 'TEST_RUN', 'BUG_CAPSULE', 'GOLDEN_CASE', 'GO_ATTENTION', 'EVIDENCE', 'ARTIFACT']);
+export const LAB_WARP_TARGETS = Object.freeze(['LAB', 'ROOM', 'ROOM_REPORT', 'SESSION', 'TEST_MATRIX', 'TEST_RUN', 'BUG_CAPSULE', 'GOLDEN_CASE', 'GO_ATTENTION', 'EVIDENCE', 'ARTIFACT', 'LOGIC_DRAFT', 'EXAMPLE_EXPERIMENT', 'FACTORY_HANDOFF']);
 
 const text = (value) => String(value ?? '').trim();
 const clone = (value) => value == null ? value : structuredClone(value);
@@ -185,11 +185,11 @@ export function runSterilization({ adapter, context = {}, evidenceVerifier = nul
   return freeze({ ...clone(result), status, evidenceStatus, evidenceRefs, at: now() });
 }
 
-export function createRoom({ roomId, roomPixieId, now = iso } = {}) {
+export function createRoom({ roomId, roomPixieId, assignedPurpose = null, now = iso } = {}) {
   const id = requireText(roomId, 'roomId');
-  return freeze({ roomId: id, roomPixieId: requireText(roomPixieId || `PIXIE-${id.replace(/^ROOM-/, '')}`, 'roomPixieId'), status: 'READY', lifecycleStage: 'READY', lifecycleHistory: ['READY'], assignedPurpose: null, activeSessionId: null, currentCycleId: null, updatedAt: now() });
+  return freeze({ roomId: id, roomPixieId: requireText(roomPixieId || `PIXIE-${id.replace(/^ROOM-/, '')}`, 'roomPixieId'), status: 'READY', lifecycleStage: 'READY', lifecycleHistory: ['READY'], assignedPurpose: ref(assignedPurpose), activeSessionId: null, currentCycleId: null, updatedAt: now() });
 }
-export function createDefaultRooms({ now = iso } = {}) { return ROOM_IDS.map((roomId) => createRoom({ roomId, now })); }
+export function createDefaultRooms({ now = iso } = {}) { return ROOM_IDS.map((roomId) => createRoom({ roomId, assignedPurpose: roomId === 'ROOM-D' ? 'INSPECT_DEBUG' : null, now })); }
 
 export function createIsolationContext({ appId, roomId, sessionId, cycleId, fixtureRef, snapshotRef = null, allowedDependencyRefs = [], grantRefs = [], baselineHash } = {}) {
   return freeze({ appId: requireText(appId, 'appId'), roomId: requireText(roomId, 'roomId'), sessionId: requireText(sessionId, 'sessionId'), cycleId: requireText(cycleId, 'cycleId'), namespace: `pixie/${text(appId)}/${text(roomId)}/${text(sessionId)}/${text(cycleId)}`, fixtureRef: requireText(fixtureRef, 'fixtureRef'), snapshotRef: ref(snapshotRef), allowedDependencyRefs: unique(allowedDependencyRefs), grantRefs: unique(grantRefs), baselineHash: requireText(baselineHash, 'baselineHash') });

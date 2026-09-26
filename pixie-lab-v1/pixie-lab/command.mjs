@@ -17,6 +17,8 @@ export const PIXIE_COMMANDS = Object.freeze([
   'add_golden_case', 'replay_golden',
   'debug_start', 'debug_step', 'debug_complete',
   'self_test', 'cross_room', 'master_gate',
+  'examples', 'run_example',
+  'logic_create', 'logic_edit', 'logic_compare',
   'candidate_passport', 'door_guard',
   'persist',
 ]);
@@ -29,7 +31,9 @@ const MUTATING = new Set([
   'add_bug', 'add_attention', 'update_attention',
   'add_golden_case', 'replay_golden',
   'debug_start', 'debug_step', 'debug_complete',
-  'self_test', 'cross_room', 'candidate_passport',
+  'self_test', 'cross_room', 'run_example',
+  'logic_create', 'logic_edit',
+  'candidate_passport',
   'persist',
 ]);
 
@@ -122,7 +126,22 @@ export function createPixieCommander({ persistence, evidenceVerifier = null, now
         result = lab.runCrossRoom(args);
         break;
       case 'master_gate':
-        result = lab.masterGate();
+        result = lab.masterGate(args);
+        break;
+      case 'examples':
+        result = lab.examples();
+        break;
+      case 'run_example':
+        result = lab.runExample(args);
+        break;
+      case 'logic_create':
+        result = lab.createLogicDraft(args);
+        break;
+      case 'logic_edit':
+        result = lab.editLogicDraft(args.draftId, requireObject(args.edit, 'args.edit'));
+        break;
+      case 'logic_compare':
+        result = lab.compareLogicDraft(args.draftId);
         break;
       case 'candidate_passport':
         result = lab.candidatePassport(args.artifactId);

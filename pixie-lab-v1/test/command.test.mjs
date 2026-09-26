@@ -22,7 +22,7 @@ test('status exposes PIXIE board from the real service', async () => {
   assert.equal(out.ok, true);
   assert.equal(out.pixieId, 'PIXIE-01');
   assert.equal(out.result.projectionOnly, true);
-  assert.equal(out.result.rooms.length, 3);
+  assert.equal(out.result.rooms.length, 4);
 });
 
 test('commands persist state across calls', async () => {
@@ -45,7 +45,7 @@ test('ask routes through Pixie guide', async () => {
   const pixie = await commander();
   const out = await pixie.execute({ command: 'ask', args: { question: 'มีกี่ห้อง' } });
   assert.equal(out.ok, true);
-  assert.match(out.result.answer, /3 room/);
+  assert.match(out.result.answer, /4 room/);
 });
 
 test('external authority commands are not exposed', async () => {

@@ -11,6 +11,10 @@ import {
   createLearningProposal, promoteLearningProposal, createWarp, createGuideAnswer, assertNoModes,
   assertNoExternalAuthority, createMemoryPersistence,
 } from './core.mjs';
+import {
+  DEBUG_ROOM_ID, listExampleExperiments, getExampleExperiment,
+  createLogicDraft, editLogicDraft, compareLogicDraft, prepareFactoryHandoff,
+} from './lab-zones.mjs';
 
 const clone = (value) => value == null ? value : structuredClone(value);
 const text = (value) => String(value ?? '').trim();
@@ -42,6 +46,7 @@ export class PixieLab {
       matrices: [], testRuns: [], proposals: [], bugs: [], attentions: [], goldenCases: [], regressionAlerts: [],
       memory: [], grants: [], snapshots: [], artifacts: [], passports: [], factorySimulations: [], evidence: [],
       debugSessions: [], selfTests: [], crossRoomChecks: [], contradictions: [],
+      logicDrafts: [], factoryHandoffs: [],
     };
     this.assertHealthy();
   }
@@ -161,15 +166,111 @@ export class PixieLab {
   addFactorySimulation(input) { const simulation = createFactorySimulation({ ...input, now: this.now }); this.state.factorySimulations.push(simulation); return clone(simulation); }
   advanceFactorySimulation(simulationId, input) { const index = this.state.factorySimulations.findIndex((simulation) => simulation.simulationId === simulationId); if (index < 0) throw new Error('FACTORY_SIMULATION_NOT_FOUND'); this.state.factorySimulations[index] = advanceFactorySimulation(this.state.factorySimulations[index], { ...input, now: this.now }); return clone(this.state.factorySimulations[index]); }
 
+  examples() { return listExampleExperiments(); }
+  runExample({ exampleId, experimentId = null } = {}) {
+    const example = getExampleExperiment(exampleId);
+    return this.runCrossRoom({
+      experimentId: experimentId || `EXAMPLE-${example.exampleId}-${this.now()}`,
+      subjectRef: example.subjectRef,
+      observations: example.observations,
+      source: `example-zone://${example.exampleId}`,
+    });
+  }
+
+  createLogicDraft(input = {}) {
+    if (this.state.logicDrafts.some((item) => item.draftId === input.draftId)) throw new Error('DUPLICATE_LOGIC_DRAFT_ID');
+    const draft = createLogicDraft({ ...input, now: this.now });
+    this.state.logicDrafts.push(draft);
+    return clone(draft);
+  }
+  editLogicDraft(draftId, edit = {}) {
+    const index = this.state.logicDrafts.findIndex((item) => item.draftId === draftId);
+    if (index < 0) throw new Error('LOGIC_DRAFT_NOT_FOUND');
+    this.state.logicDrafts[index] = editLogicDraft(this.state.logicDrafts[index], edit, { now: this.now });
+    return clone(this.state.logicDrafts[index]);
+  }
+  compareLogicDraft(draftId) {
+    const draft = this.state.logicDrafts.find((item) => item.draftId === draftId);
+    if (!draft) throw new Error('LOGIC_DRAFT_NOT_FOUND');
+    return compareLogicDraft(draft);
+  }
+
+  factoryHandoff(input = {}) {
+    const result = prepareFactoryHandoff({ ...input, now: this.now });
+    if (result.status === 'READY_FOR_FACTORY') this.state.factoryHandoffs.push(result);
+    return clone(result);
+  }
+
   runSelfTest({ checks = [] } = {}) { const selfTest = createMasterSelfTest({ selfTestId: `SELF-${this.now()}`, checks, now: this.now }); this.state.selfTests.push(selfTest); return clone(selfTest); }
-  runCrossRoom({ subjectRef, observations = [] } = {}) { const distinct = new Set(observations.map((item) => JSON.stringify(item.observed))); const result = { checkId: `CROSS-${this.now()}`, subjectRef, status: observations.some((item) => item.status === 'UNKNOWN') ? 'UNKNOWN' : distinct.size > 1 ? 'FAIL' : 'PASS', observations: clone(observations), at: this.now() }; this.state.crossRoomChecks.push(result); return clone(result); }
-  masterGate() { const contradictions = detectContradictions(this.state.roomReports); this.state.contradictions = contradictions; return evaluateMasterGate({ selfTest: this.state.selfTests.at(-1), crossRoom: this.state.crossRoomChecks, contradictions, criticalUnknowns: this.state.roomReports.flatMap((report) => report.unknowns || []).filter((value) => text(value).toLowerCase().includes('critical')) }); }
+  runCrossRoom({ subjectRef, experimentId = null, observations = [], source = null } = {}) {
+    const distinct = new Set(observations.map((item) => JSON.stringify(item.observed)));
+    const result = {
+      checkId: `CROSS-${this.now()}`,
+      experimentId: text(experimentId) || null,
+      subjectRef: required(subjectRef, 'subjectRef'),
+      source: text(source) || null,
+      status: observations.some((item) => text(item.status).toUpperCase() === 'UNKNOWN') ? 'UNKNOWN' : distinct.size > 1 ? 'FAIL' : 'PASS',
+      observations: clone(observations),
+      at: this.now(),
+    };
+    this.state.crossRoomChecks.push(result);
+    return clone(result);
+  }
+  masterGate({ subjectRef = null, experimentId = null } = {}) {
+    const allChecks = this.state.crossRoomChecks || [];
+    const scopedChecks = allChecks.filter((check) => {
+      if (text(experimentId)) return check.experimentId === text(experimentId);
+      if (text(subjectRef)) return check.subjectRef === text(subjectRef);
+      return true;
+    });
+    const currentCrossRoom = scopedChecks.length ? [scopedChecks.at(-1)] : [];
+    const historicalCrossRoom = scopedChecks.slice(0, -1);
+    const reports = text(subjectRef)
+      ? this.state.roomReports.filter((report) => report.activeSubject === text(subjectRef))
+      : this.state.roomReports;
+    const contradictions = detectContradictions(reports);
+    this.state.contradictions = contradictions;
+    const criticalUnknowns = reports
+      .flatMap((report) => report.unknowns || [])
+      .filter((value) => text(value).toLowerCase().includes('critical'));
+    const gate = evaluateMasterGate({
+      selfTest: this.state.selfTests.at(-1),
+      crossRoom: currentCrossRoom,
+      contradictions,
+      criticalUnknowns,
+    });
+    return {
+      ...gate,
+      scope: {
+        experimentId: text(experimentId) || currentCrossRoom[0]?.experimentId || null,
+        subjectRef: text(subjectRef) || currentCrossRoom[0]?.subjectRef || null,
+        mode: 'LATEST_RELEVANT_CHECK',
+      },
+      evaluatedCrossRoomRefs: currentCrossRoom.map((check) => check.checkId),
+      historicalCrossRoomRefs: historicalCrossRoom.map((check) => ({ checkId: check.checkId, status: check.status, at: check.at })),
+      historyRetained: true,
+      explanation: {
+        currentCrossRoomStatus: currentCrossRoom[0]?.status || null,
+        contradictionCount: contradictions.length,
+        criticalUnknownCount: criticalUnknowns.length,
+        staleFailuresIgnoredForCurrentGate: historicalCrossRoom.filter((check) => check.status === 'FAIL').length,
+      },
+    };
+  }
 
   async persist() { await this.persistence.save(clone(this.state)); return { status: 'PERSISTED', revision: this.now() }; }
   async rebuildBoard() {
     const canonical = await this.persistence.load();
     if (canonical) {
       this.state = clone(canonical);
+      const defaultRooms = createDefaultRooms({ now: this.now }).map(clone);
+      this.state.rooms = Array.isArray(this.state.rooms) ? this.state.rooms : [];
+      for (const room of defaultRooms) if (!this.state.rooms.some((item) => item.roomId === room.roomId)) this.state.rooms.push(room);
+      this.state.roomReports = Array.isArray(this.state.roomReports) ? this.state.roomReports : [];
+      this.state.sessions = Array.isArray(this.state.sessions) ? this.state.sessions : [];
+      this.state.crossRoomChecks = Array.isArray(this.state.crossRoomChecks) ? this.state.crossRoomChecks : [];
+      this.state.logicDrafts = Array.isArray(this.state.logicDrafts) ? this.state.logicDrafts : [];
+      this.state.factoryHandoffs = Array.isArray(this.state.factoryHandoffs) ? this.state.factoryHandoffs : [];
       this.state.evidence = (this.state.evidence || []).flatMap((value) => {
         const restored = verifyEvidenceRecord(value, { trustProvider: this.evidenceVerifier });
         return restored ? [restored] : [];
@@ -177,7 +278,41 @@ export class PixieLab {
     }
     return this.board();
   }
-  board() { return projectPixieBoard({ rooms: this.state.rooms, roomReports: this.state.roomReports, activeSessions: this.state.sessions.filter((session) => session.status === 'ACTIVE'), tests: [...this.testTypes.values()], matrices: this.state.matrices, runs: this.state.testRuns, bugs: this.state.bugs, goldenCases: this.state.goldenCases, attentions: this.state.attentions, unknowns: this.state.roomReports.flatMap((report) => report.unknowns), artifacts: this.state.artifacts, proposals: this.state.proposals, passports: this.state.passports, regressionAlerts: this.state.regressionAlerts, now: this.now }); }
-  guide(question) { const board = this.board(); const q = text(question).toLowerCase(); if (q.includes('unknown')) return createGuideAnswer({ question, answer: `${board.unknowns.length} unknown item(s)`, traceRefs: board.roomReports.map((report) => `report://${report.roomId}`), unknowns: board.unknowns }); if (q.includes('room') || q.includes('ห้อง')) return createGuideAnswer({ question, answer: `${board.rooms.length} room(s), ${board.activeSessions.length} active session(s)`, traceRefs: board.rooms.map((room) => `room://${room.roomId}`) }); if (q.includes('ready')) return createGuideAnswer({ question, answer: `${board.artifacts.filter((artifact) => artifact.status === 'READY_CANDIDATE').length} READY_CANDIDATE artifact(s)`, traceRefs: board.artifacts.map((artifact) => `artifact://${artifact.artifactId}`) }); if (q.includes('bug') || q.includes('บั๊ก')) return createGuideAnswer({ question, answer: `${board.bugs.length} bug capsule(s)`, traceRefs: board.bugs.map((bug) => `bug://${bug.bugId}`) }); return createGuideAnswer({ question, answer: 'UNKNOWN', traceRefs: ['pixie-board://PIXIE-BOARD'], unknowns: ['QUERY_NOT_IMPLEMENTED_IN_V1'] }); }
+  board() {
+    const base = projectPixieBoard({ rooms: this.state.rooms, roomReports: this.state.roomReports, activeSessions: this.state.sessions.filter((session) => session.status === 'ACTIVE'), tests: [...this.testTypes.values()], matrices: this.state.matrices, runs: this.state.testRuns, bugs: this.state.bugs, goldenCases: this.state.goldenCases, attentions: this.state.attentions, unknowns: this.state.roomReports.flatMap((report) => report.unknowns), artifacts: this.state.artifacts, proposals: this.state.proposals, passports: this.state.passports, regressionAlerts: this.state.regressionAlerts, now: this.now });
+    return {
+      ...base,
+      zones: {
+        experimentRooms: this.state.rooms.filter((room) => room.roomId !== DEBUG_ROOM_ID).map((room) => room.roomId),
+        debugRoom: DEBUG_ROOM_ID,
+        logicWorkbench: 'ACTIVE',
+        exampleZone: 'ACTIVE',
+      },
+      crossRoomChecks: clone(this.state.crossRoomChecks || []),
+      logicWorkbench: clone(this.state.logicDrafts || []),
+      exampleZone: listExampleExperiments(),
+      factoryHandoffs: clone(this.state.factoryHandoffs || []),
+      counts: {
+        ...base.counts,
+        crossRoomChecks: (this.state.crossRoomChecks || []).length,
+        logicDrafts: (this.state.logicDrafts || []).length,
+        examples: listExampleExperiments().length,
+        factoryHandoffs: (this.state.factoryHandoffs || []).length,
+      },
+    };
+  }
+  guide(question) {
+    const board = this.board();
+    const q = text(question).toLowerCase();
+    if (q.includes('unknown')) return createGuideAnswer({ question, answer: `${board.unknowns.length} unknown item(s)`, traceRefs: board.roomReports.map((report) => `report://${report.roomId}`), unknowns: board.unknowns });
+    if (q.includes('debug') || q.includes('ดีบั๊ก') || q.includes('ตรวจสอบ')) return createGuideAnswer({ question, answer: `ROOM-D is the dedicated inspection/debug room; ${board.factoryHandoffs.length} Lab handoff record(s)`, traceRefs: ['room://ROOM-D'] });
+    if (q.includes('example') || q.includes('ตัวอย่าง')) return createGuideAnswer({ question, answer: `${board.exampleZone.length} reusable example experiment(s)`, traceRefs: board.exampleZone.map((item) => `example://${item.exampleId}`) });
+    if (q.includes('logic') || q.includes('ลอจิค') || q.includes('โต๊ะ')) return createGuideAnswer({ question, answer: `${board.logicWorkbench.length} Logic Workbench draft(s)`, traceRefs: board.logicWorkbench.map((item) => `logic-draft://${item.draftId}`) });
+    if (q.includes('factory') || q.includes('โรงงาน')) return createGuideAnswer({ question, answer: 'ROOM-D can reach Factory only through GO Hub with a live ACTIVE MAINTENANCE or EMERGENCY Factory-scoped Pass; normal WORK/READ passes are blocked.', traceRefs: ['room://ROOM-D', 'destination://factory'] });
+    if (q.includes('room') || q.includes('ห้อง')) return createGuideAnswer({ question, answer: `${board.rooms.length} room(s), ${board.activeSessions.length} active session(s)`, traceRefs: board.rooms.map((room) => `room://${room.roomId}`) });
+    if (q.includes('ready')) return createGuideAnswer({ question, answer: `${board.artifacts.filter((artifact) => artifact.status === 'READY_CANDIDATE').length} READY_CANDIDATE artifact(s)`, traceRefs: board.artifacts.map((artifact) => `artifact://${artifact.artifactId}`) });
+    if (q.includes('bug') || q.includes('บั๊ก')) return createGuideAnswer({ question, answer: `${board.bugs.length} bug capsule(s)`, traceRefs: board.bugs.map((bug) => `bug://${bug.bugId}`) });
+    return createGuideAnswer({ question, answer: 'UNKNOWN', traceRefs: ['pixie-board://PIXIE-BOARD'], unknowns: ['QUERY_NOT_IMPLEMENTED_IN_V1'] });
+  }
   warp(input) { return createWarp({ ...input, now: this.now }); }
 }
