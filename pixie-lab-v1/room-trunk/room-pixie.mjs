@@ -1,12 +1,19 @@
 import { ROOM_PROFILE } from "./room-profile.mjs";
 import { createRoomCommand, createRoomResult } from "./room-contract.mjs";
 import { interpretGoCommand } from "./command-intelligence.mjs";
-
-const text = value => String(value ?? "").trim();
+import { createPixieWorkshopToolkit } from "./workshop-tools.mjs";
+import { createPixieApprentice } from "./apprentice-agent.mjs";
 
 export function createRoomPixie() {
   return Object.freeze({
     profile:ROOM_PROFILE,
+    createWorkshop({ host = {}, extensions = [] } = {}) {
+      return createPixieWorkshopToolkit({ host, extensions });
+    },
+    createApprentice({ host = {}, extensions = [], now } = {}) {
+      const toolkit = createPixieWorkshopToolkit({ host, extensions });
+      return createPixieApprentice({ toolkit, now });
+    },
     run(input = {}) {
       const command = createRoomCommand({ ...input, roomId:ROOM_PROFILE.roomId });
       const interpretation = interpretGoCommand({
@@ -24,7 +31,7 @@ export function createRoomPixie() {
         role:ROOM_PROFILE.role,
         plan:interpretation.plan,
         result:{
-          summary:`${ROOM_PROFILE.roomPixieId} interpreted a GO command locally and prepared an exploration candidate.`,
+          summary:ROOM_PROFILE.roomPixieId + " interpreted one optional experiment path inside the free-play workshop.",
           guidingQuestion:ROOM_PROFILE.guidingQuestion,
           intent:interpretation.intent,
           targets:interpretation.targets,
@@ -35,7 +42,7 @@ export function createRoomPixie() {
         },
         unknowns:unresolved,
         candidate:{
-          kind:"ROOM_A_COMMAND_CANDIDATE",
+          kind:"ROOM_WORKSHOP_COMMAND_CANDIDATE",
           roomId:ROOM_PROFILE.roomId,
           sourceBranch:ROOM_PROFILE.trunkBranch,
           intelligenceContract:interpretation.contract,
