@@ -92,6 +92,48 @@
   "evidence": [],
   "debugSessions": [],
   "selfTests": [],
-  "crossRoomChecks": [],
+  "crossRoomChecks": [
+    {
+      "checkId": "CROSS-2026-09-26T05:01:50.066Z",
+      "subjectRef": "fixture://go-hub-public-entry/self-heal-v1",
+      "status": "FAIL",
+      "observations": [
+        {
+          "roomId": "ROOM-A",
+          "status": "PASS",
+          "observed": {
+            "backendHealth": "PASS",
+            "userEntry": "PASS",
+            "httpStatus": 200,
+            "hasGoHubTitle": true,
+            "hasCentre": true
+          }
+        },
+        {
+          "roomId": "ROOM-B",
+          "status": "FAIL",
+          "observed": {
+            "backendHealth": "FAIL",
+            "userEntry": "FAIL",
+            "httpStatus": 404,
+            "hasGoHubTitle": false,
+            "hasCentre": false
+          }
+        },
+        {
+          "roomId": "ROOM-C",
+          "status": "FAIL",
+          "observed": {
+            "backendHealth": "PASS",
+            "userEntry": "FAIL",
+            "httpStatus": 404,
+            "hasGoHubTitle": false,
+            "hasCentre": false
+          }
+        }
+      ],
+      "at": "2026-09-26T05:01:50.066Z"
+    }
+  ],
   "contradictions": []
 }

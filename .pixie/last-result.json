@@ -1,25 +1,56 @@
 {
-  "requestId": "PIXIE-ENTRY-LAB-20260926-ROOM-C-001",
-  "command": "start_session",
+  "requestId": "PIXIE-ENTRY-LAB-20260926-CROSS-001",
+  "command": "cross_room",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "start_session",
+    "command": "cross_room",
     "mutated": true,
     "result": {
-      "sessionId": "S-ENTRY-FALSE-GREEN-001",
-      "roomId": "ROOM-C",
-      "purpose": "False-green fixture: backend health PASS while user-facing GO Hub page is unavailable",
-      "activityType": "CHECK",
-      "sourceType": "LAB_FIXTURE",
-      "subjectRef": "fixture://go-hub-public-entry/false-green",
-      "status": "ACTIVE",
-      "createdAt": "2026-09-26T05:01:02.145Z"
+      "checkId": "CROSS-2026-09-26T05:01:50.066Z",
+      "subjectRef": "fixture://go-hub-public-entry/self-heal-v1",
+      "status": "FAIL",
+      "observations": [
+        {
+          "roomId": "ROOM-A",
+          "status": "PASS",
+          "observed": {
+            "backendHealth": "PASS",
+            "userEntry": "PASS",
+            "httpStatus": 200,
+            "hasGoHubTitle": true,
+            "hasCentre": true
+          }
+        },
+        {
+          "roomId": "ROOM-B",
+          "status": "FAIL",
+          "observed": {
+            "backendHealth": "FAIL",
+            "userEntry": "FAIL",
+            "httpStatus": 404,
+            "hasGoHubTitle": false,
+            "hasCentre": false
+          }
+        },
+        {
+          "roomId": "ROOM-C",
+          "status": "FAIL",
+          "observed": {
+            "backendHealth": "PASS",
+            "userEntry": "FAIL",
+            "httpStatus": 404,
+            "hasGoHubTitle": false,
+            "hasCentre": false
+          }
+        }
+      ],
+      "at": "2026-09-26T05:01:50.066Z"
     }
   },
   "error": null,
-  "completedAt": "2026-09-26T05:01:02.182Z"
+  "completedAt": "2026-09-26T05:01:50.094Z"
 }
