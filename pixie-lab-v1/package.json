@@ -3,6 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "pixie": "node cli.mjs"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
