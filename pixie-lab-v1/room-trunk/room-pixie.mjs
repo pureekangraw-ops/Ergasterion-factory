@@ -3,6 +3,7 @@ import { createRoomCommand, createRoomResult } from "./room-contract.mjs";
 import { interpretGoCommand } from "./command-intelligence.mjs";
 import { createPixieWorkshopToolkit } from "./workshop-tools.mjs";
 import { createPixieApprentice } from "./apprentice-agent.mjs";
+import { createGoSupportTeam } from "./go-support-team.mjs";
 
 export function createRoomPixie() {
   return Object.freeze({
@@ -13,6 +14,10 @@ export function createRoomPixie() {
     createApprentice({ host = {}, extensions = [], now } = {}) {
       const toolkit = createPixieWorkshopToolkit({ host, extensions });
       return createPixieApprentice({ toolkit, now });
+    },
+    createSupportTeam({ host = {}, extensions = [], now } = {}) {
+      const toolkit = createPixieWorkshopToolkit({ host, extensions });
+      return createGoSupportTeam({ toolkit, now });
     },
     run(input = {}) {
       const command = createRoomCommand({ ...input, roomId:ROOM_PROFILE.roomId });
