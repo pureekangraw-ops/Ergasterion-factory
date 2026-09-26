@@ -78,7 +78,9 @@ export function interpretGoCommand({ command, requestedResult = null, constraint
   const normalized = text(command);
   if (!normalized) throw new Error("GO_COMMAND_REQUIRED");
 
-  const namedTargets = inferTargets(normalized);\n  const localContextAvailable = Array.isArray(contextRefs) && contextRefs.some(value => text(value));\n  const targets = namedTargets.length ? namedTargets : (localContextAvailable ? ["room-context"] : []);
+  const namedTargets = inferTargets(normalized);
+  const localContextAvailable = Array.isArray(contextRefs) && contextRefs.some(value => text(value));
+  const targets = namedTargets.length ? namedTargets : (localContextAvailable ? ["room-context"] : []);
   const intent = inferIntent(normalized);
   const conditions = inferConditions(normalized);
   const unknowns = [];
