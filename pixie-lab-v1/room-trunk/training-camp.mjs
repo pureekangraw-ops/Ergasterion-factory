@@ -55,12 +55,30 @@ export function createTrainingCamp() {
               "  return { ...task, status:'OPEN' };",
               "}",
             ].join("\n"),
-            "queue.test.mjs":[
-              "high priority should be selected before low priority",
-              "DONE/CANCELLED items should not be returned",
-              "finishTask should return status DONE",
-            ].join("\n"),
           },
+          cases:[
+            {
+              name:"high-priority-first",
+              input:[
+                {id:"LOW",status:"OPEN",priority:1},
+                {id:"HIGH",status:"OPEN",priority:10},
+              ],
+              expectedTaskId:"HIGH",
+            },
+            {
+              name:"cancelled-never-selected",
+              input:[
+                {id:"CANCELLED",status:"CANCELLED",priority:99},
+                {id:"OPEN",status:"OPEN",priority:1},
+              ],
+              expectedTaskId:"OPEN",
+            },
+            {
+              name:"finish-task",
+              input:{id:"T-1",status:"OPEN",priority:5},
+              expectedStatus:"DONE",
+            },
+          ],
           bugs:[
             "priority-sort-direction",
             "cancelled-task-not-filtered",
