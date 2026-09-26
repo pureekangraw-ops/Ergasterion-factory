@@ -2,6 +2,7 @@ import { ROOM_PROFILE } from "./room-profile.mjs";
 import { createRoomCommand, createRoomResult } from "./room-contract.mjs";
 import { createPixieWorkshopToolkit } from "./workshop-tools.mjs";
 import { createPixieApprentice } from "./apprentice-agent.mjs";
+import { createGoSupportTeam } from "./go-support-team.mjs";
 
 const text = value => String(value ?? "").trim();
 
@@ -14,6 +15,10 @@ export function createRoomPixie() {
     createApprentice({ host = {}, extensions = [], now } = {}) {
       const toolkit = createPixieWorkshopToolkit({ host, extensions });
       return createPixieApprentice({ toolkit, now });
+    },
+    createSupportTeam({ host = {}, extensions = [], now } = {}) {
+      const toolkit = createPixieWorkshopToolkit({ host, extensions });
+      return createGoSupportTeam({ toolkit, now });
     },
     run(input = {}) {
       const command = createRoomCommand({ ...input, roomId:ROOM_PROFILE.roomId });
