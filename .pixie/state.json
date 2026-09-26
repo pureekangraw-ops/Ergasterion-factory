@@ -234,7 +234,8 @@
         },
         "checks": [
           "BACKEND_HEALTH",
-          "PUBLIC_ENTRY"
+          "PUBLIC_ENTRY",
+          "FALSE_GREEN_CROSS_ROOM"
         ],
         "note": "  baseline copy for PIXIE Logic Workbench  "
       },
@@ -246,10 +247,17 @@
             "verifyAttempts"
           ],
           "at": "2026-09-26T07:46:44.146Z"
+        },
+        {
+          "op": "APPEND",
+          "path": [
+            "checks"
+          ],
+          "at": "2026-09-26T07:47:18.989Z"
         }
       ],
       "createdAt": "2026-09-26T07:46:07.991Z",
-      "updatedAt": "2026-09-26T07:46:44.146Z"
+      "updatedAt": "2026-09-26T07:47:18.989Z"
     }
   ],
   "factoryHandoffs": []
