@@ -26,7 +26,7 @@ test('Pixie Lab has one board and no mode field', () => {
   assert.equal(board.boardId, 'PIXIE-BOARD');
   assert.equal(board.projectionOnly, true);
   assert.equal('mode' in board, false);
-  assert.deepEqual(rooms.map((room) => room.roomPixieId), ['PIXIE-A', 'PIXIE-B', 'PIXIE-C']);
+  assert.deepEqual(rooms.map((room) => room.roomPixieId), ['PIXIE-A', 'PIXIE-B', 'PIXIE-C', 'PIXIE-D']);
 });
 
 test('cycle records ZERO and STERILIZE before testing', () => {
