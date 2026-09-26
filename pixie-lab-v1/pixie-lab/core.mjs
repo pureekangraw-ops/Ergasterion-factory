@@ -1,5 +1,5 @@
 export const PIXIE_ID = 'PIXIE-01';
-export const ROOM_IDS = Object.freeze(['ROOM-A', 'ROOM-B', 'ROOM-C']);
+export const ROOM_IDS = Object.freeze(['ROOM-A', 'ROOM-B', 'ROOM-C', 'ROOM-D']);
 
 export const CYCLE_ACTIONS = Object.freeze([
   'ZERO', 'STERILIZE', 'TEST', 'DEBUG', 'IMPROVE', 'CANNON', 'LEARN',
@@ -33,7 +33,7 @@ export const TEST_CATEGORIES = Object.freeze([
 ]);
 export const ACCESS_TYPES = Object.freeze(['READ', 'COPY', 'SNAPSHOT', 'IMPORT']);
 export const FACTORY_SIMULATION_STAGES = Object.freeze(['PLAN', 'BUILD', 'ASSEMBLY', 'MERGE', 'CHECK', 'OUTPUT']);
-export const LAB_WARP_TARGETS = Object.freeze(['LAB', 'ROOM', 'ROOM_REPORT', 'SESSION', 'TEST_MATRIX', 'TEST_RUN', 'BUG_CAPSULE', 'GOLDEN_CASE', 'GO_ATTENTION', 'EVIDENCE', 'ARTIFACT']);
+export const LAB_WARP_TARGETS = Object.freeze(['LAB', 'ROOM', 'ROOM_REPORT', 'SESSION', 'TEST_MATRIX', 'TEST_RUN', 'BUG_CAPSULE', 'GOLDEN_CASE', 'GO_ATTENTION', 'EVIDENCE', 'ARTIFACT', 'LOGIC_DRAFT', 'EXAMPLE_EXPERIMENT', 'FACTORY_HANDOFF']);
 
 const text = (value) => String(value ?? '').trim();
 const clone = (value) => value == null ? value : structuredClone(value);
