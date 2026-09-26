@@ -1,5 +1,5 @@
 {
-  "requestId": "PIXIE-CLEAN-ROOM-A-STATUS-20260926-001",
+  "requestId": "PIXIE-VISUAL-DESK-CHECK-20260926-001",
   "command": "status",
   "exitCode": 0,
   "ok": true,
@@ -13,7 +13,7 @@
       "boardId": "PIXIE-BOARD",
       "projectionOnly": true,
       "generatedBy": "PIXIE-01",
-      "generatedAt": "2026-09-26T07:52:53.708Z",
+      "generatedAt": "2026-09-26T08:05:17.713Z",
       "rooms": [
         {
           "roomId": "ROOM-A",
@@ -360,6 +360,9 @@
         "proposals": 0,
         "crossRoomChecks": 2,
         "logicDrafts": 1,
+        "visualDrafts": 0,
+        "visualRenderPackets": 0,
+        "visualVerifications": 0,
         "examples": 5,
         "factoryHandoffs": 0
       },
@@ -371,6 +374,7 @@
         ],
         "debugRoom": "ROOM-D",
         "logicWorkbench": "ACTIVE",
+        "visualWorkbench": "ACTIVE",
         "exampleZone": "ACTIVE"
       },
       "crossRoomChecks": [
@@ -527,6 +531,9 @@
           "updatedAt": "2026-09-26T07:47:18.989Z"
         }
       ],
+      "visualWorkbench": [],
+      "visualRenderPackets": [],
+      "visualVerifications": [],
       "exampleZone": [
         {
           "exampleId": "GOHUB-ENTRY-HEALTHY",
@@ -706,5 +713,5 @@
     }
   },
   "error": null,
-  "completedAt": "2026-09-26T07:52:53.740Z"
+  "completedAt": "2026-09-26T08:05:17.735Z"
 }
