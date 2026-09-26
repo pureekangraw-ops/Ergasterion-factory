@@ -190,7 +190,7 @@ export function verifyVisualRender(packet, {
     const evidenceRefs = unique(check.evidenceRefs);
     let status = upper(check.status || 'UNKNOWN');
     if (!['PASS', 'FAIL', 'UNKNOWN'].includes(status)) status = 'UNKNOWN';
-    if (status === 'PASS' && !evidenceRefs.length) status = 'UNKNOWN';
+    if (['PASS', 'FAIL'].includes(status) && !evidenceRefs.length) status = 'UNKNOWN';
     return freeze({
       checkId: text(check.checkId) || `CHECK-${index + 1}`,
       status,
@@ -198,10 +198,10 @@ export function verifyVisualRender(packet, {
       evidenceRefs,
     });
   });
-  const status = !normalized.length || normalized.some((item) => item.status === 'UNKNOWN')
-    ? 'UNKNOWN'
-    : normalized.some((item) => item.status === 'FAIL')
-      ? 'FAIL'
+  const status = normalized.some((item) => item.status === 'FAIL')
+    ? 'FAIL'
+    : !normalized.length || normalized.some((item) => item.status === 'UNKNOWN')
+      ? 'UNKNOWN'
       : 'PASS';
   return freeze({
     verificationId: required(verificationId, 'verificationId'),
