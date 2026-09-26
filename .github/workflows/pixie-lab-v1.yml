@@ -20,6 +20,7 @@ on:
       - main
       - 'pixie-lab-v1-core-*'
       - 'pixie-runtime-command-*'
+      - 'room/pixie-*'
     paths:
       - 'pixie-lab-v1/**'
       - '.github/workflows/pixie-lab-v1.yml'
