@@ -134,6 +134,16 @@ test('Debug Room direct Factory handoff accepts active Maintenance or Emergency 
   assert.equal(emergency.status, 'READY_FOR_FACTORY');
   assert.equal(emergency.authority.kind, 'EMERGENCY');
 
+  const emergencyWithoutExpiry = lab.factoryHandoff({
+    roomId: 'ROOM-D',
+    workId: 'WORK-Y2',
+    checkpointId: 'CP-Y2',
+    purpose: 'invalid emergency diagnostic',
+    pass: { kind: 'EMERGENCY', state: 'ACTIVE', holder: 'GO', allowedDestinations: ['factory'] },
+  });
+  assert.equal(emergencyWithoutExpiry.status, 'BLOCKED');
+  assert.equal(emergencyWithoutExpiry.reason, 'FACTORY_HANDOFF_EMERGENCY_EXPIRY_REQUIRED');
+
   const wrongRoom = lab.factoryHandoff({
     roomId: 'ROOM-A',
     workId: 'WORK-Z',
