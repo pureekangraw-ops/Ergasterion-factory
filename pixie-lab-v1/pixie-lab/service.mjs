@@ -15,6 +15,10 @@ import {
   DEBUG_ROOM_ID, listExampleExperiments, getExampleExperiment,
   createLogicDraft, editLogicDraft, compareLogicDraft, prepareFactoryHandoff,
 } from './lab-zones.mjs';
+import {
+  createVisualDraft, scanVisualDraft, editVisualDraft, compareVisualDraft,
+  createVisualRenderPacket, verifyVisualRender,
+} from './visual-workbench.mjs';
 
 const clone = (value) => value == null ? value : structuredClone(value);
 const text = (value) => String(value ?? '').trim();
@@ -47,6 +51,7 @@ export class PixieLab {
       memory: [], grants: [], snapshots: [], artifacts: [], passports: [], factorySimulations: [], evidence: [],
       debugSessions: [], selfTests: [], crossRoomChecks: [], contradictions: [],
       logicDrafts: [], factoryHandoffs: [],
+      visualDrafts: [], visualRenderPackets: [], visualVerifications: [],
     };
     this.assertHealthy();
   }
@@ -195,6 +200,48 @@ export class PixieLab {
     return compareLogicDraft(draft);
   }
 
+  createVisualDraft(input = {}) {
+    if (this.state.visualDrafts.some((item) => item.visualDraftId === input.visualDraftId)) throw new Error('DUPLICATE_VISUAL_DRAFT_ID');
+    const draft = createVisualDraft({ ...input, now: this.now });
+    this.state.visualDrafts.push(draft);
+    return clone(draft);
+  }
+  scanVisualDraft(visualDraftId, scan = {}) {
+    const index = this.state.visualDrafts.findIndex((item) => item.visualDraftId === visualDraftId);
+    if (index < 0) throw new Error('VISUAL_DRAFT_NOT_FOUND');
+    this.state.visualDrafts[index] = scanVisualDraft(this.state.visualDrafts[index], { ...scan, now: this.now });
+    return clone(this.state.visualDrafts[index]);
+  }
+  editVisualDraft(visualDraftId, edit = {}) {
+    const index = this.state.visualDrafts.findIndex((item) => item.visualDraftId === visualDraftId);
+    if (index < 0) throw new Error('VISUAL_DRAFT_NOT_FOUND');
+    this.state.visualDrafts[index] = editVisualDraft(this.state.visualDrafts[index], edit, { now: this.now });
+    return clone(this.state.visualDrafts[index]);
+  }
+  compareVisualDraft(visualDraftId) {
+    const draft = this.state.visualDrafts.find((item) => item.visualDraftId === visualDraftId);
+    if (!draft) throw new Error('VISUAL_DRAFT_NOT_FOUND');
+    return compareVisualDraft(draft);
+  }
+  createVisualRenderPacket(visualDraftId, packet = {}) {
+    const draftIndex = this.state.visualDrafts.findIndex((item) => item.visualDraftId === visualDraftId);
+    if (draftIndex < 0) throw new Error('VISUAL_DRAFT_NOT_FOUND');
+    const result = createVisualRenderPacket(this.state.visualDrafts[draftIndex], { ...packet, now: this.now });
+    if (this.state.visualRenderPackets.some((item) => item.packetId === result.packetId)) throw new Error('DUPLICATE_VISUAL_PACKET_ID');
+    this.state.visualRenderPackets.push(result);
+    const draft = this.state.visualDrafts[draftIndex];
+    this.state.visualDrafts[draftIndex] = Object.freeze({ ...clone(draft), renderPacketRefs: [...(draft.renderPacketRefs || []), result.packetId], updatedAt: this.now() });
+    return clone(result);
+  }
+  verifyVisualRender(packetId, verification = {}) {
+    const packet = this.state.visualRenderPackets.find((item) => item.packetId === packetId);
+    if (!packet) throw new Error('VISUAL_RENDER_PACKET_NOT_FOUND');
+    const result = verifyVisualRender(packet, { ...verification, now: this.now });
+    if (this.state.visualVerifications.some((item) => item.verificationId === result.verificationId)) throw new Error('DUPLICATE_VISUAL_VERIFICATION_ID');
+    this.state.visualVerifications.push(result);
+    return clone(result);
+  }
+
   factoryHandoff(input = {}) {
     const result = prepareFactoryHandoff({ ...input, now: this.now });
     if (result.status === 'READY_FOR_FACTORY') this.state.factoryHandoffs.push(result);
@@ -271,6 +318,9 @@ export class PixieLab {
       this.state.crossRoomChecks = Array.isArray(this.state.crossRoomChecks) ? this.state.crossRoomChecks : [];
       this.state.logicDrafts = Array.isArray(this.state.logicDrafts) ? this.state.logicDrafts : [];
       this.state.factoryHandoffs = Array.isArray(this.state.factoryHandoffs) ? this.state.factoryHandoffs : [];
+      this.state.visualDrafts = Array.isArray(this.state.visualDrafts) ? this.state.visualDrafts : [];
+      this.state.visualRenderPackets = Array.isArray(this.state.visualRenderPackets) ? this.state.visualRenderPackets : [];
+      this.state.visualVerifications = Array.isArray(this.state.visualVerifications) ? this.state.visualVerifications : [];
       this.state.evidence = (this.state.evidence || []).flatMap((value) => {
         const restored = verifyEvidenceRecord(value, { trustProvider: this.evidenceVerifier });
         return restored ? [restored] : [];
@@ -286,16 +336,23 @@ export class PixieLab {
         experimentRooms: this.state.rooms.filter((room) => room.roomId !== DEBUG_ROOM_ID).map((room) => room.roomId),
         debugRoom: DEBUG_ROOM_ID,
         logicWorkbench: 'ACTIVE',
+        visualWorkbench: 'ACTIVE',
         exampleZone: 'ACTIVE',
       },
       crossRoomChecks: clone(this.state.crossRoomChecks || []),
       logicWorkbench: clone(this.state.logicDrafts || []),
+      visualWorkbench: clone(this.state.visualDrafts || []),
+      visualRenderPackets: clone(this.state.visualRenderPackets || []),
+      visualVerifications: clone(this.state.visualVerifications || []),
       exampleZone: listExampleExperiments(),
       factoryHandoffs: clone(this.state.factoryHandoffs || []),
       counts: {
         ...base.counts,
         crossRoomChecks: (this.state.crossRoomChecks || []).length,
         logicDrafts: (this.state.logicDrafts || []).length,
+        visualDrafts: (this.state.visualDrafts || []).length,
+        visualRenderPackets: (this.state.visualRenderPackets || []).length,
+        visualVerifications: (this.state.visualVerifications || []).length,
         examples: listExampleExperiments().length,
         factoryHandoffs: (this.state.factoryHandoffs || []).length,
       },
@@ -307,6 +364,7 @@ export class PixieLab {
     if (q.includes('unknown')) return createGuideAnswer({ question, answer: `${board.unknowns.length} unknown item(s)`, traceRefs: board.roomReports.map((report) => `report://${report.roomId}`), unknowns: board.unknowns });
     if (q.includes('debug') || q.includes('ดีบั๊ก') || q.includes('ตรวจสอบ')) return createGuideAnswer({ question, answer: `ROOM-D is the dedicated inspection/debug room; ${board.factoryHandoffs.length} Lab handoff record(s)`, traceRefs: ['room://ROOM-D'] });
     if (q.includes('example') || q.includes('ตัวอย่าง')) return createGuideAnswer({ question, answer: `${board.exampleZone.length} reusable example experiment(s)`, traceRefs: board.exampleZone.map((item) => `example://${item.exampleId}`) });
+    if (q.includes('ภาพ') || q.includes('visual') || q.includes('วาด') || q.includes('render')) return createGuideAnswer({ question, answer: `${board.visualWorkbench.length} Visual Workbench draft(s), ${board.visualRenderPackets.length} render packet(s), ${board.visualVerifications.length} verification(s)`, traceRefs: board.visualWorkbench.map((item) => `visual-draft://${item.visualDraftId}`) });
     if (q.includes('logic') || q.includes('ลอจิค') || q.includes('โต๊ะ')) return createGuideAnswer({ question, answer: `${board.logicWorkbench.length} Logic Workbench draft(s)`, traceRefs: board.logicWorkbench.map((item) => `logic-draft://${item.draftId}`) });
     if (q.includes('factory') || q.includes('โรงงาน')) return createGuideAnswer({ question, answer: 'ROOM-D can reach Factory only through GO Hub with a live ACTIVE MAINTENANCE or EMERGENCY Factory-scoped Pass; normal WORK/READ passes are blocked.', traceRefs: ['room://ROOM-D', 'destination://factory'] });
     if (q.includes('room') || q.includes('ห้อง')) return createGuideAnswer({ question, answer: `${board.rooms.length} room(s), ${board.activeSessions.length} active session(s)`, traceRefs: board.rooms.map((room) => `room://${room.roomId}`) });

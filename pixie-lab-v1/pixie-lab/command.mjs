@@ -19,6 +19,7 @@ export const PIXIE_COMMANDS = Object.freeze([
   'self_test', 'cross_room', 'master_gate',
   'examples', 'run_example',
   'logic_create', 'logic_edit', 'logic_compare',
+  'visual_create', 'visual_scan', 'visual_edit', 'visual_compare', 'visual_render_packet', 'visual_verify',
   'candidate_passport', 'door_guard',
   'persist',
 ]);
@@ -33,6 +34,7 @@ const MUTATING = new Set([
   'debug_start', 'debug_step', 'debug_complete',
   'self_test', 'cross_room', 'run_example',
   'logic_create', 'logic_edit',
+  'visual_create', 'visual_scan', 'visual_edit', 'visual_render_packet', 'visual_verify',
   'candidate_passport',
   'persist',
 ]);
@@ -142,6 +144,24 @@ export function createPixieCommander({ persistence, evidenceVerifier = null, now
         break;
       case 'logic_compare':
         result = lab.compareLogicDraft(args.draftId);
+        break;
+      case 'visual_create':
+        result = lab.createVisualDraft(args);
+        break;
+      case 'visual_scan':
+        result = lab.scanVisualDraft(args.visualDraftId, requireObject(args.scan, 'args.scan'));
+        break;
+      case 'visual_edit':
+        result = lab.editVisualDraft(args.visualDraftId, requireObject(args.edit, 'args.edit'));
+        break;
+      case 'visual_compare':
+        result = lab.compareVisualDraft(args.visualDraftId);
+        break;
+      case 'visual_render_packet':
+        result = lab.createVisualRenderPacket(args.visualDraftId, requireObject(args.packet, 'args.packet'));
+        break;
+      case 'visual_verify':
+        result = lab.verifyVisualRender(args.packetId, requireObject(args.verification, 'args.verification'));
         break;
       case 'candidate_passport':
         result = lab.candidatePassport(args.artifactId);
