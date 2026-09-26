@@ -12,7 +12,7 @@ const TARGETS = Object.freeze([
   { id:"pixie", patterns:[/pixie/i,/พิกซี/i] },
   { id:"drive", patterns:[/drive/i,/ไดรฟ์/i,/ไฟล์/i] },
   { id:"gmail", patterns:[/gmail/i,/เมล/i,/อีเมล/i] },
-  { id:"counter", patterns:[/counter/i,/เคาน์เตอร์/i,/light/i,/ไลท์/i] },
+  { id:"counter", patterns:[/counter/i,/เคาน์เตอร์/i,/\blight\b/i,/ถามไลท์/i] },
 ]);
 
 const any = (value, patterns) => patterns.some(pattern => pattern.test(value));
@@ -74,11 +74,11 @@ function buildPlan({ command, targets, intent, conditions }) {
   }));
 }
 
-export function interpretGoCommand({ command, requestedResult = null, constraints = [] } = {}) {
+export function interpretGoCommand({ command, requestedResult = null, constraints = [], contextRefs = [] } = {}) {
   const normalized = text(command);
   if (!normalized) throw new Error("GO_COMMAND_REQUIRED");
 
-  const targets = inferTargets(normalized);
+  const namedTargets = inferTargets(normalized);\n  const localContextAvailable = Array.isArray(contextRefs) && contextRefs.some(value => text(value));\n  const targets = namedTargets.length ? namedTargets : (localContextAvailable ? ["room-context"] : []);
   const intent = inferIntent(normalized);
   const conditions = inferConditions(normalized);
   const unknowns = [];
