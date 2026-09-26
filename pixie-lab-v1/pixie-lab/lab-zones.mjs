@@ -172,9 +172,10 @@ export function validateFactoryHandoffAuthority(pass = {}, { now = nowIso } = {}
   if (!destinations.some((value) => ['factory', 'destination://factory', 'ALL_GO_HUB_OWNED_AREAS'].includes(value))) {
     return { allowed: false, reason: 'FACTORY_HANDOFF_FACTORY_SCOPE_REQUIRED' };
   }
-  if (kind === 'EMERGENCY' && pass.expiresAt) {
-    const expiry = Date.parse(pass.expiresAt);
-    if (!Number.isFinite(expiry) || expiry <= Date.parse(now())) return { allowed: false, reason: 'FACTORY_HANDOFF_EMERGENCY_PASS_EXPIRED' };
+  if (kind === 'EMERGENCY') {
+    const expiry = Date.parse(text(pass.expiresAt));
+    if (!Number.isFinite(expiry)) return { allowed: false, reason: 'FACTORY_HANDOFF_EMERGENCY_EXPIRY_REQUIRED' };
+    if (expiry <= Date.parse(now())) return { allowed: false, reason: 'FACTORY_HANDOFF_EMERGENCY_PASS_EXPIRED' };
   }
   return { allowed: true, reason: null, kind };
 }
