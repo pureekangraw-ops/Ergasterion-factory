@@ -87,3 +87,11 @@ Commands:
 - `visual_compare`
 - `visual_render_packet`
 - `visual_verify`
+
+
+### Room controls: Archive and Clean are intentionally separate
+
+- `archive_session` creates an Archive Zone snapshot of the session, room, and related cycles. It does **not** close the session and does **not** clean the room.
+- `close_session` closes the session only and leaves the room `DIRTY` until an explicit clean.
+- `clean_room` discards the room's active transient session/cycles and room report, runs the Lab-owned cleanup lifecycle `ZERO → STERILIZE → VERIFY_CLEAN → LOAD_CLEAN_SEED → READY`, and does **not** create an archive.
+- Archive records survive later room cleaning. Clean runs keep only cleanup audit metadata; they are not hidden archives.

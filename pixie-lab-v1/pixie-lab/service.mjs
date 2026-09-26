@@ -52,6 +52,7 @@ export class PixieLab {
       debugSessions: [], selfTests: [], crossRoomChecks: [], contradictions: [],
       logicDrafts: [], factoryHandoffs: [],
       visualDrafts: [], visualRenderPackets: [], visualVerifications: [],
+      archives: [], cleanRuns: [],
     };
     this.assertHealthy();
   }
@@ -71,18 +72,118 @@ export class PixieLab {
   startSession({ roomId, sessionId, purpose, activityType, sourceType = 'LAB_FIXTURE', subjectRef = null } = {}) {
     const room = this.room(required(roomId, 'roomId'));
     if (!room) throw new Error('ROOM_NOT_FOUND');
+    if (room.status !== 'READY' || room.activeSessionId) throw new Error('ROOM_NOT_READY');
     if (this.session(sessionId)) throw new Error('DUPLICATE_SESSION_ID');
     const session = { sessionId: required(sessionId, 'sessionId'), roomId, purpose: required(purpose, 'purpose'), activityType: required(activityType, 'activityType'), sourceType: required(sourceType, 'sourceType'), subjectRef: text(subjectRef) || null, status: 'ACTIVE', createdAt: this.now() };
-    this.state.sessions.push(session); Object.assign(room, { status: 'RESERVED', activeSessionId: session.sessionId, updatedAt: this.now() }); this.assertHealthy(); return clone(session);
+    this.state.sessions.push(session);
+    Object.assign(room, { status: 'RESERVED', lifecycleStage: 'READY', activeSessionId: session.sessionId, updatedAt: this.now() });
+    this.assertHealthy();
+    return clone(session);
   }
-  closeSession(sessionId) {
-    const session = this.session(sessionId); if (!session) throw new Error('SESSION_NOT_FOUND');
-    session.status = 'CLOSED';
+
+  archiveSession(sessionId, { archiveId = null, note = null } = {}) {
+    const session = this.session(required(sessionId, 'sessionId'));
+    if (!session) throw new Error('SESSION_NOT_FOUND');
     const room = this.room(session.roomId);
-    if (room) {
-      Object.assign(room, { status: 'ARCHIVE', lifecycleStage: 'ARCHIVE', lifecycleHistory: [...(room.lifecycleHistory || []), 'ARCHIVE'], activeSessionId: null, currentCycleId: null, updatedAt: this.now() });
+    if (!room) throw new Error('ROOM_NOT_FOUND');
+    const id = text(archiveId) || `ARCHIVE-${session.sessionId}-${this.now()}`;
+    if (this.state.archives.some((item) => item.archiveId === id)) throw new Error('DUPLICATE_ARCHIVE_ID');
+    const relatedCycles = this.state.cycles.filter((cycle) => cycle.sessionId === session.sessionId);
+    const archive = {
+      archiveId: id,
+      sessionId: session.sessionId,
+      roomId: session.roomId,
+      subjectRef: session.subjectRef || null,
+      note: text(note) || null,
+      sessionSnapshot: clone(session),
+      roomSnapshot: clone(room),
+      cycleSnapshots: clone(relatedCycles),
+      archivedAt: this.now(),
+    };
+    this.state.archives.push(archive);
+    this.assertHealthy();
+    return clone(archive);
+  }
+
+  closeSession(sessionId) {
+    const session = this.session(required(sessionId, 'sessionId'));
+    if (!session) throw new Error('SESSION_NOT_FOUND');
+    session.status = 'CLOSED';
+    session.closedAt = this.now();
+    const room = this.room(session.roomId);
+    if (room && room.activeSessionId === session.sessionId) {
+      Object.assign(room, {
+        status: 'DIRTY',
+        lifecycleStage: 'DIRTY',
+        lifecycleHistory: [...(room.lifecycleHistory || []), 'DIRTY'],
+        activeSessionId: null,
+        currentCycleId: null,
+        updatedAt: this.now(),
+      });
     }
-    this.assertHealthy(); return clone(session);
+    this.assertHealthy();
+    return clone(session);
+  }
+
+  cleanRoom(roomId, { reason = 'MANUAL_CLEAN', seedRef = null } = {}) {
+    const room = this.room(required(roomId, 'roomId'));
+    if (!room) throw new Error('ROOM_NOT_FOUND');
+    const startedAt = this.now();
+    const activeSessionId = room.activeSessionId || null;
+    const discardedSessionIds = [];
+    const discardedCycleIds = [];
+
+    if (activeSessionId) {
+      const activeSession = this.session(activeSessionId);
+      if (activeSession) discardedSessionIds.push(activeSession.sessionId);
+      for (const cycle of this.state.cycles.filter((item) => item.sessionId === activeSessionId)) discardedCycleIds.push(cycle.cycleId);
+      this.state.sessions = this.state.sessions.filter((item) => item.sessionId !== activeSessionId);
+      this.state.cycles = this.state.cycles.filter((item) => item.sessionId !== activeSessionId);
+    }
+
+    const clearedRoomReports = this.state.roomReports.filter((report) => report.roomId === room.roomId).length;
+    this.state.roomReports = this.state.roomReports.filter((report) => report.roomId !== room.roomId);
+
+    const stages = ['ZERO', 'STERILIZE', 'VERIFY_CLEAN', 'LOAD_CLEAN_SEED', 'READY'];
+    const cleanSeedRef = text(seedRef) || `pixie-clean-seed://${room.roomId}/${startedAt}`;
+    const before = {
+      status: room.status,
+      lifecycleStage: room.lifecycleStage,
+      activeSessionId,
+      currentCycleId: room.currentCycleId || null,
+    };
+
+    Object.assign(room, {
+      status: 'READY',
+      lifecycleStage: 'READY',
+      lifecycleHistory: [...(room.lifecycleHistory || []), ...stages],
+      activeSessionId: null,
+      currentCycleId: null,
+      cleanSeedRef,
+      quarantineReason: null,
+      updatedAt: this.now(),
+    });
+
+    const cleanRun = {
+      cleanId: `CLEAN-${room.roomId}-${startedAt}`,
+      roomId: room.roomId,
+      status: 'PASS',
+      cleanupKind: 'LAB_TRANSIENT_RESET',
+      reason: text(reason) || 'MANUAL_CLEAN',
+      stages,
+      discardedSessionIds,
+      discardedCycleIds,
+      clearedRoomReports,
+      archiveCreated: false,
+      cleanSeedRef,
+      before,
+      after: { status: room.status, lifecycleStage: room.lifecycleStage, activeSessionId: null, currentCycleId: null },
+      startedAt,
+      completedAt: this.now(),
+    };
+    this.state.cleanRuns.push(cleanRun);
+    this.assertHealthy();
+    return clone(cleanRun);
   }
 
   advanceRoomLifecycle(roomId, { stage, result = 'PASS', evidence = [], seedRef = null } = {}) {
@@ -90,6 +191,7 @@ export class PixieLab {
     const current = room.lifecycleStage || room.status; const next = text(stage).toUpperCase();
     const order = {
       ARCHIVE: 'ZERO',
+      DIRTY: 'ZERO',
       ZERO: 'STERILIZE',
       STERILIZE: 'VERIFY_CLEAN',
       VERIFY_CLEAN: 'LOAD_CLEAN_SEED',
@@ -321,6 +423,8 @@ export class PixieLab {
       this.state.visualDrafts = Array.isArray(this.state.visualDrafts) ? this.state.visualDrafts : [];
       this.state.visualRenderPackets = Array.isArray(this.state.visualRenderPackets) ? this.state.visualRenderPackets : [];
       this.state.visualVerifications = Array.isArray(this.state.visualVerifications) ? this.state.visualVerifications : [];
+      this.state.archives = Array.isArray(this.state.archives) ? this.state.archives : [];
+      this.state.cleanRuns = Array.isArray(this.state.cleanRuns) ? this.state.cleanRuns : [];
       this.state.evidence = (this.state.evidence || []).flatMap((value) => {
         const restored = verifyEvidenceRecord(value, { trustProvider: this.evidenceVerifier });
         return restored ? [restored] : [];
@@ -338,12 +442,16 @@ export class PixieLab {
         logicWorkbench: 'ACTIVE',
         visualWorkbench: 'ACTIVE',
         exampleZone: 'ACTIVE',
+        archiveZone: 'ACTIVE',
+        roomCleaner: 'ACTIVE',
       },
       crossRoomChecks: clone(this.state.crossRoomChecks || []),
       logicWorkbench: clone(this.state.logicDrafts || []),
       visualWorkbench: clone(this.state.visualDrafts || []),
       visualRenderPackets: clone(this.state.visualRenderPackets || []),
       visualVerifications: clone(this.state.visualVerifications || []),
+      archives: clone(this.state.archives || []),
+      cleanRuns: clone(this.state.cleanRuns || []),
       exampleZone: listExampleExperiments(),
       factoryHandoffs: clone(this.state.factoryHandoffs || []),
       counts: {
@@ -353,6 +461,8 @@ export class PixieLab {
         visualDrafts: (this.state.visualDrafts || []).length,
         visualRenderPackets: (this.state.visualRenderPackets || []).length,
         visualVerifications: (this.state.visualVerifications || []).length,
+        archives: (this.state.archives || []).length,
+        cleanRuns: (this.state.cleanRuns || []).length,
         examples: listExampleExperiments().length,
         factoryHandoffs: (this.state.factoryHandoffs || []).length,
       },
@@ -362,6 +472,8 @@ export class PixieLab {
     const board = this.board();
     const q = text(question).toLowerCase();
     if (q.includes('unknown')) return createGuideAnswer({ question, answer: `${board.unknowns.length} unknown item(s)`, traceRefs: board.roomReports.map((report) => `report://${report.roomId}`), unknowns: board.unknowns });
+    if (q.includes('archive') || q.includes('เก็บ')) return createGuideAnswer({ question, answer: `${board.archives.length} archive snapshot(s); Archive never cleans or closes a room.`, traceRefs: board.archives.map((item) => `archive://${item.archiveId}`) });
+    if (q.includes('clean') || q.includes('ล้าง')) return createGuideAnswer({ question, answer: `${board.cleanRuns.length} clean run(s); Clean resets room transient state and never creates an archive.`, traceRefs: board.cleanRuns.map((item) => `clean://${item.cleanId}`) });
     if (q.includes('debug') || q.includes('ดีบั๊ก') || q.includes('ตรวจสอบ')) return createGuideAnswer({ question, answer: `ROOM-D is the dedicated inspection/debug room; ${board.factoryHandoffs.length} Lab handoff record(s)`, traceRefs: ['room://ROOM-D'] });
     if (q.includes('example') || q.includes('ตัวอย่าง')) return createGuideAnswer({ question, answer: `${board.exampleZone.length} reusable example experiment(s)`, traceRefs: board.exampleZone.map((item) => `example://${item.exampleId}`) });
     if (q.includes('ภาพ') || q.includes('visual') || q.includes('วาด') || q.includes('render')) return createGuideAnswer({ question, answer: `${board.visualWorkbench.length} Visual Workbench draft(s), ${board.visualRenderPackets.length} render packet(s), ${board.visualVerifications.length} verification(s)`, traceRefs: board.visualWorkbench.map((item) => `visual-draft://${item.visualDraftId}`) });

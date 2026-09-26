@@ -21,12 +21,12 @@ const proof = (id, provider = trust()) => createVerifiedEvidence(
   { trustProvider: provider },
 );
 
-test('closeSession enters ARCHIVE and requires the full clean-room lifecycle', () => {
+test('closeSession leaves DIRTY and the manual lifecycle can still clean explicitly', () => {
   const provider = trust();
   const lab = new PixieLab({ now, evidenceVerifier: createEvidenceVerifier(provider) });
   lab.startSession({ roomId: 'ROOM-A', sessionId: 'S-1', purpose: 'X', activityType: 'CHECK' });
   lab.closeSession('S-1');
-  assert.equal(lab.room('ROOM-A').status, 'ARCHIVE');
+  assert.equal(lab.room('ROOM-A').status, 'DIRTY');
   lab.advanceRoomLifecycle('ROOM-A', { stage: 'ZERO', evidence: [proof('ZERO', provider)] });
   lab.advanceRoomLifecycle('ROOM-A', { stage: 'STERILIZE', evidence: [proof('STERILE', provider)] });
   lab.advanceRoomLifecycle('ROOM-A', { stage: 'VERIFY_CLEAN', evidence: [proof('VERIFY', provider)] });
