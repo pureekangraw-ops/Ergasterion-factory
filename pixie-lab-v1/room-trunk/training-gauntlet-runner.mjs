@@ -55,17 +55,17 @@ function logicSignals(item) {
 
   if(intent) signals.push("UNDERSTAND_INTENT");
 
+  if (/mayRun\s*=.*CANCELLED/.test(code)) {
+    signals.push("BOOLEAN_INVERSION");
+    signals.push("MINIMAL_PATCH");
+    findings.push("cancelled-inverted");
+  }
+
   if (/CANCELLED.*return true/.test(code)) {
-    if (/mayRun\s*=.*CANCELLED/.test(code)) {
-      signals.push("BOOLEAN_INVERSION");
-      signals.push("MINIMAL_PATCH");
-      findings.push("cancelled-inverted");
-    } else {
-      signals.push("EARLY_RETURN_BUG");
-      signals.push("COUNTEREXAMPLE");
-      signals.push("MINIMAL_PATCH");
-      findings.push("cancelled-early-return");
-    }
+    signals.push("EARLY_RETURN_BUG");
+    signals.push("COUNTEREXAMPLE");
+    if (!signals.includes("MINIMAL_PATCH")) signals.push("MINIMAL_PATCH");
+    findings.push("cancelled-early-return");
   }
 
   if (/!target.*return true/.test(code)) {
