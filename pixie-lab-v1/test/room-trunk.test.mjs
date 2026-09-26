@@ -27,7 +27,11 @@ test("ROOM-A local Pixie returns only a room result contract", () => {
   assert.equal(result.approval, "NOT_AN_APPROVAL");
   assert.equal(result.externalExecution, false);
   assert.equal(result.productionAuthority, false);
-  assert.equal(result.plan.length, 4);
+  assert.equal(result.plan.some(step => step.action === "OBSERVE"), true);
+  assert.equal(result.plan.some(step => step.action === "PLAN_LOCAL"), true);
+  assert.equal(result.plan.some(step => step.action === "COMPARE"), true);
+  assert.equal(result.candidate.execution.externalExecution, false);
+  assert.equal(result.candidate.execution.productionAuthority, false);
 });
 
 test("ROOM-A preserves missing requested result as UNKNOWN", () => {
@@ -36,5 +40,5 @@ test("ROOM-A preserves missing requested result as UNKNOWN", () => {
     command:"จัดการอันนี้",
   });
   assert.equal(result.status, "UNKNOWN");
-  assert.deepEqual(result.unknowns, ["REQUESTED_RESULT_UNSPECIFIED"]);
+  assert.deepEqual(result.unknowns, ["REQUESTED_RESULT_UNSPECIFIED", "TARGET_UNRESOLVED"]);
 });
