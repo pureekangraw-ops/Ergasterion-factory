@@ -156,10 +156,10 @@ test('Debug Room direct Factory handoff accepts active Maintenance or Emergency 
 });
 
 test('PIXIE command surface exposes Lab zones but still does not expose production authority commands', () => {
-  for (const command of ['examples', 'run_example', 'logic_create', 'logic_edit', 'logic_compare', 'factory_handoff']) {
+  for (const command of ['examples', 'run_example', 'logic_create', 'logic_edit', 'logic_compare']) {
     assert.equal(PIXIE_COMMANDS.includes(command), true);
   }
-  for (const command of ['deploy', 'merge', 'delete', 'share', 'external_write']) {
+  for (const command of ['factory_handoff', 'deploy', 'merge', 'delete', 'share', 'external_write']) {
     assert.equal(PIXIE_COMMANDS.includes(command), false);
   }
 });
