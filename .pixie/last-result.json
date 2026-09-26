@@ -1,13 +1,13 @@
 {
-  "requestId": "PIXIE-WORKBENCH-CREATE-20260926-001",
-  "command": "logic_create",
+  "requestId": "PIXIE-WORKBENCH-EDIT-VERIFY-20260926-001",
+  "command": "logic_edit",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "logic_create",
+    "command": "logic_edit",
     "mutated": true,
     "result": {
       "draftId": "DRAFT-GOHUB-ENTRY-SELFHEAL-001",
@@ -48,7 +48,7 @@
         "repair": {
           "action": "WRANGLER_REDEPLOY_ONCE",
           "maxRepairs": 1,
-          "verifyAttempts": 8
+          "verifyAttempts": 12
         },
         "checks": [
           "BACKEND_HEALTH",
@@ -56,11 +56,20 @@
         ],
         "note": "  baseline copy for PIXIE Logic Workbench  "
       },
-      "edits": [],
+      "edits": [
+        {
+          "op": "SET",
+          "path": [
+            "repair",
+            "verifyAttempts"
+          ],
+          "at": "2026-09-26T07:46:44.146Z"
+        }
+      ],
       "createdAt": "2026-09-26T07:46:07.991Z",
-      "updatedAt": "2026-09-26T07:46:07.991Z"
+      "updatedAt": "2026-09-26T07:46:44.146Z"
     }
   },
   "error": null,
-  "completedAt": "2026-09-26T07:46:08.025Z"
+  "completedAt": "2026-09-26T07:46:44.175Z"
 }
