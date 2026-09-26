@@ -168,7 +168,7 @@ export class PixieLab {
       cleanId: `CLEAN-${room.roomId}-${startedAt}`,
       roomId: room.roomId,
       status: 'PASS',
-      mode: 'LAB_TRANSIENT_RESET',
+      cleanupKind: 'LAB_TRANSIENT_RESET',
       reason: text(reason) || 'MANUAL_CLEAN',
       stages,
       discardedSessionIds,
