@@ -13,6 +13,7 @@ export function createRoomPixie() {
         command:command.command,
         requestedResult:command.requestedResult,
         constraints:command.constraints,
+        contextRefs:command.contextRefs,
       });
       const unresolved = [...interpretation.unknowns];
 
