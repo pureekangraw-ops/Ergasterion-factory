@@ -3,38 +3,34 @@ import assert from "node:assert/strict";
 import { ROOM_PROFILE } from "../room-trunk/room-profile.mjs";
 import { createRoomPixie } from "../room-trunk/room-pixie.mjs";
 
-test("ROOM-C trunk has the correct room-local Pixie profile", () => {
-  assert.equal(ROOM_PROFILE.roomId, "ROOM-C");
-  assert.equal(ROOM_PROFILE.roomPixieId, "PIXIE-C");
-  assert.equal(ROOM_PROFILE.role, "VERIFY");
-  assert.equal(ROOM_PROFILE.trunkBranch, "room/pixie-c");
-  assert.equal(ROOM_PROFILE.productionAuthority, false);
-  assert.equal(ROOM_PROFILE.directMainMutation, false);
+test("ROOM-C is a free-play workshop, not a fixed specialty", () => {
+  assert.equal(ROOM_PROFILE.roomId,"ROOM-C");
+  assert.equal(ROOM_PROFILE.roomPixieId,"PIXIE-C");
+  assert.equal(ROOM_PROFILE.role,"WORKSHOP");
+  assert.equal(ROOM_PROFILE.workspace,"FREE_PLAY");
+  assert.deepEqual(ROOM_PROFILE.defaultActions,[]);
+  assert.equal(ROOM_PROFILE.productionAuthority,false);
 });
 
-test("ROOM-C local Pixie returns only a room result contract", () => {
-  const pixie = createRoomPixie();
-  const result = pixie.run({
-    requestId:"REQ-ROOM-C",
-    command:"ลองรับคำสั่งยากจาก GO แล้วแตกงานในห้องนี้",
-    requestedResult:"ได้แผนทดลองในห้องโดยไม่แตะ production",
-    contextRefs:["fixture://room"],
+test("ROOM-C exposes workshop and apprentice directly", () => {
+  const pixie=createRoomPixie();
+  const apprentice=pixie.createApprentice();
+  apprentice.startMission({sessionId:"APP-C",roomId:"ROOM-C",mission:"ลองของ"});
+  assert.equal(apprentice.brief("APP-C").operatingStyle,"FREE_NEXT_ACTION");
+});
+
+test("ROOM-C leaves method choice open", () => {
+  const result=createRoomPixie().run({
+    requestId:"REQ-C",
+    command:"ลองวิธีใหม่",
+    requestedResult:"ได้ผลทดลอง",
   });
-  assert.equal(result.contract, "PIXIE_ROOM_RESULT_V1");
-  assert.equal(result.roomId, "ROOM-C");
-  assert.equal(result.role, "VERIFY");
-  assert.equal(result.status, "READY");
-  assert.equal(result.approval, "NOT_AN_APPROVAL");
-  assert.equal(result.externalExecution, false);
-  assert.equal(result.productionAuthority, false);
-  assert.equal(result.plan.length, 4);
+  assert.equal(result.role,"WORKSHOP");
+  assert.equal(result.plan[0].action,"CHOOSE_NEXT_ACTION");
+  assert.equal(result.productionAuthority,false);
 });
 
 test("ROOM-C preserves missing requested result as UNKNOWN", () => {
-  const result = createRoomPixie().run({
-    requestId:"REQ-UNKNOWN-ROOM-C",
-    command:"จัดการอันนี้",
-  });
-  assert.equal(result.status, "UNKNOWN");
-  assert.deepEqual(result.unknowns, ["REQUESTED_RESULT_UNSPECIFIED"]);
+  const result=createRoomPixie().run({requestId:"REQ-C-U",command:"จัดการอันนี้"});
+  assert.equal(result.status,"UNKNOWN");
 });
