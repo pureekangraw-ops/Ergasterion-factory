@@ -1,63 +1,25 @@
 {
-  "requestId": "PIXIE-WORKBENCH-COMPARE-20260926-001",
-  "command": "logic_compare",
+  "requestId": "PIXIE-CLEAN-ROOM-A-20260926-001",
+  "command": "close_session",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "logic_compare",
-    "mutated": false,
+    "command": "close_session",
+    "mutated": true,
     "result": {
-      "draftId": "DRAFT-GOHUB-ENTRY-SELFHEAL-001",
-      "logicId": "GOHUB-PUBLIC-ENTRY-SELFHEAL",
-      "changed": true,
-      "original": {
-        "probe": {
-          "attemptsBeforeRepair": 4,
-          "requiredSignals": [
-            "HTTP_200",
-            "TITLE_GO_HUB",
-            "CENTRE_VISIBLE"
-          ]
-        },
-        "repair": {
-          "action": "WRANGLER_REDEPLOY_ONCE",
-          "maxRepairs": 1,
-          "verifyAttempts": 8
-        },
-        "checks": [
-          "BACKEND_HEALTH",
-          "PUBLIC_ENTRY"
-        ],
-        "note": "  baseline copy for PIXIE Logic Workbench  "
-      },
-      "workingCopy": {
-        "probe": {
-          "attemptsBeforeRepair": 4,
-          "requiredSignals": [
-            "HTTP_200",
-            "TITLE_GO_HUB",
-            "CENTRE_VISIBLE"
-          ]
-        },
-        "repair": {
-          "action": "WRANGLER_REDEPLOY_ONCE",
-          "maxRepairs": 1,
-          "verifyAttempts": 12
-        },
-        "checks": [
-          "BACKEND_HEALTH",
-          "PUBLIC_ENTRY",
-          "FALSE_GREEN_CROSS_ROOM"
-        ],
-        "note": "  baseline copy for PIXIE Logic Workbench  "
-      },
-      "editCount": 2,
-      "approval": "NOT_AN_APPROVAL"
+      "sessionId": "S-ENTRY-HEALTHY-001",
+      "roomId": "ROOM-A",
+      "purpose": "Baseline: GO Hub public entry healthy (HTTP 200 + GO Hub title + CENTRE visible)",
+      "activityType": "CHECK",
+      "sourceType": "LAB_FIXTURE",
+      "subjectRef": "fixture://go-hub-public-entry/healthy",
+      "status": "CLOSED",
+      "createdAt": "2026-09-26T04:59:53.906Z"
     }
   },
   "error": null,
-  "completedAt": "2026-09-26T07:47:55.854Z"
+  "completedAt": "2026-09-26T07:52:17.787Z"
 }
