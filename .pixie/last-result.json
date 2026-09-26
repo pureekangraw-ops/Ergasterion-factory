@@ -1,0 +1,331 @@
+{
+  "requestId": "PIXIE-ENTRY-LAB-20260926-STATUS-001",
+  "command": "status",
+  "exitCode": 0,
+  "ok": true,
+  "output": {
+    "ok": true,
+    "pixieId": "PIXIE-01",
+    "labId": "PIXIE-LAB",
+    "command": "status",
+    "mutated": false,
+    "result": {
+      "boardId": "PIXIE-BOARD",
+      "projectionOnly": true,
+      "generatedBy": "PIXIE-01",
+      "generatedAt": "2026-09-26T04:58:31.919Z",
+      "rooms": [
+        {
+          "roomId": "ROOM-A",
+          "roomPixieId": "PIXIE-A",
+          "status": "READY",
+          "lifecycleStage": "READY",
+          "lifecycleHistory": [
+            "READY"
+          ],
+          "assignedPurpose": null,
+          "activeSessionId": null,
+          "currentCycleId": null,
+          "updatedAt": "2026-09-26T04:58:31.918Z"
+        },
+        {
+          "roomId": "ROOM-B",
+          "roomPixieId": "PIXIE-B",
+          "status": "READY",
+          "lifecycleStage": "READY",
+          "lifecycleHistory": [
+            "READY"
+          ],
+          "assignedPurpose": null,
+          "activeSessionId": null,
+          "currentCycleId": null,
+          "updatedAt": "2026-09-26T04:58:31.918Z"
+        },
+        {
+          "roomId": "ROOM-C",
+          "roomPixieId": "PIXIE-C",
+          "status": "READY",
+          "lifecycleStage": "READY",
+          "lifecycleHistory": [
+            "READY"
+          ],
+          "assignedPurpose": null,
+          "activeSessionId": null,
+          "currentCycleId": null,
+          "updatedAt": "2026-09-26T04:58:31.918Z"
+        }
+      ],
+      "roomReports": [],
+      "activeSessions": [],
+      "tests": [
+        {
+          "testTypeId": "functional",
+          "name": "FUNCTIONAL",
+          "category": "FUNCTIONAL",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://functional",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "V1_CONTRACT_READY"
+        },
+        {
+          "testTypeId": "integration",
+          "name": "INTEGRATION",
+          "category": "INTEGRATION",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://integration",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "CONTRACT_ONLY"
+        },
+        {
+          "testTypeId": "contract",
+          "name": "CONTRACT",
+          "category": "CONTRACT",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://contract",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "V1_CONTRACT_READY"
+        },
+        {
+          "testTypeId": "regression",
+          "name": "REGRESSION",
+          "category": "REGRESSION",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://regression",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "V1_CONTRACT_READY"
+        },
+        {
+          "testTypeId": "golden",
+          "name": "GOLDEN",
+          "category": "GOLDEN",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://golden",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "V1_CONTRACT_READY"
+        },
+        {
+          "testTypeId": "permission_boundary",
+          "name": "PERMISSION_BOUNDARY",
+          "category": "PERMISSION_BOUNDARY",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://permission_boundary",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "V1_CONTRACT_READY"
+        },
+        {
+          "testTypeId": "recovery",
+          "name": "RECOVERY",
+          "category": "RECOVERY",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://recovery",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "V1_CONTRACT_READY"
+        },
+        {
+          "testTypeId": "migration",
+          "name": "MIGRATION",
+          "category": "MIGRATION",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://migration",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "CONTRACT_ONLY"
+        },
+        {
+          "testTypeId": "compatibility",
+          "name": "COMPATIBILITY",
+          "category": "COMPATIBILITY",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://compatibility",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "CONTRACT_ONLY"
+        },
+        {
+          "testTypeId": "chaos",
+          "name": "CHAOS",
+          "category": "CHAOS",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://chaos",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "CONTRACT_ONLY"
+        },
+        {
+          "testTypeId": "performance",
+          "name": "PERFORMANCE",
+          "category": "PERFORMANCE",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://performance",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "CONTRACT_ONLY"
+        },
+        {
+          "testTypeId": "install_update",
+          "name": "INSTALL_UPDATE",
+          "category": "INSTALL_UPDATE",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://install_update",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "CONTRACT_ONLY"
+        },
+        {
+          "testTypeId": "release_package",
+          "name": "RELEASE_PACKAGE",
+          "category": "RELEASE_PACKAGE",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://release_package",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "CONTRACT_ONLY"
+        },
+        {
+          "testTypeId": "security_oriented",
+          "name": "SECURITY_ORIENTED",
+          "category": "SECURITY_ORIENTED",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://security_oriented",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "CONTRACT_ONLY"
+        },
+        {
+          "testTypeId": "unknown_edge",
+          "name": "UNKNOWN_EDGE",
+          "category": "UNKNOWN_EDGE",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://unknown_edge",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "CONTRACT_ONLY"
+        }
+      ],
+      "matrices": [],
+      "testRuns": [],
+      "bugs": [],
+      "goldenCases": [],
+      "goAttention": [],
+      "unknowns": [],
+      "artifacts": [],
+      "candidatePassports": [],
+      "regressionAlerts": [],
+      "proposals": [],
+      "counts": {
+        "rooms": 3,
+        "activeSessions": 0,
+        "tests": 15,
+        "matrices": 0,
+        "testRuns": 0,
+        "bugs": 0,
+        "goldenCases": 0,
+        "goAttention": 0,
+        "unknowns": 0,
+        "artifacts": 0,
+        "candidatePassports": 0,
+        "regressionAlerts": 0,
+        "proposals": 0
+      }
+    }
+  },
+  "error": null,
+  "completedAt": "2026-09-26T04:58:31.944Z"
+}
