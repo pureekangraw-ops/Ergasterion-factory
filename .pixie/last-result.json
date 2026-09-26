@@ -1,48 +1,764 @@
 {
-  "requestId": "PIXIE-CLEAN-ROOM-A-NEWCONTROL-20260926-001",
-  "command": "clean_room",
+  "requestId": "REQ-PIXIE-VISUAL-WORKBENCH-INSPECT-20260926-001",
+  "command": "status",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "clean_room",
-    "mutated": true,
+    "command": "status",
+    "mutated": false,
     "result": {
-      "cleanId": "CLEAN-ROOM-A-2026-09-26T08:09:39.860Z",
-      "roomId": "ROOM-A",
-      "status": "PASS",
-      "cleanupKind": "LAB_TRANSIENT_RESET",
-      "reason": "OWNER_REQUESTED_CLEAN_BUTTON_TEST",
-      "stages": [
-        "ZERO",
-        "STERILIZE",
-        "VERIFY_CLEAN",
-        "LOAD_CLEAN_SEED",
-        "READY"
+      "boardId": "PIXIE-BOARD",
+      "projectionOnly": true,
+      "generatedBy": "PIXIE-01",
+      "generatedAt": "2026-09-26T08:10:06.926Z",
+      "rooms": [
+        {
+          "roomId": "ROOM-A",
+          "roomPixieId": "PIXIE-A",
+          "status": "READY",
+          "lifecycleStage": "READY",
+          "lifecycleHistory": [
+            "READY",
+            "ARCHIVE",
+            "ZERO",
+            "STERILIZE",
+            "VERIFY_CLEAN",
+            "LOAD_CLEAN_SEED",
+            "READY"
+          ],
+          "assignedPurpose": null,
+          "activeSessionId": null,
+          "currentCycleId": null,
+          "updatedAt": "2026-09-26T08:09:39.860Z",
+          "cleanSeedRef": "pixie-clean-seed://ROOM-A/2026-09-26T08:09:39.860Z",
+          "quarantineReason": null
+        },
+        {
+          "roomId": "ROOM-B",
+          "roomPixieId": "PIXIE-B",
+          "status": "RESERVED",
+          "lifecycleStage": "READY",
+          "lifecycleHistory": [
+            "READY"
+          ],
+          "assignedPurpose": null,
+          "activeSessionId": "S-ENTRY-404-001",
+          "currentCycleId": null,
+          "updatedAt": "2026-09-26T05:00:31.130Z"
+        },
+        {
+          "roomId": "ROOM-C",
+          "roomPixieId": "PIXIE-C",
+          "status": "RESERVED",
+          "lifecycleStage": "READY",
+          "lifecycleHistory": [
+            "READY"
+          ],
+          "assignedPurpose": null,
+          "activeSessionId": "S-ENTRY-FALSE-GREEN-001",
+          "currentCycleId": null,
+          "updatedAt": "2026-09-26T05:01:02.145Z"
+        },
+        {
+          "roomId": "ROOM-D",
+          "roomPixieId": "PIXIE-D",
+          "status": "READY",
+          "lifecycleStage": "READY",
+          "lifecycleHistory": [
+            "READY"
+          ],
+          "assignedPurpose": "INSPECT_DEBUG",
+          "activeSessionId": null,
+          "currentCycleId": null,
+          "updatedAt": "2026-09-26T07:46:07.990Z"
+        }
       ],
-      "discardedSessionIds": [],
-      "discardedCycleIds": [],
-      "clearedRoomReports": 0,
-      "archiveCreated": false,
-      "cleanSeedRef": "pixie-clean-seed://ROOM-A/2026-09-26T08:09:39.860Z",
-      "before": {
-        "status": "ARCHIVE",
-        "lifecycleStage": "ARCHIVE",
-        "activeSessionId": null,
-        "currentCycleId": null
+      "roomReports": [],
+      "activeSessions": [
+        {
+          "sessionId": "S-ENTRY-404-001",
+          "roomId": "ROOM-B",
+          "purpose": "Failure fixture: GO Hub public entry returns 404 / page missing",
+          "activityType": "CHECK",
+          "sourceType": "LAB_FIXTURE",
+          "subjectRef": "fixture://go-hub-public-entry/404",
+          "status": "ACTIVE",
+          "createdAt": "2026-09-26T05:00:31.130Z"
+        },
+        {
+          "sessionId": "S-ENTRY-FALSE-GREEN-001",
+          "roomId": "ROOM-C",
+          "purpose": "False-green fixture: backend health PASS while user-facing GO Hub page is unavailable",
+          "activityType": "CHECK",
+          "sourceType": "LAB_FIXTURE",
+          "subjectRef": "fixture://go-hub-public-entry/false-green",
+          "status": "ACTIVE",
+          "createdAt": "2026-09-26T05:01:02.145Z"
+        }
+      ],
+      "tests": [
+        {
+          "testTypeId": "functional",
+          "name": "FUNCTIONAL",
+          "category": "FUNCTIONAL",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://functional",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "V1_CONTRACT_READY"
+        },
+        {
+          "testTypeId": "integration",
+          "name": "INTEGRATION",
+          "category": "INTEGRATION",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://integration",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "CONTRACT_ONLY"
+        },
+        {
+          "testTypeId": "contract",
+          "name": "CONTRACT",
+          "category": "CONTRACT",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://contract",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "V1_CONTRACT_READY"
+        },
+        {
+          "testTypeId": "regression",
+          "name": "REGRESSION",
+          "category": "REGRESSION",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://regression",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "V1_CONTRACT_READY"
+        },
+        {
+          "testTypeId": "golden",
+          "name": "GOLDEN",
+          "category": "GOLDEN",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://golden",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "V1_CONTRACT_READY"
+        },
+        {
+          "testTypeId": "permission_boundary",
+          "name": "PERMISSION_BOUNDARY",
+          "category": "PERMISSION_BOUNDARY",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://permission_boundary",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "V1_CONTRACT_READY"
+        },
+        {
+          "testTypeId": "recovery",
+          "name": "RECOVERY",
+          "category": "RECOVERY",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://recovery",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "V1_CONTRACT_READY"
+        },
+        {
+          "testTypeId": "migration",
+          "name": "MIGRATION",
+          "category": "MIGRATION",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://migration",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "CONTRACT_ONLY"
+        },
+        {
+          "testTypeId": "compatibility",
+          "name": "COMPATIBILITY",
+          "category": "COMPATIBILITY",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://compatibility",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "CONTRACT_ONLY"
+        },
+        {
+          "testTypeId": "chaos",
+          "name": "CHAOS",
+          "category": "CHAOS",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://chaos",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "CONTRACT_ONLY"
+        },
+        {
+          "testTypeId": "performance",
+          "name": "PERFORMANCE",
+          "category": "PERFORMANCE",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://performance",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "CONTRACT_ONLY"
+        },
+        {
+          "testTypeId": "install_update",
+          "name": "INSTALL_UPDATE",
+          "category": "INSTALL_UPDATE",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://install_update",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "CONTRACT_ONLY"
+        },
+        {
+          "testTypeId": "release_package",
+          "name": "RELEASE_PACKAGE",
+          "category": "RELEASE_PACKAGE",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://release_package",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "CONTRACT_ONLY"
+        },
+        {
+          "testTypeId": "security_oriented",
+          "name": "SECURITY_ORIENTED",
+          "category": "SECURITY_ORIENTED",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://security_oriented",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "CONTRACT_ONLY"
+        },
+        {
+          "testTypeId": "unknown_edge",
+          "name": "UNKNOWN_EDGE",
+          "category": "UNKNOWN_EDGE",
+          "inputContract": {
+            "source": "LAB_FIXTURE"
+          },
+          "runner": "runner://unknown_edge",
+          "runnerInterface": null,
+          "expectedContract": "expected://result",
+          "severity": "MEDIUM",
+          "replayable": true,
+          "requiresGrant": false,
+          "evidencePolicy": "trace-everything",
+          "runnerStatus": "CONTRACT_ONLY"
+        }
+      ],
+      "matrices": [],
+      "testRuns": [],
+      "bugs": [],
+      "goldenCases": [],
+      "goAttention": [],
+      "unknowns": [],
+      "artifacts": [],
+      "candidatePassports": [],
+      "regressionAlerts": [],
+      "proposals": [],
+      "counts": {
+        "rooms": 4,
+        "activeSessions": 2,
+        "tests": 15,
+        "matrices": 0,
+        "testRuns": 0,
+        "bugs": 0,
+        "goldenCases": 0,
+        "goAttention": 0,
+        "unknowns": 0,
+        "artifacts": 0,
+        "candidatePassports": 0,
+        "regressionAlerts": 0,
+        "proposals": 0,
+        "crossRoomChecks": 2,
+        "logicDrafts": 1,
+        "visualDrafts": 0,
+        "visualRenderPackets": 0,
+        "visualVerifications": 0,
+        "archives": 0,
+        "cleanRuns": 1,
+        "examples": 5,
+        "factoryHandoffs": 0
       },
-      "after": {
-        "status": "READY",
-        "lifecycleStage": "READY",
-        "activeSessionId": null,
-        "currentCycleId": null
+      "zones": {
+        "experimentRooms": [
+          "ROOM-A",
+          "ROOM-B",
+          "ROOM-C"
+        ],
+        "debugRoom": "ROOM-D",
+        "logicWorkbench": "ACTIVE",
+        "visualWorkbench": "ACTIVE",
+        "exampleZone": "ACTIVE",
+        "archiveZone": "ACTIVE",
+        "roomCleaner": "ACTIVE"
       },
-      "startedAt": "2026-09-26T08:09:39.860Z",
-      "completedAt": "2026-09-26T08:09:39.860Z"
+      "crossRoomChecks": [
+        {
+          "checkId": "CROSS-2026-09-26T05:01:50.066Z",
+          "subjectRef": "fixture://go-hub-public-entry/self-heal-v1",
+          "status": "FAIL",
+          "observations": [
+            {
+              "roomId": "ROOM-A",
+              "status": "PASS",
+              "observed": {
+                "backendHealth": "PASS",
+                "userEntry": "PASS",
+                "httpStatus": 200,
+                "hasGoHubTitle": true,
+                "hasCentre": true
+              }
+            },
+            {
+              "roomId": "ROOM-B",
+              "status": "FAIL",
+              "observed": {
+                "backendHealth": "FAIL",
+                "userEntry": "FAIL",
+                "httpStatus": 404,
+                "hasGoHubTitle": false,
+                "hasCentre": false
+              }
+            },
+            {
+              "roomId": "ROOM-C",
+              "status": "FAIL",
+              "observed": {
+                "backendHealth": "PASS",
+                "userEntry": "FAIL",
+                "httpStatus": 404,
+                "hasGoHubTitle": false,
+                "hasCentre": false
+              }
+            }
+          ],
+          "at": "2026-09-26T05:01:50.066Z"
+        },
+        {
+          "checkId": "CROSS-2026-09-26T06:19:39.285Z",
+          "subjectRef": "fixture://go-hub-public-entry/recovered-v1",
+          "status": "PASS",
+          "observations": [
+            {
+              "roomId": "ROOM-A",
+              "status": "PASS",
+              "observed": {
+                "backendHealth": "PASS",
+                "userEntry": "PASS",
+                "httpStatus": 200,
+                "hasGoHubTitle": true,
+                "hasCentre": true
+              }
+            },
+            {
+              "roomId": "ROOM-B",
+              "status": "PASS",
+              "observed": {
+                "backendHealth": "PASS",
+                "userEntry": "PASS",
+                "httpStatus": 200,
+                "hasGoHubTitle": true,
+                "hasCentre": true
+              }
+            },
+            {
+              "roomId": "ROOM-C",
+              "status": "PASS",
+              "observed": {
+                "backendHealth": "PASS",
+                "userEntry": "PASS",
+                "httpStatus": 200,
+                "hasGoHubTitle": true,
+                "hasCentre": true
+              }
+            }
+          ],
+          "at": "2026-09-26T06:19:39.285Z"
+        }
+      ],
+      "logicWorkbench": [
+        {
+          "draftId": "DRAFT-GOHUB-ENTRY-SELFHEAL-001",
+          "logicId": "GOHUB-PUBLIC-ENTRY-SELFHEAL",
+          "sourceRef": "github://pureekangraw-ops/standard-/go-hub-public-entry-watch",
+          "sourceVersion": "LAB-COPY-1",
+          "labOwned": true,
+          "status": "DRAFT",
+          "original": {
+            "probe": {
+              "attemptsBeforeRepair": 4,
+              "requiredSignals": [
+                "HTTP_200",
+                "TITLE_GO_HUB",
+                "CENTRE_VISIBLE"
+              ]
+            },
+            "repair": {
+              "action": "WRANGLER_REDEPLOY_ONCE",
+              "maxRepairs": 1,
+              "verifyAttempts": 8
+            },
+            "checks": [
+              "BACKEND_HEALTH",
+              "PUBLIC_ENTRY"
+            ],
+            "note": "  baseline copy for PIXIE Logic Workbench  "
+          },
+          "workingCopy": {
+            "probe": {
+              "attemptsBeforeRepair": 4,
+              "requiredSignals": [
+                "HTTP_200",
+                "TITLE_GO_HUB",
+                "CENTRE_VISIBLE"
+              ]
+            },
+            "repair": {
+              "action": "WRANGLER_REDEPLOY_ONCE",
+              "maxRepairs": 1,
+              "verifyAttempts": 12
+            },
+            "checks": [
+              "BACKEND_HEALTH",
+              "PUBLIC_ENTRY",
+              "FALSE_GREEN_CROSS_ROOM"
+            ],
+            "note": "  baseline copy for PIXIE Logic Workbench  "
+          },
+          "edits": [
+            {
+              "op": "SET",
+              "path": [
+                "repair",
+                "verifyAttempts"
+              ],
+              "at": "2026-09-26T07:46:44.146Z"
+            },
+            {
+              "op": "APPEND",
+              "path": [
+                "checks"
+              ],
+              "at": "2026-09-26T07:47:18.989Z"
+            }
+          ],
+          "createdAt": "2026-09-26T07:46:07.991Z",
+          "updatedAt": "2026-09-26T07:47:18.989Z"
+        }
+      ],
+      "visualWorkbench": [],
+      "visualRenderPackets": [],
+      "visualVerifications": [],
+      "archives": [],
+      "cleanRuns": [
+        {
+          "cleanId": "CLEAN-ROOM-A-2026-09-26T08:09:39.860Z",
+          "roomId": "ROOM-A",
+          "status": "PASS",
+          "cleanupKind": "LAB_TRANSIENT_RESET",
+          "reason": "OWNER_REQUESTED_CLEAN_BUTTON_TEST",
+          "stages": [
+            "ZERO",
+            "STERILIZE",
+            "VERIFY_CLEAN",
+            "LOAD_CLEAN_SEED",
+            "READY"
+          ],
+          "discardedSessionIds": [],
+          "discardedCycleIds": [],
+          "clearedRoomReports": 0,
+          "archiveCreated": false,
+          "cleanSeedRef": "pixie-clean-seed://ROOM-A/2026-09-26T08:09:39.860Z",
+          "before": {
+            "status": "ARCHIVE",
+            "lifecycleStage": "ARCHIVE",
+            "activeSessionId": null,
+            "currentCycleId": null
+          },
+          "after": {
+            "status": "READY",
+            "lifecycleStage": "READY",
+            "activeSessionId": null,
+            "currentCycleId": null
+          },
+          "startedAt": "2026-09-26T08:09:39.860Z",
+          "completedAt": "2026-09-26T08:09:39.860Z"
+        }
+      ],
+      "exampleZone": [
+        {
+          "exampleId": "GOHUB-ENTRY-HEALTHY",
+          "name": "GO Hub public entry healthy",
+          "subjectRef": "fixture://go-hub-public-entry/healthy",
+          "observations": [
+            {
+              "roomId": "ROOM-A",
+              "status": "PASS",
+              "observed": {
+                "backendHealth": "PASS",
+                "userEntry": "PASS",
+                "httpStatus": 200,
+                "hasGoHubTitle": true,
+                "hasCentre": true
+              }
+            },
+            {
+              "roomId": "ROOM-B",
+              "status": "PASS",
+              "observed": {
+                "backendHealth": "PASS",
+                "userEntry": "PASS",
+                "httpStatus": 200,
+                "hasGoHubTitle": true,
+                "hasCentre": true
+              }
+            },
+            {
+              "roomId": "ROOM-C",
+              "status": "PASS",
+              "observed": {
+                "backendHealth": "PASS",
+                "userEntry": "PASS",
+                "httpStatus": 200,
+                "hasGoHubTitle": true,
+                "hasCentre": true
+              }
+            }
+          ]
+        },
+        {
+          "exampleId": "GOHUB-ENTRY-404",
+          "name": "GO Hub public entry missing",
+          "subjectRef": "fixture://go-hub-public-entry/404",
+          "observations": [
+            {
+              "roomId": "ROOM-A",
+              "status": "PASS",
+              "observed": {
+                "backendHealth": "PASS",
+                "userEntry": "PASS",
+                "httpStatus": 200
+              }
+            },
+            {
+              "roomId": "ROOM-B",
+              "status": "FAIL",
+              "observed": {
+                "backendHealth": "FAIL",
+                "userEntry": "FAIL",
+                "httpStatus": 404
+              }
+            },
+            {
+              "roomId": "ROOM-C",
+              "status": "FAIL",
+              "observed": {
+                "backendHealth": "FAIL",
+                "userEntry": "FAIL",
+                "httpStatus": 404
+              }
+            }
+          ]
+        },
+        {
+          "exampleId": "GOHUB-ENTRY-FALSE-GREEN",
+          "name": "Backend green while user entry is down",
+          "subjectRef": "fixture://go-hub-public-entry/false-green",
+          "observations": [
+            {
+              "roomId": "ROOM-A",
+              "status": "PASS",
+              "observed": {
+                "backendHealth": "PASS",
+                "userEntry": "PASS",
+                "httpStatus": 200
+              }
+            },
+            {
+              "roomId": "ROOM-B",
+              "status": "FAIL",
+              "observed": {
+                "backendHealth": "FAIL",
+                "userEntry": "FAIL",
+                "httpStatus": 404
+              }
+            },
+            {
+              "roomId": "ROOM-C",
+              "status": "FAIL",
+              "observed": {
+                "backendHealth": "PASS",
+                "userEntry": "FAIL",
+                "httpStatus": 404
+              }
+            }
+          ]
+        },
+        {
+          "exampleId": "GOHUB-ENTRY-RECOVERED",
+          "name": "Recovered public entry after repair",
+          "subjectRef": "fixture://go-hub-public-entry/recovered",
+          "observations": [
+            {
+              "roomId": "ROOM-A",
+              "status": "PASS",
+              "observed": {
+                "backendHealth": "PASS",
+                "userEntry": "PASS",
+                "httpStatus": 200
+              }
+            },
+            {
+              "roomId": "ROOM-B",
+              "status": "PASS",
+              "observed": {
+                "backendHealth": "PASS",
+                "userEntry": "PASS",
+                "httpStatus": 200
+              }
+            },
+            {
+              "roomId": "ROOM-C",
+              "status": "PASS",
+              "observed": {
+                "backendHealth": "PASS",
+                "userEntry": "PASS",
+                "httpStatus": 200
+              }
+            }
+          ]
+        },
+        {
+          "exampleId": "CRITICAL-UNKNOWN",
+          "name": "Critical unknown blocks the gate",
+          "subjectRef": "fixture://critical-unknown",
+          "observations": [
+            {
+              "roomId": "ROOM-A",
+              "status": "UNKNOWN",
+              "observed": {
+                "result": "UNKNOWN",
+                "reason": "EVIDENCE_UNAVAILABLE"
+              }
+            },
+            {
+              "roomId": "ROOM-B",
+              "status": "UNKNOWN",
+              "observed": {
+                "result": "UNKNOWN",
+                "reason": "EVIDENCE_UNAVAILABLE"
+              }
+            },
+            {
+              "roomId": "ROOM-C",
+              "status": "UNKNOWN",
+              "observed": {
+                "result": "UNKNOWN",
+                "reason": "EVIDENCE_UNAVAILABLE"
+              }
+            }
+          ]
+        }
+      ],
+      "factoryHandoffs": []
     }
   },
   "error": null,
-  "completedAt": "2026-09-26T08:09:39.886Z"
+  "completedAt": "2026-09-26T08:10:06.956Z"
 }
