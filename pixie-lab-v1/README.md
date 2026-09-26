@@ -48,3 +48,17 @@ No external write, delete, share, merge, deploy, or production-control authority
 ```bash
 npm test
 ```
+
+
+## Experiment Lab zones
+
+PIXIE LAB now separates experimentation from investigation:
+
+- `ROOM-A`, `ROOM-B`, `ROOM-C` — ordinary isolated experiment rooms.
+- `ROOM-D` — dedicated inspection/debug room.
+- **Logic Workbench** — creates Lab-owned drafts and safely edits the working copy with SET, DELETE, APPEND, TRIM_TEXT, and REPLACE_TEXT while preserving the source snapshot.
+- **Example Zone** — reusable fixtures for healthy public entry, 404, false-green, recovered entry, and critical-unknown behavior.
+- **Experiment-aware Master Gate** — evaluates the latest relevant cross-room result for the requested experiment/subject. Historical FAIL evidence is retained for learning but does not permanently poison a recovered experiment.
+- **Debug → Factory handoff** — PIXIE can prepare a Factory handoff only from ROOM-D and only for an ACTIVE `MAINTENANCE` or `EMERGENCY` Factory-scoped Pass. The GO Hub host must independently verify the live Centre Pass before Factory execution. A normal WORK/READ Pass is not sufficient.
+
+PIXIE still has no direct merge, deploy, delete, share, or production-control authority. A debug handoff is `NOT_AN_APPROVAL` and host execution remains governed.
