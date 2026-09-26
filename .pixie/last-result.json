@@ -1,5 +1,5 @@
 {
-  "requestId": "PIXIE-ENTRY-LAB-20260926-ROOM-B-001",
+  "requestId": "PIXIE-ENTRY-LAB-20260926-ROOM-C-001",
   "command": "start_session",
   "exitCode": 0,
   "ok": true,
@@ -10,16 +10,16 @@
     "command": "start_session",
     "mutated": true,
     "result": {
-      "sessionId": "S-ENTRY-404-001",
-      "roomId": "ROOM-B",
-      "purpose": "Failure fixture: GO Hub public entry returns 404 / page missing",
+      "sessionId": "S-ENTRY-FALSE-GREEN-001",
+      "roomId": "ROOM-C",
+      "purpose": "False-green fixture: backend health PASS while user-facing GO Hub page is unavailable",
       "activityType": "CHECK",
       "sourceType": "LAB_FIXTURE",
-      "subjectRef": "fixture://go-hub-public-entry/404",
+      "subjectRef": "fixture://go-hub-public-entry/false-green",
       "status": "ACTIVE",
-      "createdAt": "2026-09-26T05:00:31.130Z"
+      "createdAt": "2026-09-26T05:01:02.145Z"
     }
   },
   "error": null,
-  "completedAt": "2026-09-26T05:00:31.156Z"
+  "completedAt": "2026-09-26T05:01:02.182Z"
 }
