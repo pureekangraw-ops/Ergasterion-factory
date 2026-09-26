@@ -133,6 +133,47 @@
         }
       ],
       "at": "2026-09-26T05:01:50.066Z"
+    },
+    {
+      "checkId": "CROSS-2026-09-26T06:19:39.285Z",
+      "subjectRef": "fixture://go-hub-public-entry/recovered-v1",
+      "status": "PASS",
+      "observations": [
+        {
+          "roomId": "ROOM-A",
+          "status": "PASS",
+          "observed": {
+            "backendHealth": "PASS",
+            "userEntry": "PASS",
+            "httpStatus": 200,
+            "hasGoHubTitle": true,
+            "hasCentre": true
+          }
+        },
+        {
+          "roomId": "ROOM-B",
+          "status": "PASS",
+          "observed": {
+            "backendHealth": "PASS",
+            "userEntry": "PASS",
+            "httpStatus": 200,
+            "hasGoHubTitle": true,
+            "hasCentre": true
+          }
+        },
+        {
+          "roomId": "ROOM-C",
+          "status": "PASS",
+          "observed": {
+            "backendHealth": "PASS",
+            "userEntry": "PASS",
+            "httpStatus": 200,
+            "hasGoHubTitle": true,
+            "hasCentre": true
+          }
+        }
+      ],
+      "at": "2026-09-26T06:19:39.285Z"
     }
   ],
   "contradictions": []
