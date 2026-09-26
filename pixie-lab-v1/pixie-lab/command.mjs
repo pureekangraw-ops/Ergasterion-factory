@@ -19,7 +19,6 @@ export const PIXIE_COMMANDS = Object.freeze([
   'self_test', 'cross_room', 'master_gate',
   'examples', 'run_example',
   'logic_create', 'logic_edit', 'logic_compare',
-  'factory_handoff',
   'candidate_passport', 'door_guard',
   'persist',
 ]);
@@ -33,7 +32,7 @@ const MUTATING = new Set([
   'add_golden_case', 'replay_golden',
   'debug_start', 'debug_step', 'debug_complete',
   'self_test', 'cross_room', 'run_example',
-  'logic_create', 'logic_edit', 'factory_handoff',
+  'logic_create', 'logic_edit',
   'candidate_passport',
   'persist',
 ]);
@@ -143,9 +142,6 @@ export function createPixieCommander({ persistence, evidenceVerifier = null, now
         break;
       case 'logic_compare':
         result = lab.compareLogicDraft(args.draftId);
-        break;
-      case 'factory_handoff':
-        result = lab.factoryHandoff(args);
         break;
       case 'candidate_passport':
         result = lab.candidatePassport(args.artifactId);
