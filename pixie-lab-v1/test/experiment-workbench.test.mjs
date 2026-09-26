@@ -18,6 +18,7 @@ test('ROOM-D is dedicated debug room and board exposes lab zones', () => {
   const lab = new PixieLab({ now: clock() });
   const board = lab.board();
   assert.equal(board.rooms.some((room) => room.roomId === 'ROOM-D'), true);
+  assert.equal(board.rooms.find((room) => room.roomId === 'ROOM-D').assignedPurpose, 'INSPECT_DEBUG');
   assert.equal(board.zones.debugRoom, 'ROOM-D');
   assert.equal(board.zones.logicWorkbench, 'ACTIVE');
   assert.equal(board.zones.exampleZone, 'ACTIVE');
