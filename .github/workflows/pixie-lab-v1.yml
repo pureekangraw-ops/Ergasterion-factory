@@ -1,6 +1,16 @@
 name: PIXIE LAB V1 Core
 
 on:
+  workflow_dispatch:
+    inputs:
+      request_id:
+        description: Stable GO Hub request id
+        required: true
+        type: string
+      command_json:
+        description: PIXIE command envelope JSON
+        required: true
+        type: string
   pull_request:
     paths:
       - 'pixie-lab-v1/**'
@@ -9,9 +19,13 @@ on:
     branches:
       - main
       - 'pixie-lab-v1-core-*'
+      - 'pixie-runtime-command-*'
     paths:
       - 'pixie-lab-v1/**'
       - '.github/workflows/pixie-lab-v1.yml'
+
+permissions:
+  contents: read
 
 jobs:
   test:
@@ -25,3 +39,110 @@ jobs:
         with:
           node-version: 20
       - run: npm test
+
+  command:
+    if: github.event_name == 'workflow_dispatch'
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: pixie-runtime-command
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Restore PIXIE runtime state
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .pixie
+          git fetch origin pixie-runtime-state:refs/remotes/origin/pixie-runtime-state
+          if git show origin/pixie-runtime-state:.pixie/state.json > .pixie/state.json 2>/dev/null; then
+            echo "PIXIE state restored"
+          else
+            rm -f .pixie/state.json
+            echo "PIXIE state not initialized yet"
+          fi
+
+      - name: Run PIXIE command
+        shell: bash
+        env:
+          PIXIE_COMMAND_JSON: ${{ inputs.command_json }}
+          PIXIE_REQUEST_ID: ${{ inputs.request_id }}
+        run: |
+          set -uo pipefail
+          set +e
+          node pixie-lab-v1/cli.mjs "$PIXIE_COMMAND_JSON" > /tmp/pixie-output.json 2> /tmp/pixie-error.txt
+          code=$?
+          set -e
+          printf '%s' "$code" > /tmp/pixie-exit-code
+
+          node --input-type=module <<'NODE'
+          import { readFile, writeFile } from 'node:fs/promises';
+
+          async function read(path) {
+            try { return await readFile(path, 'utf8'); } catch { return ''; }
+          }
+
+          const rawOutput = await read('/tmp/pixie-output.json');
+          const rawError = await read('/tmp/pixie-error.txt');
+          const exitCode = Number((await read('/tmp/pixie-exit-code')).trim() || 1);
+          let output = null;
+          try { output = rawOutput ? JSON.parse(rawOutput) : null; }
+          catch { output = rawOutput || null; }
+
+          let command = null;
+          try { command = JSON.parse(process.env.PIXIE_COMMAND_JSON || '{}')?.command || null; }
+          catch {}
+
+          const result = {
+            requestId: process.env.PIXIE_REQUEST_ID,
+            command,
+            exitCode,
+            ok: exitCode === 0 && output?.ok !== false,
+            output,
+            error: rawError.trim() || null,
+            completedAt: new Date().toISOString(),
+          };
+          await writeFile('/tmp/pixie-last-result.json', JSON.stringify(result, null, 2));
+          NODE
+
+      - name: Persist PIXIE runtime state and result
+        shell: bash
+        env:
+          PIXIE_REQUEST_ID: ${{ inputs.request_id }}
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/pixie-state
+          git worktree add --force /tmp/pixie-state origin/pixie-runtime-state
+          git -C /tmp/pixie-state switch -C pixie-runtime-state origin/pixie-runtime-state
+          mkdir -p /tmp/pixie-state/.pixie
+
+          if [ -f .pixie/state.json ]; then
+            cp .pixie/state.json /tmp/pixie-state/.pixie/state.json
+          fi
+          cp /tmp/pixie-last-result.json /tmp/pixie-state/.pixie/last-result.json
+
+          git -C /tmp/pixie-state config user.name "PIXIE Runtime"
+          git -C /tmp/pixie-state config user.email "pixie-runtime@users.noreply.github.com"
+          git -C /tmp/pixie-state add -f .pixie/last-result.json
+          if [ -f /tmp/pixie-state/.pixie/state.json ]; then
+            git -C /tmp/pixie-state add -f .pixie/state.json
+          fi
+
+          if ! git -C /tmp/pixie-state diff --cached --quiet; then
+            git -C /tmp/pixie-state commit -m "pixie: persist runtime request $PIXIE_REQUEST_ID"
+            git -C /tmp/pixie-state push origin HEAD:pixie-runtime-state
+          fi
+
+      - name: Propagate PIXIE command result
+        shell: bash
+        run: |
+          code="$(cat /tmp/pixie-exit-code)"
+          exit "$code"
