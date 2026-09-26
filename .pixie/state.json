@@ -269,7 +269,96 @@
     }
   ],
   "factoryHandoffs": [],
-  "visualDrafts": [],
+  "visualDrafts": [
+    {
+      "visualDraftId": "VIS-LOSTERA-HERO-001",
+      "sourceRef": "https://app.notion.com/p/3da7043d9861811d965bf8e2f7aca2c6?pvs=204",
+      "sourceVersion": "CURRENT-2026-09-26",
+      "sourceHash": null,
+      "sourceLocked": true,
+      "labOwned": true,
+      "status": "DRAFT",
+      "originalSpec": {
+        "role": "scroll-stopping sales hero image",
+        "product": "Lost Era: Layered Worldbuilding Kit",
+        "audience": [
+          "writers",
+          "game designers",
+          "TTRPG creators",
+          "worldbuilders"
+        ],
+        "concept": "An ordinary present-day urban place where one physically believable remnant of an older era occupies the exact same space as the current architecture, creating a clear contradiction without portals or abstract effects.",
+        "composition": {
+          "scene": "grounded modern city street or station entrance",
+          "focalPoint": "one doorway/stair/structural element visibly belonging to an older lost era but integrated into the same footprint",
+          "escalation": "subtle enough to feel real, obvious enough to make the viewer stop",
+          "camera": "human eye-level cinematic editorial photography"
+        },
+        "visualRules": [
+          "same place, incompatible versions of itself",
+          "present world remains mostly normal and usable",
+          "one understandable anomaly",
+          "physical remnant, not floating fantasy",
+          "no portal",
+          "no alternate sky",
+          "no generic glitch effect",
+          "no apocalypse",
+          "no lore diagram",
+          "no fake Notion UI"
+        ],
+        "tone": [
+          "grounded",
+          "cinematic",
+          "mysterious",
+          "credible",
+          "editorial"
+        ],
+        "textInImage": "none"
+      },
+      "workingSpec": {
+        "role": "scroll-stopping sales hero image",
+        "product": "Lost Era: Layered Worldbuilding Kit",
+        "audience": [
+          "writers",
+          "game designers",
+          "TTRPG creators",
+          "worldbuilders"
+        ],
+        "concept": "An ordinary present-day urban place where one physically believable remnant of an older era occupies the exact same space as the current architecture, creating a clear contradiction without portals or abstract effects.",
+        "composition": {
+          "scene": "grounded modern city street or station entrance",
+          "focalPoint": "one doorway/stair/structural element visibly belonging to an older lost era but integrated into the same footprint",
+          "escalation": "subtle enough to feel real, obvious enough to make the viewer stop",
+          "camera": "human eye-level cinematic editorial photography"
+        },
+        "visualRules": [
+          "same place, incompatible versions of itself",
+          "present world remains mostly normal and usable",
+          "one understandable anomaly",
+          "physical remnant, not floating fantasy",
+          "no portal",
+          "no alternate sky",
+          "no generic glitch effect",
+          "no apocalypse",
+          "no lore diagram",
+          "no fake Notion UI"
+        ],
+        "tone": [
+          "grounded",
+          "cinematic",
+          "mysterious",
+          "credible",
+          "editorial"
+        ],
+        "textInImage": "none"
+      },
+      "scans": [],
+      "edits": [],
+      "renderPacketRefs": [],
+      "createdAt": "2026-09-26T09:00:56.736Z",
+      "updatedAt": "2026-09-26T09:00:56.737Z"
+    }
+  ],
   "visualRenderPackets": [],
   "visualVerifications": [],
   "archives": [],
