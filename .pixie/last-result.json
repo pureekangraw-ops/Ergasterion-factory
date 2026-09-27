@@ -1,98 +1,319 @@
 {
-  "requestId": "PIXIE-PRISM-MATRIX-20260927-001",
-  "command": "add_matrix",
+  "requestId": "PIXIE-PRISM-INTENT-REFINER-EDIT-20260927-001",
+  "command": "logic_edit",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "add_matrix",
+    "command": "logic_edit",
     "mutated": true,
     "result": {
-      "matrixId": "MATRIX-PRISM-SPECTRUM-001",
-      "subjectRef": "logic-draft://DRAFT-PRISM-SPECTRUM-001",
-      "logicVersion": "SPECTRUM-DRAFT-001",
-      "roomId": null,
-      "rows": [
-        {
-          "testTypeId": "functional",
-          "caseRefs": [
-            "intent-to-action",
-            "project-summary"
+      "draftId": "DRAFT-PRISM-SPECTRUM-001",
+      "logicId": "PRISM_SPECTRUM_CORE",
+      "sourceRef": "github://pureekangraw-ops/ygph-metropolis/pull/178@01b8816002a31b9e00e66306756b4045c7670060",
+      "sourceVersion": "LIGHTHOUSE-owner.18 / PR-178-head",
+      "labOwned": true,
+      "status": "DRAFT",
+      "original": {
+        "product": "LIGHTHOUSE",
+        "role": "MOBILE_OBSERVER_AND_RIDE_CLIENT",
+        "surfaces": [
+          "MAP",
+          "RIDE",
+          "BROWSER",
+          "OBSERVER",
+          "CONTROL_PORT",
+          "FINANCE",
+          "CHAT",
+          "CALENDAR"
+        ],
+        "orchestration": {
+          "copilot": false,
+          "intentRouting": false,
+          "workResolution": false,
+          "agentHandoff": false,
+          "readback": false
+        },
+        "deviceBridge": {
+          "openApp": false,
+          "focus": false,
+          "type": false,
+          "tap": false,
+          "observe": true
+        },
+        "hubAccess": {
+          "singleSurface": false,
+          "goHubCapabilities": "PARTIAL"
+        },
+        "authority": {
+          "owner": "BIG",
+          "externalMutation": "GOVERNED"
+        }
+      },
+      "workingCopy": {
+        "product": "LIGHTHOUSE",
+        "role": "MOBILE_OBSERVER_AND_RIDE_CLIENT",
+        "surfaces": [
+          "MAP",
+          "RIDE",
+          "BROWSER",
+          "OBSERVER",
+          "CONTROL_PORT",
+          "FINANCE",
+          "CHAT",
+          "CALENDAR"
+        ],
+        "orchestration": {
+          "copilot": false,
+          "intentRouting": false,
+          "workResolution": false,
+          "agentHandoff": false,
+          "readback": false
+        },
+        "deviceBridge": {
+          "openApp": false,
+          "focus": false,
+          "type": false,
+          "tap": false,
+          "observe": true
+        },
+        "hubAccess": {
+          "singleSurface": false,
+          "goHubCapabilities": "PARTIAL"
+        },
+        "authority": {
+          "owner": "BIG",
+          "externalMutation": "GOVERNED"
+        },
+        "proposal": {
+          "product": "PRISM",
+          "logic": "SPECTRUM",
+          "role": "BIG_MOBILE_COPILOT_AND_GO_HUB_CLIENT",
+          "principle": "ONE_SURFACE_MANY_CAPABILITIES_GO_HUB_REMAINS_TRUTH",
+          "coreFlow": [
+            "INTENT",
+            "CONTEXT",
+            "WORK",
+            "ROUTE",
+            "AUTHORITY",
+            "DISPATCH",
+            "VERIFY"
           ],
-          "status": "UNRUN",
-          "required": true
+          "surfaces": {
+            "COPILOT": "PRIMARY",
+            "HUB": "WORK_ROUTE_COUNTER_STATUS",
+            "MAP": {
+              "primary": true,
+              "RIDE": "OPTIONAL_MODE"
+            },
+            "BROWSER": "GECKOVIEW_PLUS_OBSERVER",
+            "LEDGER": "ALL_FINANCE_DATA_OWNER",
+            "LAB": "PIXIE_ENTRY",
+            "CALENDAR": "REMOVED_FROM_PRISM"
+          },
+          "copilot": {
+            "generalHelp": true,
+            "projectSummary": "ALL_OPEN_WAIT_VERIFY_BLOCKED",
+            "planning": true,
+            "appSwitchingRequired": false,
+            "unknownPolicy": "ASK_OR_RETURN_UNKNOWN_NEVER_GUESS"
+          },
+          "workResolver": {
+            "exactFirst": [
+              "workId",
+              "jobCode"
+            ],
+            "semantic": "CANDIDATE_ONLY",
+            "duplicatePrevention": true,
+            "createOnlyWhenNoExactWork": true
+          },
+          "route": {
+            "targets": [
+              "GO",
+              "LIGHT",
+              "PIXIE_LAB",
+              "FACTORY",
+              "BROWSER",
+              "MAP",
+              "LEDGER"
+            ],
+            "preserveCurrentRoute": true,
+            "sourceOfTruth": "GO_HUB_CENTRE"
+          },
+          "authority": {
+            "owner": "BIG",
+            "prismMayCoordinate": true,
+            "prismMayApproveForBig": false,
+            "strongActionsRequireOwner": true,
+            "externalMutation": "GOVERNED"
+          },
+          "dispatcher": {
+            "counterBound": true,
+            "handoffPacket": [
+              "workId",
+              "checkpointId",
+              "counterId",
+              "objective",
+              "contextRefs"
+            ],
+            "pickupTrigger": "รับสาย <CounterId>",
+            "returnTrigger": "คืนสาย <CounterId>",
+            "ownerTrigger": "รอบิ๊ก <CounterId>",
+            "autoDispatch": "ALLOWLIST_ONLY"
+          },
+          "conference": {
+            "participants": [
+              "GO",
+              "LIGHT"
+            ],
+            "moderator": "SPECTRUM",
+            "relay": "BOUNDED",
+            "mustBind": [
+              "workId",
+              "counterId",
+              "objective"
+            ],
+            "stop": [
+              "ANSWERED",
+              "BLOCKED",
+              "NEED_BIG",
+              "DONE",
+              "MAX_TURNS",
+              "TIMEOUT"
+            ],
+            "noInfiniteLoop": true
+          },
+          "deviceBridge": {
+            "preferredOrder": [
+              "NATIVE_API_OR_GO_HUB",
+              "DEEPLINK_OR_INTENT",
+              "ACCESSIBILITY_PLUS_IME"
+            ],
+            "actions": [
+              "OPEN",
+              "FOCUS",
+              "TYPE",
+              "TAP",
+              "OBSERVE"
+            ],
+            "signer": "SPECTRUM_DISPATCH_PACKET",
+            "arbitraryTyping": false,
+            "verifyBeforeAndAfterSend": true
+          },
+          "verify": {
+            "doNotTreatDispatchAsDone": true,
+            "receipts": [
+              "DELIVERED",
+              "PICKED_UP",
+              "RETURNED",
+              "READBACK"
+            ],
+            "observerEvidence": true,
+            "hubReceiptPreferred": true
+          },
+          "mobileFirst": {
+            "primaryDevice": "ANDROID",
+            "cloudDoesHeavyWork": true,
+            "localRoles": [
+              "COPILOT",
+              "DEVICE_BRIDGE",
+              "BROWSER",
+              "MAP",
+              "LEDGER",
+              "OBSERVER"
+            ],
+            "tolerateNoComputer": true
+          },
+          "migration": {
+            "from": "LIGHTHOUSE",
+            "pr178Base": true,
+            "preserveLegacyAliasesUntilVerified": true,
+            "noProductionMutationInLab": true
+          },
+          "intentRefiner": {
+            "name": "PIXIE_INTENT_REFINER",
+            "mode": "AUTO_LAB_REFINEMENT",
+            "preservesOwnerIntent": true,
+            "mayRewriteOwnerIntent": false,
+            "loop": {
+              "stages": [
+                "PARSE_INTENT",
+                "CHALLENGE_ASSUMPTIONS",
+                "EXPAND_CONTEXT",
+                "FIND_CONFLICTS",
+                "GENERATE_COUNTEREXAMPLES",
+                "REFINE_WORKING_INTENT",
+                "CHECK_SATURATION"
+              ],
+              "continueWhen": [
+                "NEW_MATERIAL_INSIGHT_FOUND",
+                "CRITICAL_UNKNOWN_REMAINS",
+                "ASSUMPTION_UNTESTED",
+                "CONFLICT_UNRESOLVED",
+                "ROUTE_OR_AUTHORITY_AMBIGUOUS"
+              ],
+              "stopWhen": {
+                "materialNoveltyBelowThreshold": true,
+                "criticalUnknownsResolvedOrExplicitlyBounded": true,
+                "contradictionsResolvedOrDocumented": true,
+                "workingIntentStableAcrossRounds": 2,
+                "actionableNextRouteKnown": true
+              },
+              "hardStops": [
+                "OWNER_INTENT_WOULD_CHANGE",
+                "AUTHORITY_EXPANSION_REQUIRED",
+                "SAFETY_BOUNDARY_HIT",
+                "MAX_ROUNDS_REACHED"
+              ],
+              "maxRounds": 12
+            },
+            "outputs": [
+              "ORIGINAL_INTENT",
+              "WORKING_INTENT",
+              "NEW_KNOWLEDGE",
+              "ASSUMPTIONS",
+              "COUNTEREXAMPLES",
+              "UNKNOWNS",
+              "CONFLICTS",
+              "STOP_REASON",
+              "CONFIDENCE"
+            ],
+            "escalation": {
+              "askBigOnlyWhen": [
+                "OWNER_INTENT_WOULD_CHANGE",
+                "MULTIPLE_MATERIAL_DIRECTIONS_REMAIN",
+                "AUTHORITY_EXPANSION_REQUIRED"
+              ],
+              "otherwiseContinueAutonomouslyInLab": true
+            },
+            "authority": "LAB_ONLY_NOT_AN_APPROVAL",
+            "productionMutation": false
+          }
+        }
+      },
+      "edits": [
+        {
+          "op": "SET",
+          "path": [
+            "proposal"
+          ],
+          "at": "2026-09-27T13:27:50.924Z"
         },
         {
-          "testTypeId": "contract",
-          "caseRefs": [
-            "intent-context-work-route-authority-dispatch-verify"
+          "op": "SET",
+          "path": [
+            "proposal",
+            "intentRefiner"
           ],
-          "status": "UNRUN",
-          "required": true
-        },
-        {
-          "testTypeId": "integration",
-          "caseRefs": [
-            "go-light-counter-handoff",
-            "single-copilot-surface"
-          ],
-          "status": "UNRUN",
-          "required": true
-        },
-        {
-          "testTypeId": "permission_boundary",
-          "caseRefs": [
-            "big-owner-approval",
-            "no-auto-authority"
-          ],
-          "status": "UNRUN",
-          "required": true
-        },
-        {
-          "testTypeId": "recovery",
-          "caseRefs": [
-            "device-bridge-ui-change",
-            "dispatch-retry-without-duplicate-work"
-          ],
-          "status": "UNRUN",
-          "required": true
-        },
-        {
-          "testTypeId": "migration",
-          "caseRefs": [
-            "lighthouse-pr178-to-prism",
-            "legacy-alias-preservation"
-          ],
-          "status": "UNRUN",
-          "required": true
-        },
-        {
-          "testTypeId": "security_oriented",
-          "caseRefs": [
-            "signed-dispatch-only",
-            "no-arbitrary-typing"
-          ],
-          "status": "UNRUN",
-          "required": true
-        },
-        {
-          "testTypeId": "unknown_edge",
-          "caseRefs": [
-            "ambiguous-context",
-            "missing-receipt"
-          ],
-          "status": "UNRUN",
-          "required": true
+          "at": "2026-09-27T13:36:27.205Z"
         }
       ],
-      "overallStatus": "INCONCLUSIVE",
-      "lifecycle": "READY_TO_RUN",
-      "createdAt": "2026-09-27T13:30:16.072Z",
-      "updatedAt": "2026-09-27T13:30:16.072Z"
+      "createdAt": "2026-09-27T13:26:42.956Z",
+      "updatedAt": "2026-09-27T13:36:27.205Z"
     }
   },
   "error": null,
-  "completedAt": "2026-09-27T13:30:16.106Z"
+  "completedAt": "2026-09-27T13:36:27.239Z"
 }

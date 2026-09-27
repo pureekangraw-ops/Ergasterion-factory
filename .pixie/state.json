@@ -836,6 +836,65 @@
             "pr178Base": true,
             "preserveLegacyAliasesUntilVerified": true,
             "noProductionMutationInLab": true
+          },
+          "intentRefiner": {
+            "name": "PIXIE_INTENT_REFINER",
+            "mode": "AUTO_LAB_REFINEMENT",
+            "preservesOwnerIntent": true,
+            "mayRewriteOwnerIntent": false,
+            "loop": {
+              "stages": [
+                "PARSE_INTENT",
+                "CHALLENGE_ASSUMPTIONS",
+                "EXPAND_CONTEXT",
+                "FIND_CONFLICTS",
+                "GENERATE_COUNTEREXAMPLES",
+                "REFINE_WORKING_INTENT",
+                "CHECK_SATURATION"
+              ],
+              "continueWhen": [
+                "NEW_MATERIAL_INSIGHT_FOUND",
+                "CRITICAL_UNKNOWN_REMAINS",
+                "ASSUMPTION_UNTESTED",
+                "CONFLICT_UNRESOLVED",
+                "ROUTE_OR_AUTHORITY_AMBIGUOUS"
+              ],
+              "stopWhen": {
+                "materialNoveltyBelowThreshold": true,
+                "criticalUnknownsResolvedOrExplicitlyBounded": true,
+                "contradictionsResolvedOrDocumented": true,
+                "workingIntentStableAcrossRounds": 2,
+                "actionableNextRouteKnown": true
+              },
+              "hardStops": [
+                "OWNER_INTENT_WOULD_CHANGE",
+                "AUTHORITY_EXPANSION_REQUIRED",
+                "SAFETY_BOUNDARY_HIT",
+                "MAX_ROUNDS_REACHED"
+              ],
+              "maxRounds": 12
+            },
+            "outputs": [
+              "ORIGINAL_INTENT",
+              "WORKING_INTENT",
+              "NEW_KNOWLEDGE",
+              "ASSUMPTIONS",
+              "COUNTEREXAMPLES",
+              "UNKNOWNS",
+              "CONFLICTS",
+              "STOP_REASON",
+              "CONFIDENCE"
+            ],
+            "escalation": {
+              "askBigOnlyWhen": [
+                "OWNER_INTENT_WOULD_CHANGE",
+                "MULTIPLE_MATERIAL_DIRECTIONS_REMAIN",
+                "AUTHORITY_EXPANSION_REQUIRED"
+              ],
+              "otherwiseContinueAutonomouslyInLab": true
+            },
+            "authority": "LAB_ONLY_NOT_AN_APPROVAL",
+            "productionMutation": false
           }
         }
       },
@@ -846,10 +905,18 @@
             "proposal"
           ],
           "at": "2026-09-27T13:27:50.924Z"
+        },
+        {
+          "op": "SET",
+          "path": [
+            "proposal",
+            "intentRefiner"
+          ],
+          "at": "2026-09-27T13:36:27.205Z"
         }
       ],
       "createdAt": "2026-09-27T13:26:42.956Z",
-      "updatedAt": "2026-09-27T13:27:50.924Z"
+      "updatedAt": "2026-09-27T13:36:27.205Z"
     }
   ],
   "factoryHandoffs": [],
