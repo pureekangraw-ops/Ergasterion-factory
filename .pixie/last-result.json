@@ -1,56 +1,146 @@
 {
-  "requestId": "PIXIE-HEIMDALL-DRAFT-20260927-002",
-  "command": "logic_create",
+  "requestId": "PIXIE-HERMES-EDIT-20260927-001",
+  "command": "logic_edit",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "logic_create",
+    "command": "logic_edit",
     "mutated": true,
     "result": {
-      "draftId": "DRAFT-HEIMDALL-VNEXT-001",
-      "logicId": "HEIMDALL_V4",
-      "sourceRef": "github://pureekangraw-ops/standard-/go-hub-heimdall-v4.js@main",
+      "draftId": "DRAFT-HERMES-VNEXT-001",
+      "logicId": "HERMES_AGENT_MISSION",
+      "sourceRef": "github://pureekangraw-ops/standard-/go-hub-agent-mission.mjs@main",
       "sourceVersion": "main",
       "labOwned": true,
       "status": "DRAFT",
       "original": {
-        "role": "WORK_INDEX_AND_PASS_WRAPPER",
-        "exactResolve": true,
-        "boardProjection": true,
-        "permissionDecision": {
-          "explicitDecisionContract": false,
-          "outcomes": []
+        "role": "MISSION_ORCHESTRATOR",
+        "workResolution": {
+          "exactIdentitySupported": true,
+          "missionSearch": "SIMILARITY_CANDIDATES",
+          "autoEnterFromSimilarity": false
         },
-        "passOpen": {
-          "delegatesTo": "CENTRE_openWorkPass",
-          "decisionReceipt": false
+        "workCreation": {
+          "idSource": "HERMES_LOCAL_CREATE_ID",
+          "formatGuard": false
         },
-        "unknownPolicy": "IMPLICIT",
-        "auditDecisionEvidence": false
+        "currentRoute": {
+          "explicitContract": false,
+          "destinationMayBeNull": true
+        },
+        "permissionOpen": {
+          "path": "HERMES_TO_CENTRE_V4_OPEN_PASS",
+          "heimdallReceiptRequired": false
+        },
+        "diagnostics": {
+          "directCapabilityRoute": false,
+          "policy": "NONE"
+        },
+        "returnReadback": {
+          "evidenceRequiredForComplete": true,
+          "centreReturn": true
+        }
       },
       "workingCopy": {
-        "role": "WORK_INDEX_AND_PASS_WRAPPER",
-        "exactResolve": true,
-        "boardProjection": true,
-        "permissionDecision": {
-          "explicitDecisionContract": false,
-          "outcomes": []
+        "role": "MISSION_ORCHESTRATOR",
+        "workResolution": {
+          "exactIdentitySupported": true,
+          "missionSearch": "SIMILARITY_CANDIDATES",
+          "autoEnterFromSimilarity": false
         },
-        "passOpen": {
-          "delegatesTo": "CENTRE_openWorkPass",
-          "decisionReceipt": false
+        "workCreation": {
+          "idSource": "HERMES_LOCAL_CREATE_ID",
+          "formatGuard": false
         },
-        "unknownPolicy": "IMPLICIT",
-        "auditDecisionEvidence": false
+        "currentRoute": {
+          "explicitContract": false,
+          "destinationMayBeNull": true
+        },
+        "permissionOpen": {
+          "path": "HERMES_TO_CENTRE_V4_OPEN_PASS",
+          "heimdallReceiptRequired": false
+        },
+        "diagnostics": {
+          "directCapabilityRoute": false,
+          "policy": "NONE"
+        },
+        "returnReadback": {
+          "evidenceRequiredForComplete": true,
+          "centreReturn": true
+        },
+        "proposal": {
+          "role": "MISSION_ORCHESTRATOR",
+          "workResolution": {
+            "exactFirst": [
+              "workId",
+              "jobCode"
+            ],
+            "semanticSearch": "CANDIDATE_ONLY",
+            "ambiguous": "ASK_GO_TO_SELECT",
+            "autoReuse": "ONLY_EXACT_IDENTITY"
+          },
+          "workCreation": {
+            "idSource": "CENTRE_CANONICAL_ALLOCATOR",
+            "localUuidFallback": false,
+            "formatGuard": "CENTRE_POLICY"
+          },
+          "currentRoute": {
+            "explicitContract": true,
+            "fields": [
+              "destination",
+              "routeState",
+              "passState",
+              "returnAddress",
+              "sourceOfTruth"
+            ],
+            "unresolvedState": "UNRESOLVED_NOT_NULL"
+          },
+          "permissionOpen": {
+            "path": "HERMES_TO_HEIMDALL_DECISION_TO_CENTRE_PERSIST",
+            "heimdallReceiptRequired": true
+          },
+          "diagnostics": {
+            "directCapabilityRoute": true,
+            "monolithicPyro": false,
+            "triggers": [
+              "ROUTE_FAIL",
+              "PASS_DENY",
+              "REPEATED_UNKNOWN",
+              "SOURCE_MISMATCH"
+            ],
+            "capabilities": [
+              "SYSTEM_CHECK",
+              "FIRST_BREAK",
+              "FAILURE_EVIDENCE",
+              "CAUSAL_TRACE",
+              "REPAIR_CONTEXT"
+            ],
+            "actionPolicy": "DIAGNOSE_AND_RETURN_EVIDENCE_NOT_AUTO_REPAIR"
+          },
+          "returnReadback": {
+            "evidenceRequiredForComplete": true,
+            "centreReturn": true,
+            "includeCurrentRoute": true,
+            "includeDiagnosticEvidenceWhenUsed": true
+          }
+        }
       },
-      "edits": [],
-      "createdAt": "2026-09-27T10:55:30.545Z",
-      "updatedAt": "2026-09-27T10:55:30.545Z"
+      "edits": [
+        {
+          "op": "SET",
+          "path": [
+            "proposal"
+          ],
+          "at": "2026-09-27T10:56:20.691Z"
+        }
+      ],
+      "createdAt": "2026-09-27T10:55:18.798Z",
+      "updatedAt": "2026-09-27T10:56:20.691Z"
     }
   },
   "error": null,
-  "completedAt": "2026-09-27T10:55:30.580Z"
+  "completedAt": "2026-09-27T10:56:20.725Z"
 }

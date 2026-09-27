@@ -364,11 +364,75 @@
         "returnReadback": {
           "evidenceRequiredForComplete": true,
           "centreReturn": true
+        },
+        "proposal": {
+          "role": "MISSION_ORCHESTRATOR",
+          "workResolution": {
+            "exactFirst": [
+              "workId",
+              "jobCode"
+            ],
+            "semanticSearch": "CANDIDATE_ONLY",
+            "ambiguous": "ASK_GO_TO_SELECT",
+            "autoReuse": "ONLY_EXACT_IDENTITY"
+          },
+          "workCreation": {
+            "idSource": "CENTRE_CANONICAL_ALLOCATOR",
+            "localUuidFallback": false,
+            "formatGuard": "CENTRE_POLICY"
+          },
+          "currentRoute": {
+            "explicitContract": true,
+            "fields": [
+              "destination",
+              "routeState",
+              "passState",
+              "returnAddress",
+              "sourceOfTruth"
+            ],
+            "unresolvedState": "UNRESOLVED_NOT_NULL"
+          },
+          "permissionOpen": {
+            "path": "HERMES_TO_HEIMDALL_DECISION_TO_CENTRE_PERSIST",
+            "heimdallReceiptRequired": true
+          },
+          "diagnostics": {
+            "directCapabilityRoute": true,
+            "monolithicPyro": false,
+            "triggers": [
+              "ROUTE_FAIL",
+              "PASS_DENY",
+              "REPEATED_UNKNOWN",
+              "SOURCE_MISMATCH"
+            ],
+            "capabilities": [
+              "SYSTEM_CHECK",
+              "FIRST_BREAK",
+              "FAILURE_EVIDENCE",
+              "CAUSAL_TRACE",
+              "REPAIR_CONTEXT"
+            ],
+            "actionPolicy": "DIAGNOSE_AND_RETURN_EVIDENCE_NOT_AUTO_REPAIR"
+          },
+          "returnReadback": {
+            "evidenceRequiredForComplete": true,
+            "centreReturn": true,
+            "includeCurrentRoute": true,
+            "includeDiagnosticEvidenceWhenUsed": true
+          }
         }
       },
-      "edits": [],
+      "edits": [
+        {
+          "op": "SET",
+          "path": [
+            "proposal"
+          ],
+          "at": "2026-09-27T10:56:20.691Z"
+        }
+      ],
       "createdAt": "2026-09-27T10:55:18.798Z",
-      "updatedAt": "2026-09-27T10:55:18.798Z"
+      "updatedAt": "2026-09-27T10:56:20.691Z"
     },
     {
       "draftId": "DRAFT-HEIMDALL-VNEXT-001",
