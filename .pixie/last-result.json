@@ -1,5 +1,5 @@
 {
-  "requestId": "PIXIE-HERMES-COMPARE-20260927-001",
+  "requestId": "PIXIE-HEIMDALL-COMPARE-20260927-001",
   "command": "logic_compare",
   "exitCode": 0,
   "ok": true,
@@ -10,119 +10,84 @@
     "command": "logic_compare",
     "mutated": false,
     "result": {
-      "draftId": "DRAFT-HERMES-VNEXT-001",
-      "logicId": "HERMES_AGENT_MISSION",
+      "draftId": "DRAFT-HEIMDALL-VNEXT-001",
+      "logicId": "HEIMDALL_V4",
       "changed": true,
       "original": {
-        "role": "MISSION_ORCHESTRATOR",
-        "workResolution": {
-          "exactIdentitySupported": true,
-          "missionSearch": "SIMILARITY_CANDIDATES",
-          "autoEnterFromSimilarity": false
+        "role": "WORK_INDEX_AND_PASS_WRAPPER",
+        "exactResolve": true,
+        "boardProjection": true,
+        "permissionDecision": {
+          "explicitDecisionContract": false,
+          "outcomes": []
         },
-        "workCreation": {
-          "idSource": "HERMES_LOCAL_CREATE_ID",
-          "formatGuard": false
+        "passOpen": {
+          "delegatesTo": "CENTRE_openWorkPass",
+          "decisionReceipt": false
         },
-        "currentRoute": {
-          "explicitContract": false,
-          "destinationMayBeNull": true
-        },
-        "permissionOpen": {
-          "path": "HERMES_TO_CENTRE_V4_OPEN_PASS",
-          "heimdallReceiptRequired": false
-        },
-        "diagnostics": {
-          "directCapabilityRoute": false,
-          "policy": "NONE"
-        },
-        "returnReadback": {
-          "evidenceRequiredForComplete": true,
-          "centreReturn": true
-        }
+        "unknownPolicy": "IMPLICIT",
+        "auditDecisionEvidence": false
       },
       "workingCopy": {
-        "role": "MISSION_ORCHESTRATOR",
-        "workResolution": {
-          "exactIdentitySupported": true,
-          "missionSearch": "SIMILARITY_CANDIDATES",
-          "autoEnterFromSimilarity": false
+        "role": "WORK_INDEX_AND_PASS_WRAPPER",
+        "exactResolve": true,
+        "boardProjection": true,
+        "permissionDecision": {
+          "explicitDecisionContract": false,
+          "outcomes": []
         },
-        "workCreation": {
-          "idSource": "HERMES_LOCAL_CREATE_ID",
-          "formatGuard": false
+        "passOpen": {
+          "delegatesTo": "CENTRE_openWorkPass",
+          "decisionReceipt": false
         },
-        "currentRoute": {
-          "explicitContract": false,
-          "destinationMayBeNull": true
-        },
-        "permissionOpen": {
-          "path": "HERMES_TO_CENTRE_V4_OPEN_PASS",
-          "heimdallReceiptRequired": false
-        },
-        "diagnostics": {
-          "directCapabilityRoute": false,
-          "policy": "NONE"
-        },
-        "returnReadback": {
-          "evidenceRequiredForComplete": true,
-          "centreReturn": true
-        },
+        "unknownPolicy": "IMPLICIT",
+        "auditDecisionEvidence": false,
         "proposal": {
-          "role": "MISSION_ORCHESTRATOR",
-          "workResolution": {
-            "exactFirst": [
-              "workId",
-              "jobCode"
+          "role": "PERMISSION_DECISION_AND_ROUTE_GUARD",
+          "preserve": {
+            "exactResolve": true,
+            "boardProjection": true
+          },
+          "permissionDecision": {
+            "explicitDecisionContract": true,
+            "outcomes": [
+              "ALLOW",
+              "DENY",
+              "UNKNOWN"
             ],
-            "semanticSearch": "CANDIDATE_ONLY",
-            "ambiguous": "ASK_GO_TO_SELECT",
-            "autoReuse": "ONLY_EXACT_IDENTITY"
-          },
-          "workCreation": {
-            "idSource": "CENTRE_CANONICAL_ALLOCATOR",
-            "localUuidFallback": false,
-            "formatGuard": "CENTRE_POLICY"
-          },
-          "currentRoute": {
-            "explicitContract": true,
-            "fields": [
+            "requiredInputs": [
+              "workContext",
+              "actor",
               "destination",
-              "routeState",
-              "passState",
-              "returnAddress",
-              "sourceOfTruth"
+              "passKind",
+              "requestedScope"
             ],
-            "unresolvedState": "UNRESOLVED_NOT_NULL"
+            "receiptFields": [
+              "decision",
+              "reason",
+              "policyRefs",
+              "requestedScope",
+              "grantedScope",
+              "decidedAt"
+            ]
           },
-          "permissionOpen": {
-            "path": "HERMES_TO_HEIMDALL_DECISION_TO_CENTRE_PERSIST",
-            "heimdallReceiptRequired": true
+          "passOpen": {
+            "decisionFirst": true,
+            "centrePersistsPass": true,
+            "decisionReceiptRequired": true,
+            "centreCannotWidenGrantedScope": true
           },
+          "unknownPolicy": "DENY_BY_DEFAULT_WITH_UNKNOWN_REASON",
+          "auditDecisionEvidence": true,
           "diagnostics": {
-            "directCapabilityRoute": true,
-            "monolithicPyro": false,
-            "triggers": [
-              "ROUTE_FAIL",
-              "PASS_DENY",
-              "REPEATED_UNKNOWN",
-              "SOURCE_MISMATCH"
-            ],
-            "capabilities": [
+            "onDenyOrMismatch": "RETURN_DIAGNOSTIC_HINTS",
+            "mayInvoke": [
               "SYSTEM_CHECK",
-              "FIRST_BREAK",
-              "FAILURE_EVIDENCE",
-              "CAUSAL_TRACE",
-              "REPAIR_CONTEXT"
+              "FIRST_BREAK"
             ],
-            "actionPolicy": "DIAGNOSE_AND_RETURN_EVIDENCE_NOT_AUTO_REPAIR"
+            "autoRepair": false
           },
-          "returnReadback": {
-            "evidenceRequiredForComplete": true,
-            "centreReturn": true,
-            "includeCurrentRoute": true,
-            "includeDiagnosticEvidenceWhenUsed": true
-          }
+          "boundary": "HEIMDALL_DECIDES_ACCESS_BUT_DOES_NOT_OWN_WORK_STATE"
         }
       },
       "editCount": 1,
@@ -130,5 +95,5 @@
     }
   },
   "error": null,
-  "completedAt": "2026-09-27T10:57:52.641Z"
+  "completedAt": "2026-09-27T11:00:06.948Z"
 }
