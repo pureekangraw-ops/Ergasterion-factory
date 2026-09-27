@@ -1,5 +1,5 @@
 {
-  "requestId": "PIXIE-CLEAN-20260927-A",
+  "requestId": "PIXIE-CLEAN-20260927-C",
   "command": "clean_room",
   "exitCode": 0,
   "ok": true,
@@ -10,8 +10,8 @@
     "command": "clean_room",
     "mutated": true,
     "result": {
-      "cleanId": "CLEAN-ROOM-A-2026-09-27T08:19:56.010Z",
-      "roomId": "ROOM-A",
+      "cleanId": "CLEAN-ROOM-C-2026-09-27T08:20:08.545Z",
+      "roomId": "ROOM-C",
       "status": "PASS",
       "cleanupKind": "LAB_TRANSIENT_RESET",
       "reason": "Prepare clean isolated rooms for upcoming core Intent processing experiment",
@@ -22,15 +22,17 @@
         "LOAD_CLEAN_SEED",
         "READY"
       ],
-      "discardedSessionIds": [],
+      "discardedSessionIds": [
+        "S-ENTRY-FALSE-GREEN-001"
+      ],
       "discardedCycleIds": [],
       "clearedRoomReports": 0,
       "archiveCreated": false,
       "cleanSeedRef": "pixie://clean-seed/intent-core",
       "before": {
-        "status": "READY",
+        "status": "RESERVED",
         "lifecycleStage": "READY",
-        "activeSessionId": null,
+        "activeSessionId": "S-ENTRY-FALSE-GREEN-001",
         "currentCycleId": null
       },
       "after": {
@@ -39,10 +41,10 @@
         "activeSessionId": null,
         "currentCycleId": null
       },
-      "startedAt": "2026-09-27T08:19:56.010Z",
-      "completedAt": "2026-09-27T08:19:56.011Z"
+      "startedAt": "2026-09-27T08:20:08.545Z",
+      "completedAt": "2026-09-27T08:20:08.545Z"
     }
   },
   "error": null,
-  "completedAt": "2026-09-27T08:19:56.034Z"
+  "completedAt": "2026-09-27T08:20:08.580Z"
 }

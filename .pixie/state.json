@@ -44,15 +44,22 @@
     {
       "roomId": "ROOM-C",
       "roomPixieId": "PIXIE-C",
-      "status": "RESERVED",
+      "status": "READY",
       "lifecycleStage": "READY",
       "lifecycleHistory": [
+        "READY",
+        "ZERO",
+        "STERILIZE",
+        "VERIFY_CLEAN",
+        "LOAD_CLEAN_SEED",
         "READY"
       ],
       "assignedPurpose": null,
-      "activeSessionId": "S-ENTRY-FALSE-GREEN-001",
+      "activeSessionId": null,
       "currentCycleId": null,
-      "updatedAt": "2026-09-26T05:01:02.145Z"
+      "updatedAt": "2026-09-27T08:20:08.545Z",
+      "cleanSeedRef": "pixie://clean-seed/intent-core",
+      "quarantineReason": null
     },
     {
       "roomId": "ROOM-D",
@@ -89,16 +96,6 @@
       "subjectRef": "fixture://go-hub-public-entry/404",
       "status": "ACTIVE",
       "createdAt": "2026-09-26T05:00:31.130Z"
-    },
-    {
-      "sessionId": "S-ENTRY-FALSE-GREEN-001",
-      "roomId": "ROOM-C",
-      "purpose": "False-green fixture: backend health PASS while user-facing GO Hub page is unavailable",
-      "activityType": "CHECK",
-      "sourceType": "LAB_FIXTURE",
-      "subjectRef": "fixture://go-hub-public-entry/false-green",
-      "status": "ACTIVE",
-      "createdAt": "2026-09-26T05:01:02.145Z"
     }
   ],
   "cycles": [],
@@ -756,6 +753,41 @@
       },
       "startedAt": "2026-09-27T08:19:56.010Z",
       "completedAt": "2026-09-27T08:19:56.011Z"
+    },
+    {
+      "cleanId": "CLEAN-ROOM-C-2026-09-27T08:20:08.545Z",
+      "roomId": "ROOM-C",
+      "status": "PASS",
+      "cleanupKind": "LAB_TRANSIENT_RESET",
+      "reason": "Prepare clean isolated rooms for upcoming core Intent processing experiment",
+      "stages": [
+        "ZERO",
+        "STERILIZE",
+        "VERIFY_CLEAN",
+        "LOAD_CLEAN_SEED",
+        "READY"
+      ],
+      "discardedSessionIds": [
+        "S-ENTRY-FALSE-GREEN-001"
+      ],
+      "discardedCycleIds": [],
+      "clearedRoomReports": 0,
+      "archiveCreated": false,
+      "cleanSeedRef": "pixie://clean-seed/intent-core",
+      "before": {
+        "status": "RESERVED",
+        "lifecycleStage": "READY",
+        "activeSessionId": "S-ENTRY-FALSE-GREEN-001",
+        "currentCycleId": null
+      },
+      "after": {
+        "status": "READY",
+        "lifecycleStage": "READY",
+        "activeSessionId": null,
+        "currentCycleId": null
+      },
+      "startedAt": "2026-09-27T08:20:08.545Z",
+      "completedAt": "2026-09-27T08:20:08.545Z"
     }
   ]
 }
