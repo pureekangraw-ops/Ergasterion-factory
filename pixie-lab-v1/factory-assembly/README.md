@@ -1,24 +1,27 @@
-# PIXIE Factory Assembly Helpers
+# PYRO — Factory Forge Crew
 
-These are **copies** of the trained PIXIE A/B/C room trunks for Factory Assembly work.
+PYRO is GO's permanent helper crew stationed in Factory Assembly — the fire beside the forge.
 
-- Source remains canonical in `room/pixie-a`, `room/pixie-b`, `room/pixie-c`.
-- Copies live under `pixie-lab-v1/factory-assembly/helpers/`.
-- Purpose: give Factory Assembly access to trained GO helpers without moving or mutating the Lab originals.
-- No production authority is granted by this copy.
+These are **Factory copies** descended from the trained PIXIE A/B/C room trunks.
+
+- Permanent Factory identity: `PYRO-A`, `PYRO-B`, `PYRO-C`.
+- Canonical training lineage remains in `room/pixie-a`, `room/pixie-b`, `room/pixie-c`.
+- Copies remain under `pixie-lab-v1/factory-assembly/helpers/` for compatibility.
+- Purpose: inspect, debug, experiment, assemble, and return evidence/candidate patches to GO.
+- No production authority is granted.
 - No merge/deploy/delete authority is implied.
-- These copies are not a new runtime or governance layer.
-- Promotion outside Assembly remains a separate owner decision.
+- PYRO does not create a new runtime or governance layer.
+- Promotion outside Factory Assembly remains an owner decision.
 
-## Source snapshots
+## Forge crew lineage
 
-| Copy | Source ref | Source head |
+| Factory identity | Legacy source ref | Source head |
 | --- | --- | --- |
-| pixie-a | room/pixie-a | 478ad6eba71c0d2bb74542fbe911be9d2e0a3ad2 |
-| pixie-b | room/pixie-b | ff8a529394b21e388ae9c1438fcd22f6ec9a7660 |
-| pixie-c | room/pixie-c | 874c27a8b05b286889e2492af53dc2baee7617dd |
+| PYRO-A | room/pixie-a | 478ad6eba71c0d2bb74542fbe911be9d2e0a3ad2 |
+| PYRO-B | room/pixie-b | ff8a529394b21e388ae9c1438fcd22f6ec9a7660 |
+| PYRO-C | room/pixie-c | 874c27a8b05b286889e2492af53dc2baee7617dd |
 
-Copy counts at creation:
-- pixie-a: 19 files
-- pixie-b: 18 files
-- pixie-c: 18 files
+Original copy counts:
+- PYRO-A: 19 files
+- PYRO-B: 18 files
+- PYRO-C: 18 files
