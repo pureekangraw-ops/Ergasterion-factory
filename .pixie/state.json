@@ -469,11 +469,66 @@
           "decisionReceipt": false
         },
         "unknownPolicy": "IMPLICIT",
-        "auditDecisionEvidence": false
+        "auditDecisionEvidence": false,
+        "proposal": {
+          "role": "PERMISSION_DECISION_AND_ROUTE_GUARD",
+          "preserve": {
+            "exactResolve": true,
+            "boardProjection": true
+          },
+          "permissionDecision": {
+            "explicitDecisionContract": true,
+            "outcomes": [
+              "ALLOW",
+              "DENY",
+              "UNKNOWN"
+            ],
+            "requiredInputs": [
+              "workContext",
+              "actor",
+              "destination",
+              "passKind",
+              "requestedScope"
+            ],
+            "receiptFields": [
+              "decision",
+              "reason",
+              "policyRefs",
+              "requestedScope",
+              "grantedScope",
+              "decidedAt"
+            ]
+          },
+          "passOpen": {
+            "decisionFirst": true,
+            "centrePersistsPass": true,
+            "decisionReceiptRequired": true,
+            "centreCannotWidenGrantedScope": true
+          },
+          "unknownPolicy": "DENY_BY_DEFAULT_WITH_UNKNOWN_REASON",
+          "auditDecisionEvidence": true,
+          "diagnostics": {
+            "onDenyOrMismatch": "RETURN_DIAGNOSTIC_HINTS",
+            "mayInvoke": [
+              "SYSTEM_CHECK",
+              "FIRST_BREAK"
+            ],
+            "autoRepair": false
+          },
+          "boundary": "HEIMDALL_DECIDES_ACCESS_BUT_DOES_NOT_OWN_WORK_STATE"
+        }
       },
-      "edits": [],
+      "edits": [
+        {
+          "op": "SET",
+          "path": [
+            "proposal"
+          ],
+          "at": "2026-09-27T10:57:04.748Z"
+        }
+      ],
       "createdAt": "2026-09-27T10:55:30.545Z",
-      "updatedAt": "2026-09-27T10:55:30.545Z"
+      "updatedAt": "2026-09-27T10:57:04.748Z"
     }
   ],
   "factoryHandoffs": [],
