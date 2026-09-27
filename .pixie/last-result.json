@@ -1,99 +1,190 @@
 {
-  "requestId": "PIXIE-HEIMDALL-COMPARE-20260927-001",
-  "command": "logic_compare",
+  "requestId": "PIXIE-PRISM-EXAMPLES-20260927-001",
+  "command": "examples",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "logic_compare",
+    "command": "examples",
     "mutated": false,
-    "result": {
-      "draftId": "DRAFT-HEIMDALL-VNEXT-001",
-      "logicId": "HEIMDALL_V4",
-      "changed": true,
-      "original": {
-        "role": "WORK_INDEX_AND_PASS_WRAPPER",
-        "exactResolve": true,
-        "boardProjection": true,
-        "permissionDecision": {
-          "explicitDecisionContract": false,
-          "outcomes": []
-        },
-        "passOpen": {
-          "delegatesTo": "CENTRE_openWorkPass",
-          "decisionReceipt": false
-        },
-        "unknownPolicy": "IMPLICIT",
-        "auditDecisionEvidence": false
+    "result": [
+      {
+        "exampleId": "GOHUB-ENTRY-HEALTHY",
+        "name": "GO Hub public entry healthy",
+        "subjectRef": "fixture://go-hub-public-entry/healthy",
+        "observations": [
+          {
+            "roomId": "ROOM-A",
+            "status": "PASS",
+            "observed": {
+              "backendHealth": "PASS",
+              "userEntry": "PASS",
+              "httpStatus": 200,
+              "hasGoHubTitle": true,
+              "hasCentre": true
+            }
+          },
+          {
+            "roomId": "ROOM-B",
+            "status": "PASS",
+            "observed": {
+              "backendHealth": "PASS",
+              "userEntry": "PASS",
+              "httpStatus": 200,
+              "hasGoHubTitle": true,
+              "hasCentre": true
+            }
+          },
+          {
+            "roomId": "ROOM-C",
+            "status": "PASS",
+            "observed": {
+              "backendHealth": "PASS",
+              "userEntry": "PASS",
+              "httpStatus": 200,
+              "hasGoHubTitle": true,
+              "hasCentre": true
+            }
+          }
+        ]
       },
-      "workingCopy": {
-        "role": "WORK_INDEX_AND_PASS_WRAPPER",
-        "exactResolve": true,
-        "boardProjection": true,
-        "permissionDecision": {
-          "explicitDecisionContract": false,
-          "outcomes": []
-        },
-        "passOpen": {
-          "delegatesTo": "CENTRE_openWorkPass",
-          "decisionReceipt": false
-        },
-        "unknownPolicy": "IMPLICIT",
-        "auditDecisionEvidence": false,
-        "proposal": {
-          "role": "PERMISSION_DECISION_AND_ROUTE_GUARD",
-          "preserve": {
-            "exactResolve": true,
-            "boardProjection": true
+      {
+        "exampleId": "GOHUB-ENTRY-404",
+        "name": "GO Hub public entry missing",
+        "subjectRef": "fixture://go-hub-public-entry/404",
+        "observations": [
+          {
+            "roomId": "ROOM-A",
+            "status": "PASS",
+            "observed": {
+              "backendHealth": "PASS",
+              "userEntry": "PASS",
+              "httpStatus": 200
+            }
           },
-          "permissionDecision": {
-            "explicitDecisionContract": true,
-            "outcomes": [
-              "ALLOW",
-              "DENY",
-              "UNKNOWN"
-            ],
-            "requiredInputs": [
-              "workContext",
-              "actor",
-              "destination",
-              "passKind",
-              "requestedScope"
-            ],
-            "receiptFields": [
-              "decision",
-              "reason",
-              "policyRefs",
-              "requestedScope",
-              "grantedScope",
-              "decidedAt"
-            ]
+          {
+            "roomId": "ROOM-B",
+            "status": "FAIL",
+            "observed": {
+              "backendHealth": "FAIL",
+              "userEntry": "FAIL",
+              "httpStatus": 404
+            }
           },
-          "passOpen": {
-            "decisionFirst": true,
-            "centrePersistsPass": true,
-            "decisionReceiptRequired": true,
-            "centreCannotWidenGrantedScope": true
-          },
-          "unknownPolicy": "DENY_BY_DEFAULT_WITH_UNKNOWN_REASON",
-          "auditDecisionEvidence": true,
-          "diagnostics": {
-            "onDenyOrMismatch": "RETURN_DIAGNOSTIC_HINTS",
-            "mayInvoke": [
-              "SYSTEM_CHECK",
-              "FIRST_BREAK"
-            ],
-            "autoRepair": false
-          },
-          "boundary": "HEIMDALL_DECIDES_ACCESS_BUT_DOES_NOT_OWN_WORK_STATE"
-        }
+          {
+            "roomId": "ROOM-C",
+            "status": "FAIL",
+            "observed": {
+              "backendHealth": "FAIL",
+              "userEntry": "FAIL",
+              "httpStatus": 404
+            }
+          }
+        ]
       },
-      "editCount": 1,
-      "approval": "NOT_AN_APPROVAL"
-    }
+      {
+        "exampleId": "GOHUB-ENTRY-FALSE-GREEN",
+        "name": "Backend green while user entry is down",
+        "subjectRef": "fixture://go-hub-public-entry/false-green",
+        "observations": [
+          {
+            "roomId": "ROOM-A",
+            "status": "PASS",
+            "observed": {
+              "backendHealth": "PASS",
+              "userEntry": "PASS",
+              "httpStatus": 200
+            }
+          },
+          {
+            "roomId": "ROOM-B",
+            "status": "FAIL",
+            "observed": {
+              "backendHealth": "FAIL",
+              "userEntry": "FAIL",
+              "httpStatus": 404
+            }
+          },
+          {
+            "roomId": "ROOM-C",
+            "status": "FAIL",
+            "observed": {
+              "backendHealth": "PASS",
+              "userEntry": "FAIL",
+              "httpStatus": 404
+            }
+          }
+        ]
+      },
+      {
+        "exampleId": "GOHUB-ENTRY-RECOVERED",
+        "name": "Recovered public entry after repair",
+        "subjectRef": "fixture://go-hub-public-entry/recovered",
+        "observations": [
+          {
+            "roomId": "ROOM-A",
+            "status": "PASS",
+            "observed": {
+              "backendHealth": "PASS",
+              "userEntry": "PASS",
+              "httpStatus": 200
+            }
+          },
+          {
+            "roomId": "ROOM-B",
+            "status": "PASS",
+            "observed": {
+              "backendHealth": "PASS",
+              "userEntry": "PASS",
+              "httpStatus": 200
+            }
+          },
+          {
+            "roomId": "ROOM-C",
+            "status": "PASS",
+            "observed": {
+              "backendHealth": "PASS",
+              "userEntry": "PASS",
+              "httpStatus": 200
+            }
+          }
+        ]
+      },
+      {
+        "exampleId": "CRITICAL-UNKNOWN",
+        "name": "Critical unknown blocks the gate",
+        "subjectRef": "fixture://critical-unknown",
+        "observations": [
+          {
+            "roomId": "ROOM-A",
+            "status": "UNKNOWN",
+            "observed": {
+              "result": "UNKNOWN",
+              "reason": "EVIDENCE_UNAVAILABLE"
+            }
+          },
+          {
+            "roomId": "ROOM-B",
+            "status": "UNKNOWN",
+            "observed": {
+              "result": "UNKNOWN",
+              "reason": "EVIDENCE_UNAVAILABLE"
+            }
+          },
+          {
+            "roomId": "ROOM-C",
+            "status": "UNKNOWN",
+            "observed": {
+              "result": "UNKNOWN",
+              "reason": "EVIDENCE_UNAVAILABLE"
+            }
+          }
+        ]
+      }
+    ]
   },
   "error": null,
-  "completedAt": "2026-09-27T11:00:06.948Z"
+  "completedAt": "2026-09-27T13:25:30.479Z"
 }
