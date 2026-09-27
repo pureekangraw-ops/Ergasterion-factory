@@ -618,13 +618,31 @@
           "Old Access",
           "Functional Mismatch",
           "Product Proof"
-        ]
+        ],
+        "presentationRule": {
+          "rule": "Choose exactly one point to present. Every visible element must support that point.",
+          "emphasis": "The point does not need to be exaggerated, but the viewer must recognize what the image is about immediately.",
+          "hierarchy": [
+            "Point: unmistakable",
+            "Supporting elements: push attention toward the point",
+            "Atmosphere: support only, never compete"
+          ],
+          "rejectionTest": "If a viewer first notices the scenery, mood, city, or decoration instead of the intended point, the image fails."
+        }
       },
       "scans": [],
-      "edits": [],
+      "edits": [
+        {
+          "op": "SET",
+          "path": [
+            "presentationRule"
+          ],
+          "at": "2026-09-27T08:02:04.309Z"
+        }
+      ],
       "renderPacketRefs": [],
       "createdAt": "2026-09-27T06:12:00.783Z",
-      "updatedAt": "2026-09-27T06:12:00.783Z"
+      "updatedAt": "2026-09-27T08:02:04.309Z"
     }
   ],
   "visualRenderPackets": [],

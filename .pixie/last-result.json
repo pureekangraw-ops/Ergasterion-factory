@@ -1,13 +1,13 @@
 {
-  "requestId": "PIXIE-LOST-ERA-SALES-BOARD-20260927-001",
-  "command": "visual_create",
+  "requestId": "PIXIE-LOST-ERA-PRESENTATION-RULE-20260927-001",
+  "command": "visual_edit",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "visual_create",
+    "command": "visual_edit",
     "mutated": true,
     "result": {
       "visualDraftId": "VIS-LOST-ERA-SALES-20260927-001",
@@ -269,15 +269,33 @@
           "Old Access",
           "Functional Mismatch",
           "Product Proof"
-        ]
+        ],
+        "presentationRule": {
+          "rule": "Choose exactly one point to present. Every visible element must support that point.",
+          "emphasis": "The point does not need to be exaggerated, but the viewer must recognize what the image is about immediately.",
+          "hierarchy": [
+            "Point: unmistakable",
+            "Supporting elements: push attention toward the point",
+            "Atmosphere: support only, never compete"
+          ],
+          "rejectionTest": "If a viewer first notices the scenery, mood, city, or decoration instead of the intended point, the image fails."
+        }
       },
       "scans": [],
-      "edits": [],
+      "edits": [
+        {
+          "op": "SET",
+          "path": [
+            "presentationRule"
+          ],
+          "at": "2026-09-27T08:02:04.309Z"
+        }
+      ],
       "renderPacketRefs": [],
       "createdAt": "2026-09-27T06:12:00.783Z",
-      "updatedAt": "2026-09-27T06:12:00.783Z"
+      "updatedAt": "2026-09-27T08:02:04.309Z"
     }
   },
   "error": null,
-  "completedAt": "2026-09-27T06:12:00.821Z"
+  "completedAt": "2026-09-27T08:02:04.351Z"
 }
