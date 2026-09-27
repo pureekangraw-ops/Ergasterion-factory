@@ -369,6 +369,47 @@
       "edits": [],
       "createdAt": "2026-09-27T10:55:18.798Z",
       "updatedAt": "2026-09-27T10:55:18.798Z"
+    },
+    {
+      "draftId": "DRAFT-HEIMDALL-VNEXT-001",
+      "logicId": "HEIMDALL_V4",
+      "sourceRef": "github://pureekangraw-ops/standard-/go-hub-heimdall-v4.js@main",
+      "sourceVersion": "main",
+      "labOwned": true,
+      "status": "DRAFT",
+      "original": {
+        "role": "WORK_INDEX_AND_PASS_WRAPPER",
+        "exactResolve": true,
+        "boardProjection": true,
+        "permissionDecision": {
+          "explicitDecisionContract": false,
+          "outcomes": []
+        },
+        "passOpen": {
+          "delegatesTo": "CENTRE_openWorkPass",
+          "decisionReceipt": false
+        },
+        "unknownPolicy": "IMPLICIT",
+        "auditDecisionEvidence": false
+      },
+      "workingCopy": {
+        "role": "WORK_INDEX_AND_PASS_WRAPPER",
+        "exactResolve": true,
+        "boardProjection": true,
+        "permissionDecision": {
+          "explicitDecisionContract": false,
+          "outcomes": []
+        },
+        "passOpen": {
+          "delegatesTo": "CENTRE_openWorkPass",
+          "decisionReceipt": false
+        },
+        "unknownPolicy": "IMPLICIT",
+        "auditDecisionEvidence": false
+      },
+      "edits": [],
+      "createdAt": "2026-09-27T10:55:30.545Z",
+      "updatedAt": "2026-09-27T10:55:30.545Z"
     }
   ],
   "factoryHandoffs": [],

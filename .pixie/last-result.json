@@ -1,5 +1,5 @@
 {
-  "requestId": "PIXIE-HERMES-DRAFT-20260927-002",
+  "requestId": "PIXIE-HEIMDALL-DRAFT-20260927-002",
   "command": "logic_create",
   "exitCode": 0,
   "ok": true,
@@ -10,73 +10,47 @@
     "command": "logic_create",
     "mutated": true,
     "result": {
-      "draftId": "DRAFT-HERMES-VNEXT-001",
-      "logicId": "HERMES_AGENT_MISSION",
-      "sourceRef": "github://pureekangraw-ops/standard-/go-hub-agent-mission.mjs@main",
+      "draftId": "DRAFT-HEIMDALL-VNEXT-001",
+      "logicId": "HEIMDALL_V4",
+      "sourceRef": "github://pureekangraw-ops/standard-/go-hub-heimdall-v4.js@main",
       "sourceVersion": "main",
       "labOwned": true,
       "status": "DRAFT",
       "original": {
-        "role": "MISSION_ORCHESTRATOR",
-        "workResolution": {
-          "exactIdentitySupported": true,
-          "missionSearch": "SIMILARITY_CANDIDATES",
-          "autoEnterFromSimilarity": false
+        "role": "WORK_INDEX_AND_PASS_WRAPPER",
+        "exactResolve": true,
+        "boardProjection": true,
+        "permissionDecision": {
+          "explicitDecisionContract": false,
+          "outcomes": []
         },
-        "workCreation": {
-          "idSource": "HERMES_LOCAL_CREATE_ID",
-          "formatGuard": false
+        "passOpen": {
+          "delegatesTo": "CENTRE_openWorkPass",
+          "decisionReceipt": false
         },
-        "currentRoute": {
-          "explicitContract": false,
-          "destinationMayBeNull": true
-        },
-        "permissionOpen": {
-          "path": "HERMES_TO_CENTRE_V4_OPEN_PASS",
-          "heimdallReceiptRequired": false
-        },
-        "diagnostics": {
-          "directCapabilityRoute": false,
-          "policy": "NONE"
-        },
-        "returnReadback": {
-          "evidenceRequiredForComplete": true,
-          "centreReturn": true
-        }
+        "unknownPolicy": "IMPLICIT",
+        "auditDecisionEvidence": false
       },
       "workingCopy": {
-        "role": "MISSION_ORCHESTRATOR",
-        "workResolution": {
-          "exactIdentitySupported": true,
-          "missionSearch": "SIMILARITY_CANDIDATES",
-          "autoEnterFromSimilarity": false
+        "role": "WORK_INDEX_AND_PASS_WRAPPER",
+        "exactResolve": true,
+        "boardProjection": true,
+        "permissionDecision": {
+          "explicitDecisionContract": false,
+          "outcomes": []
         },
-        "workCreation": {
-          "idSource": "HERMES_LOCAL_CREATE_ID",
-          "formatGuard": false
+        "passOpen": {
+          "delegatesTo": "CENTRE_openWorkPass",
+          "decisionReceipt": false
         },
-        "currentRoute": {
-          "explicitContract": false,
-          "destinationMayBeNull": true
-        },
-        "permissionOpen": {
-          "path": "HERMES_TO_CENTRE_V4_OPEN_PASS",
-          "heimdallReceiptRequired": false
-        },
-        "diagnostics": {
-          "directCapabilityRoute": false,
-          "policy": "NONE"
-        },
-        "returnReadback": {
-          "evidenceRequiredForComplete": true,
-          "centreReturn": true
-        }
+        "unknownPolicy": "IMPLICIT",
+        "auditDecisionEvidence": false
       },
       "edits": [],
-      "createdAt": "2026-09-27T10:55:18.798Z",
-      "updatedAt": "2026-09-27T10:55:18.798Z"
+      "createdAt": "2026-09-27T10:55:30.545Z",
+      "updatedAt": "2026-09-27T10:55:30.545Z"
     }
   },
   "error": null,
-  "completedAt": "2026-09-27T10:55:18.835Z"
+  "completedAt": "2026-09-27T10:55:30.580Z"
 }
