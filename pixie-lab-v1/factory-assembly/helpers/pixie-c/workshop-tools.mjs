@@ -18,9 +18,7 @@ export const PIXIE_WORKSHOP_ACTIONS = Object.freeze([
   "create_branch",
   "write_file",
   "delete_file",
-  "run_tests",
-  "read_ci",
-  "read_failure",
+
   "open_pr",
   "room_merge",
   "snapshot",
@@ -36,9 +34,7 @@ const DEFAULT_CAPABILITY_MAP = Object.freeze({
   create_branch:"createBranch",
   write_file:"writeFile",
   delete_file:"deleteFile",
-  run_tests:"runTests",
-  read_ci:"readCi",
-  read_failure:"readFailure",
+
   open_pr:"openPullRequest",
   room_merge:"roomMerge",
   snapshot:"snapshot",
@@ -143,12 +139,7 @@ function argsForHost(request) {
       return { repository:request.repository, branch:assertWorkshopRef(request.targetRef,"TARGET_REF"), path:requireText(request.path,"PATH"), content:request.content ?? "", expectedSha:request.expectedSha || null };
     case "delete_file":
       return { repository:request.repository, branch:assertWorkshopRef(request.targetRef,"TARGET_REF"), path:requireText(request.path,"PATH"), expectedSha:requireText(request.expectedSha,"EXPECTED_SHA") };
-    case "run_tests":
-      return { repository:request.repository, ref:request.targetRef || PIXIE_WORKSHOP_TRUNKS[request.roomId], metadata:clone(request.metadata) };
-    case "read_ci":
-      return { repository:request.repository, ref:request.targetRef || PIXIE_WORKSHOP_TRUNKS[request.roomId], metadata:clone(request.metadata) };
-    case "read_failure":
-      return { repository:request.repository, runId:request.runId, ref:request.targetRef || null };
+
     case "open_pr":
       return {
         repository:request.repository,
@@ -210,7 +201,7 @@ export function createPixieWorkshopToolkit({ host = {}, extensions = [] } = {}) 
       })),
       extensions:[...extensionMap.keys()],
       boundary:"A_B_C_ONLY",
-      note:"Workshop tools are room-local capabilities. No production/main behavior is implied.",
+      note:"PYRO forge tools are candidate-building capabilities. Board management belongs to Heimdall; debug/test/CI diagnosis belongs to the System Scanner. No production/main behavior is implied.",
     });
   }
 
