@@ -96,7 +96,91 @@
     }
   ],
   "cycles": [],
-  "matrices": [],
+  "matrices": [
+    {
+      "matrixId": "MATRIX-PRISM-SPECTRUM-001",
+      "subjectRef": "logic-draft://DRAFT-PRISM-SPECTRUM-001",
+      "logicVersion": "SPECTRUM-DRAFT-001",
+      "roomId": null,
+      "rows": [
+        {
+          "testTypeId": "functional",
+          "caseRefs": [
+            "intent-to-action",
+            "project-summary"
+          ],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "contract",
+          "caseRefs": [
+            "intent-context-work-route-authority-dispatch-verify"
+          ],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "integration",
+          "caseRefs": [
+            "go-light-counter-handoff",
+            "single-copilot-surface"
+          ],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "permission_boundary",
+          "caseRefs": [
+            "big-owner-approval",
+            "no-auto-authority"
+          ],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "recovery",
+          "caseRefs": [
+            "device-bridge-ui-change",
+            "dispatch-retry-without-duplicate-work"
+          ],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "migration",
+          "caseRefs": [
+            "lighthouse-pr178-to-prism",
+            "legacy-alias-preservation"
+          ],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "security_oriented",
+          "caseRefs": [
+            "signed-dispatch-only",
+            "no-arbitrary-typing"
+          ],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "unknown_edge",
+          "caseRefs": [
+            "ambiguous-context",
+            "missing-receipt"
+          ],
+          "status": "UNRUN",
+          "required": true
+        }
+      ],
+      "overallStatus": "INCONCLUSIVE",
+      "lifecycle": "READY_TO_RUN",
+      "createdAt": "2026-09-27T13:30:16.072Z",
+      "updatedAt": "2026-09-27T13:30:16.072Z"
+    }
+  ],
   "testRuns": [],
   "proposals": [],
   "bugs": [],

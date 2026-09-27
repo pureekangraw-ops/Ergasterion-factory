@@ -1,240 +1,98 @@
 {
-  "requestId": "PIXIE-PRISM-LOGIC-COMPARE-20260927-001",
-  "command": "logic_compare",
+  "requestId": "PIXIE-PRISM-MATRIX-20260927-001",
+  "command": "add_matrix",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "logic_compare",
-    "mutated": false,
+    "command": "add_matrix",
+    "mutated": true,
     "result": {
-      "draftId": "DRAFT-PRISM-SPECTRUM-001",
-      "logicId": "PRISM_SPECTRUM_CORE",
-      "changed": true,
-      "original": {
-        "product": "LIGHTHOUSE",
-        "role": "MOBILE_OBSERVER_AND_RIDE_CLIENT",
-        "surfaces": [
-          "MAP",
-          "RIDE",
-          "BROWSER",
-          "OBSERVER",
-          "CONTROL_PORT",
-          "FINANCE",
-          "CHAT",
-          "CALENDAR"
-        ],
-        "orchestration": {
-          "copilot": false,
-          "intentRouting": false,
-          "workResolution": false,
-          "agentHandoff": false,
-          "readback": false
-        },
-        "deviceBridge": {
-          "openApp": false,
-          "focus": false,
-          "type": false,
-          "tap": false,
-          "observe": true
-        },
-        "hubAccess": {
-          "singleSurface": false,
-          "goHubCapabilities": "PARTIAL"
-        },
-        "authority": {
-          "owner": "BIG",
-          "externalMutation": "GOVERNED"
-        }
-      },
-      "workingCopy": {
-        "product": "LIGHTHOUSE",
-        "role": "MOBILE_OBSERVER_AND_RIDE_CLIENT",
-        "surfaces": [
-          "MAP",
-          "RIDE",
-          "BROWSER",
-          "OBSERVER",
-          "CONTROL_PORT",
-          "FINANCE",
-          "CHAT",
-          "CALENDAR"
-        ],
-        "orchestration": {
-          "copilot": false,
-          "intentRouting": false,
-          "workResolution": false,
-          "agentHandoff": false,
-          "readback": false
-        },
-        "deviceBridge": {
-          "openApp": false,
-          "focus": false,
-          "type": false,
-          "tap": false,
-          "observe": true
-        },
-        "hubAccess": {
-          "singleSurface": false,
-          "goHubCapabilities": "PARTIAL"
-        },
-        "authority": {
-          "owner": "BIG",
-          "externalMutation": "GOVERNED"
-        },
-        "proposal": {
-          "product": "PRISM",
-          "logic": "SPECTRUM",
-          "role": "BIG_MOBILE_COPILOT_AND_GO_HUB_CLIENT",
-          "principle": "ONE_SURFACE_MANY_CAPABILITIES_GO_HUB_REMAINS_TRUTH",
-          "coreFlow": [
-            "INTENT",
-            "CONTEXT",
-            "WORK",
-            "ROUTE",
-            "AUTHORITY",
-            "DISPATCH",
-            "VERIFY"
+      "matrixId": "MATRIX-PRISM-SPECTRUM-001",
+      "subjectRef": "logic-draft://DRAFT-PRISM-SPECTRUM-001",
+      "logicVersion": "SPECTRUM-DRAFT-001",
+      "roomId": null,
+      "rows": [
+        {
+          "testTypeId": "functional",
+          "caseRefs": [
+            "intent-to-action",
+            "project-summary"
           ],
-          "surfaces": {
-            "COPILOT": "PRIMARY",
-            "HUB": "WORK_ROUTE_COUNTER_STATUS",
-            "MAP": {
-              "primary": true,
-              "RIDE": "OPTIONAL_MODE"
-            },
-            "BROWSER": "GECKOVIEW_PLUS_OBSERVER",
-            "LEDGER": "ALL_FINANCE_DATA_OWNER",
-            "LAB": "PIXIE_ENTRY",
-            "CALENDAR": "REMOVED_FROM_PRISM"
-          },
-          "copilot": {
-            "generalHelp": true,
-            "projectSummary": "ALL_OPEN_WAIT_VERIFY_BLOCKED",
-            "planning": true,
-            "appSwitchingRequired": false,
-            "unknownPolicy": "ASK_OR_RETURN_UNKNOWN_NEVER_GUESS"
-          },
-          "workResolver": {
-            "exactFirst": [
-              "workId",
-              "jobCode"
-            ],
-            "semantic": "CANDIDATE_ONLY",
-            "duplicatePrevention": true,
-            "createOnlyWhenNoExactWork": true
-          },
-          "route": {
-            "targets": [
-              "GO",
-              "LIGHT",
-              "PIXIE_LAB",
-              "FACTORY",
-              "BROWSER",
-              "MAP",
-              "LEDGER"
-            ],
-            "preserveCurrentRoute": true,
-            "sourceOfTruth": "GO_HUB_CENTRE"
-          },
-          "authority": {
-            "owner": "BIG",
-            "prismMayCoordinate": true,
-            "prismMayApproveForBig": false,
-            "strongActionsRequireOwner": true,
-            "externalMutation": "GOVERNED"
-          },
-          "dispatcher": {
-            "counterBound": true,
-            "handoffPacket": [
-              "workId",
-              "checkpointId",
-              "counterId",
-              "objective",
-              "contextRefs"
-            ],
-            "pickupTrigger": "รับสาย <CounterId>",
-            "returnTrigger": "คืนสาย <CounterId>",
-            "ownerTrigger": "รอบิ๊ก <CounterId>",
-            "autoDispatch": "ALLOWLIST_ONLY"
-          },
-          "conference": {
-            "participants": [
-              "GO",
-              "LIGHT"
-            ],
-            "moderator": "SPECTRUM",
-            "relay": "BOUNDED",
-            "mustBind": [
-              "workId",
-              "counterId",
-              "objective"
-            ],
-            "stop": [
-              "ANSWERED",
-              "BLOCKED",
-              "NEED_BIG",
-              "DONE",
-              "MAX_TURNS",
-              "TIMEOUT"
-            ],
-            "noInfiniteLoop": true
-          },
-          "deviceBridge": {
-            "preferredOrder": [
-              "NATIVE_API_OR_GO_HUB",
-              "DEEPLINK_OR_INTENT",
-              "ACCESSIBILITY_PLUS_IME"
-            ],
-            "actions": [
-              "OPEN",
-              "FOCUS",
-              "TYPE",
-              "TAP",
-              "OBSERVE"
-            ],
-            "signer": "SPECTRUM_DISPATCH_PACKET",
-            "arbitraryTyping": false,
-            "verifyBeforeAndAfterSend": true
-          },
-          "verify": {
-            "doNotTreatDispatchAsDone": true,
-            "receipts": [
-              "DELIVERED",
-              "PICKED_UP",
-              "RETURNED",
-              "READBACK"
-            ],
-            "observerEvidence": true,
-            "hubReceiptPreferred": true
-          },
-          "mobileFirst": {
-            "primaryDevice": "ANDROID",
-            "cloudDoesHeavyWork": true,
-            "localRoles": [
-              "COPILOT",
-              "DEVICE_BRIDGE",
-              "BROWSER",
-              "MAP",
-              "LEDGER",
-              "OBSERVER"
-            ],
-            "tolerateNoComputer": true
-          },
-          "migration": {
-            "from": "LIGHTHOUSE",
-            "pr178Base": true,
-            "preserveLegacyAliasesUntilVerified": true,
-            "noProductionMutationInLab": true
-          }
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "contract",
+          "caseRefs": [
+            "intent-context-work-route-authority-dispatch-verify"
+          ],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "integration",
+          "caseRefs": [
+            "go-light-counter-handoff",
+            "single-copilot-surface"
+          ],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "permission_boundary",
+          "caseRefs": [
+            "big-owner-approval",
+            "no-auto-authority"
+          ],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "recovery",
+          "caseRefs": [
+            "device-bridge-ui-change",
+            "dispatch-retry-without-duplicate-work"
+          ],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "migration",
+          "caseRefs": [
+            "lighthouse-pr178-to-prism",
+            "legacy-alias-preservation"
+          ],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "security_oriented",
+          "caseRefs": [
+            "signed-dispatch-only",
+            "no-arbitrary-typing"
+          ],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "unknown_edge",
+          "caseRefs": [
+            "ambiguous-context",
+            "missing-receipt"
+          ],
+          "status": "UNRUN",
+          "required": true
         }
-      },
-      "editCount": 1,
-      "approval": "NOT_AN_APPROVAL"
+      ],
+      "overallStatus": "INCONCLUSIVE",
+      "lifecycle": "READY_TO_RUN",
+      "createdAt": "2026-09-27T13:30:16.072Z",
+      "updatedAt": "2026-09-27T13:30:16.072Z"
     }
   },
   "error": null,
-  "completedAt": "2026-09-27T13:29:12.035Z"
+  "completedAt": "2026-09-27T13:30:16.106Z"
 }
