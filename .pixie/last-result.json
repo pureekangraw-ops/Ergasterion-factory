@@ -1,92 +1,20 @@
 {
-  "requestId": "PIXIE-FORGE-LAB-VISUAL-SCAN-20260928-001",
-  "command": "visual_scan",
+  "requestId": "PIXIE-FORGE-LAB-RENDER-PACKET-20260928-001",
+  "command": "visual_render_packet",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "visual_scan",
+    "command": "visual_render_packet",
     "mutated": true,
     "result": {
+      "packetId": "RENDER-FORGE-LAB-001",
       "visualDraftId": "VISUAL-FORGE-LAB-001",
       "sourceRef": "work://WORK-61dc5e5e-7885-4d3f-87d7-a56acd42c404",
       "sourceVersion": "FORGE-LAB-CONCEPT-V1",
       "sourceHash": null,
-      "sourceLocked": true,
-      "labOwned": true,
-      "status": "DRAFT",
-      "originalSpec": {
-        "name": "FORGE LAB",
-        "role": "INTERACTIVE_BUILD_AND_TEST_WORKSPACE_BEFORE_FACTORY",
-        "visualGoal": "Make it feel like a real engineering workbench where one active artifact is being assembled, tested, inspected, and prepared for handoff—not a monitoring dashboard.",
-        "focalPoint": "CENTRAL_FORGE_BENCH",
-        "layout": {
-          "topLeft": {
-            "name": "MISSION CLAMP",
-            "purpose": "Pinned Work Card, requested result, source refs, constraints; readable at a glance but visually secondary."
-          },
-          "topRight": {
-            "name": "BUILD RECIPE",
-            "purpose": "Current plan / intended change / must-keep / must-not-change / target result."
-          },
-          "center": {
-            "name": "FORGE BENCH",
-            "purpose": "Large active working surface showing the current artifact/module, diff/assembly layers, selected component, and direct manipulations."
-          },
-          "leftRail": {
-            "name": "MATERIAL RACK",
-            "purpose": "Files, modules, branches, dependencies, reusable components; drag or select into the bench."
-          },
-          "rightRail": {
-            "name": "TEST BAY",
-            "purpose": "Functional checks, integration checks, permission boundary, recovery, unknowns; PASS/FAIL/UNKNOWN shown with evidence."
-          },
-          "bottom": {
-            "name": "EVIDENCE TRACK",
-            "purpose": "Builds/versions V1 V2 V3, hashes, test receipts, snapshots, rollback points; current version obvious."
-          },
-          "handoff": {
-            "name": "FACTORY DOCK",
-            "purpose": "A single deliberate exit from Forge Lab to Factory when evidence is ready; never visually mixed with editing controls."
-          }
-        },
-        "interactionModel": [
-          "One Work Card owns the bench.",
-          "One primary artifact is in focus at a time.",
-          "Selecting a material shows where it came from and what it changes.",
-          "Every test result has evidence or remains UNKNOWN.",
-          "Factory handoff is a separate deliberate action, not an accidental button."
-        ],
-        "visualHierarchy": [
-          "Central artifact first",
-          "Current requested result second",
-          "Test/evidence state third",
-          "Materials/history/supporting context fourth"
-        ],
-        "style": {
-          "mood": "precision workshop / compact forge / engineering lab",
-          "density": "information-rich but spatially calm",
-          "shapes": "physical worktable metaphor, trays, clamps, racks, dock",
-          "avoid": [
-            "generic dashboard tiles",
-            "too many equal-weight panels",
-            "decorative sci-fi clutter",
-            "command-center wall of metrics",
-            "neon overload"
-          ],
-          "typography": "clean technical labels with large human-readable status",
-          "colorBehavior": "neutral workspace; reserve strong color for state/evidence only"
-        },
-        "states": {
-          "EMPTY": "Bench clear, Mission Clamp waiting for Work Card.",
-          "ACTIVE": "Artifact centered; recipe and selected materials visible.",
-          "TESTING": "Test Bay becomes visually active while bench remains readable.",
-          "BLOCKED": "The exact blocker is pinned beside the artifact; unrelated panels dim.",
-          "READY_FOR_FACTORY": "Factory Dock lights up only after evidence/unknown rules are satisfied."
-        }
-      },
       "workingSpec": {
         "name": "FORGE LAB",
         "role": "INTERACTIVE_BUILD_AND_TEST_WORKSPACE_BEFORE_FACTORY",
@@ -157,32 +85,86 @@
           "READY_FOR_FACTORY": "Factory Dock lights up only after evidence/unknown rules are satisfied."
         }
       },
-      "scans": [
+      "intent": "Design FORGE LAB as a tangible, high-function engineering workbench where BIG can understand the active build by looking at one central artifact, not by reading a dashboard.",
+      "requestedResult": "A first visual concept for the FORGE LAB interface that feels like a compact precision workshop: central Forge Bench, pinned Mission/Build Recipe above, materials feeding in from the left, evidence/testing on the right, version/evidence track below, and one deliberate Factory Dock exit.",
+      "mustKeep": [
+        "One dominant central Forge Bench",
+        "Mission Clamp and Build Recipe above the bench",
+        "Material Rack feeds the bench from the left",
+        "Test Bay/evidence on the right",
+        "Evidence/version track along the bottom",
+        "Factory Dock visually separate from edit controls",
+        "One Work Card / one primary artifact focus",
+        "PASS/FAIL/UNKNOWN must be evidence-backed"
+      ],
+      "mustRemove": [
+        "generic dashboard card grid",
+        "equal-weight panels everywhere",
+        "wall-of-metrics command center",
+        "decorative sci-fi clutter",
+        "neon-heavy cyberpunk treatment",
+        "multiple primary focal points",
+        "merge/deploy buttons mixed into normal editing"
+      ],
+      "copy": [
         {
-          "scanId": "SCAN-FORGE-LAB-001",
-          "observations": [
-            "Current composition has one dominant central bench and avoids equal-weight dashboard tiles.",
-            "Mission/recipe context is pinned above the work area, matching BIG's preferred worktable model.",
-            "Factory exit is deliberately separated from editing controls, preserving governance.",
-            "Evidence/version history is visible at the bottom without becoming the visual focal point.",
-            "Potential risk: too many named rails/bays can still feel like a control-room dashboard if rendered as boxed panels; render should use physical trays/clamps/docks instead of cards."
-          ],
-          "evidenceRefs": [
-            "github://pureekangraw-ops/Go-Calalog-@pixie-runtime-state#66836e44352b6f04df5dfbbc8abc00b38bbda1d7"
-          ],
-          "unknowns": [
-            "Exact visual language of FORGE LAB has not yet been rendered; spacing and hierarchy must be verified from the first image."
-          ],
-          "status": "UNKNOWN",
-          "scannedAt": "2026-09-27T23:26:15.614Z"
+          "text": "FORGE LAB",
+          "role": "title"
+        },
+        {
+          "text": "MISSION",
+          "role": "small label"
+        },
+        {
+          "text": "BUILD RECIPE",
+          "role": "small label"
+        },
+        {
+          "text": "FORGE BENCH",
+          "role": "primary workspace label"
+        },
+        {
+          "text": "MATERIALS",
+          "role": "rail label"
+        },
+        {
+          "text": "TEST / EVIDENCE",
+          "role": "rail label"
+        },
+        {
+          "text": "V1  V2  V3",
+          "role": "version track"
+        },
+        {
+          "text": "FACTORY DOCK",
+          "role": "handoff label"
         }
       ],
-      "edits": [],
-      "renderPacketRefs": [],
-      "createdAt": "2026-09-27T23:25:34.373Z",
-      "updatedAt": "2026-09-27T23:26:15.614Z"
+      "constraints": [
+        "Desktop-like workbench composition even if later adapted to mobile",
+        "Use physical metaphors—tray, clamp, rack, bench, dock—rather than floating dashboard cards",
+        "Central artifact must be readable within one glance",
+        "State colors only for evidence/status, not decoration",
+        "Blocked state should dim unrelated areas and pin the exact blocker near the artifact",
+        "Ready-for-Factory state may reveal/activate the Factory Dock but must not imply automatic authority"
+      ],
+      "evidenceRefs": [
+        "github://pureekangraw-ops/Go-Calalog-@pixie-runtime-state#66836e44352b6f04df5dfbbc8abc00b38bbda1d7",
+        "github://pureekangraw-ops/Go-Calalog-@pixie-runtime-state#fb7854ab8624014e2908542b79b507fd3f0109cf"
+      ],
+      "unknowns": [
+        "Exact visual language of FORGE LAB has not yet been rendered; spacing and hierarchy must be verified from the first image.",
+        "First render must verify whether the left/right rails feel like real workspace furniture rather than dashboard panels.",
+        "Exact responsive behavior on PRISM/mobile is intentionally out of scope for this first Forge Lab visual."
+      ],
+      "targetTool": "GO_IMAGE_TOOL",
+      "externalExecutionRequired": true,
+      "imageGenerationAuthority": false,
+      "productionAuthority": false,
+      "approval": "NOT_AN_APPROVAL",
+      "createdAt": "2026-09-27T23:27:01.771Z"
     }
   },
   "error": null,
-  "completedAt": "2026-09-27T23:26:15.642Z"
+  "completedAt": "2026-09-27T23:27:01.809Z"
 }
