@@ -1,53 +1,190 @@
 {
-  "requestId": "PIXIE-PLAY-20260927-001",
-  "command": "help",
-  "exitCode": 2,
-  "ok": false,
+  "requestId": "PIXIE-PLAY-20260927-002",
+  "command": "examples",
+  "exitCode": 0,
+  "ok": true,
   "output": {
-    "ok": false,
-    "command": "help",
-    "error": "COMMAND_NOT_ALLOWED",
-    "allowedCommands": [
-      "status",
-      "ask",
-      "start_session",
-      "archive_session",
-      "close_session",
-      "clean_room",
-      "start_cycle",
-      "cycle_action",
-      "add_matrix",
-      "start_matrix",
-      "update_matrix",
-      "add_test_run",
-      "rerun_test_run",
-      "add_bug",
-      "add_attention",
-      "update_attention",
-      "add_golden_case",
-      "replay_golden",
-      "debug_start",
-      "debug_step",
-      "debug_complete",
-      "self_test",
-      "cross_room",
-      "master_gate",
-      "examples",
-      "run_example",
-      "logic_create",
-      "logic_edit",
-      "logic_compare",
-      "visual_create",
-      "visual_scan",
-      "visual_edit",
-      "visual_compare",
-      "visual_render_packet",
-      "visual_verify",
-      "candidate_passport",
-      "door_guard",
-      "persist"
+    "ok": true,
+    "pixieId": "PIXIE-01",
+    "labId": "PIXIE-LAB",
+    "command": "examples",
+    "mutated": false,
+    "result": [
+      {
+        "exampleId": "GOHUB-ENTRY-HEALTHY",
+        "name": "GO Hub public entry healthy",
+        "subjectRef": "fixture://go-hub-public-entry/healthy",
+        "observations": [
+          {
+            "roomId": "ROOM-A",
+            "status": "PASS",
+            "observed": {
+              "backendHealth": "PASS",
+              "userEntry": "PASS",
+              "httpStatus": 200,
+              "hasGoHubTitle": true,
+              "hasCentre": true
+            }
+          },
+          {
+            "roomId": "ROOM-B",
+            "status": "PASS",
+            "observed": {
+              "backendHealth": "PASS",
+              "userEntry": "PASS",
+              "httpStatus": 200,
+              "hasGoHubTitle": true,
+              "hasCentre": true
+            }
+          },
+          {
+            "roomId": "ROOM-C",
+            "status": "PASS",
+            "observed": {
+              "backendHealth": "PASS",
+              "userEntry": "PASS",
+              "httpStatus": 200,
+              "hasGoHubTitle": true,
+              "hasCentre": true
+            }
+          }
+        ]
+      },
+      {
+        "exampleId": "GOHUB-ENTRY-404",
+        "name": "GO Hub public entry missing",
+        "subjectRef": "fixture://go-hub-public-entry/404",
+        "observations": [
+          {
+            "roomId": "ROOM-A",
+            "status": "PASS",
+            "observed": {
+              "backendHealth": "PASS",
+              "userEntry": "PASS",
+              "httpStatus": 200
+            }
+          },
+          {
+            "roomId": "ROOM-B",
+            "status": "FAIL",
+            "observed": {
+              "backendHealth": "FAIL",
+              "userEntry": "FAIL",
+              "httpStatus": 404
+            }
+          },
+          {
+            "roomId": "ROOM-C",
+            "status": "FAIL",
+            "observed": {
+              "backendHealth": "FAIL",
+              "userEntry": "FAIL",
+              "httpStatus": 404
+            }
+          }
+        ]
+      },
+      {
+        "exampleId": "GOHUB-ENTRY-FALSE-GREEN",
+        "name": "Backend green while user entry is down",
+        "subjectRef": "fixture://go-hub-public-entry/false-green",
+        "observations": [
+          {
+            "roomId": "ROOM-A",
+            "status": "PASS",
+            "observed": {
+              "backendHealth": "PASS",
+              "userEntry": "PASS",
+              "httpStatus": 200
+            }
+          },
+          {
+            "roomId": "ROOM-B",
+            "status": "FAIL",
+            "observed": {
+              "backendHealth": "FAIL",
+              "userEntry": "FAIL",
+              "httpStatus": 404
+            }
+          },
+          {
+            "roomId": "ROOM-C",
+            "status": "FAIL",
+            "observed": {
+              "backendHealth": "PASS",
+              "userEntry": "FAIL",
+              "httpStatus": 404
+            }
+          }
+        ]
+      },
+      {
+        "exampleId": "GOHUB-ENTRY-RECOVERED",
+        "name": "Recovered public entry after repair",
+        "subjectRef": "fixture://go-hub-public-entry/recovered",
+        "observations": [
+          {
+            "roomId": "ROOM-A",
+            "status": "PASS",
+            "observed": {
+              "backendHealth": "PASS",
+              "userEntry": "PASS",
+              "httpStatus": 200
+            }
+          },
+          {
+            "roomId": "ROOM-B",
+            "status": "PASS",
+            "observed": {
+              "backendHealth": "PASS",
+              "userEntry": "PASS",
+              "httpStatus": 200
+            }
+          },
+          {
+            "roomId": "ROOM-C",
+            "status": "PASS",
+            "observed": {
+              "backendHealth": "PASS",
+              "userEntry": "PASS",
+              "httpStatus": 200
+            }
+          }
+        ]
+      },
+      {
+        "exampleId": "CRITICAL-UNKNOWN",
+        "name": "Critical unknown blocks the gate",
+        "subjectRef": "fixture://critical-unknown",
+        "observations": [
+          {
+            "roomId": "ROOM-A",
+            "status": "UNKNOWN",
+            "observed": {
+              "result": "UNKNOWN",
+              "reason": "EVIDENCE_UNAVAILABLE"
+            }
+          },
+          {
+            "roomId": "ROOM-B",
+            "status": "UNKNOWN",
+            "observed": {
+              "result": "UNKNOWN",
+              "reason": "EVIDENCE_UNAVAILABLE"
+            }
+          },
+          {
+            "roomId": "ROOM-C",
+            "status": "UNKNOWN",
+            "observed": {
+              "result": "UNKNOWN",
+              "reason": "EVIDENCE_UNAVAILABLE"
+            }
+          }
+        ]
+      }
     ]
   },
   "error": null,
-  "completedAt": "2026-09-27T08:16:57.728Z"
+  "completedAt": "2026-09-27T08:17:38.961Z"
 }
