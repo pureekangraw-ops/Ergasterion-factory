@@ -7,10 +7,13 @@ These are **Factory copies** descended from the trained PIXIE A/B/C room trunks.
 - Permanent Factory identity: `PYRO-A`, `PYRO-B`, `PYRO-C`.
 - Canonical training lineage remains in `room/pixie-a`, `room/pixie-b`, `room/pixie-c`.
 - Copies remain under `pixie-lab-v1/factory-assembly/helpers/` for compatibility.
-- Purpose: inspect, debug, experiment, assemble, and return evidence/candidate patches to GO.
+- Purpose: inspect, reason, assemble candidate changes, and return evidence/candidates to GO.
 - No production authority is granted.
 - No merge/deploy/delete authority is implied.
 - PYRO does not create a new runtime or governance layer.
+- Board ownership: Heimdall V4.
+- Debug / test / CI-failure diagnosis ownership: Maintenance System Scanner.
+- Historical training and field-debug material stays in the original PIXIE Lab lineage and `research/my-first-research.md`; it is not carried by the permanent Factory copies.
 - Promotion outside Factory Assembly remains an owner decision.
 
 ## Forge crew lineage
