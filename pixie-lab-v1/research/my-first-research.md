@@ -1,6 +1,6 @@
-# My first research
+# ความสำเร็จแรก
 
-Archive label for the first PIXIE → PYRO experiment.
+Archive label for the first successful PIXIE → PYRO experiment.
 
 This record is kept as an example of the experiment itself, not as runtime logic and not as production authority.
 
@@ -42,4 +42,4 @@ The original PIXIE training lineage remains preserved for traceability.
 Passing authored training does not prove general intelligence or autonomous production readiness. PYRO remains a helper under GO, with no independent merge/deploy/main authority.
 
 Status: ARCHIVED_EXPERIMENT_EXAMPLE
-Label: My first research
+Label: ความสำเร็จแรก
