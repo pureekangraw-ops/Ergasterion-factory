@@ -1431,6 +1431,160 @@
       "renderPacketRefs": [],
       "createdAt": "2026-09-27T06:12:00.783Z",
       "updatedAt": "2026-09-27T08:02:04.309Z"
+    },
+    {
+      "visualDraftId": "VISUAL-FORGE-LAB-001",
+      "sourceRef": "work://WORK-61dc5e5e-7885-4d3f-87d7-a56acd42c404",
+      "sourceVersion": "FORGE-LAB-CONCEPT-V1",
+      "sourceHash": null,
+      "sourceLocked": true,
+      "labOwned": true,
+      "status": "DRAFT",
+      "originalSpec": {
+        "name": "FORGE LAB",
+        "role": "INTERACTIVE_BUILD_AND_TEST_WORKSPACE_BEFORE_FACTORY",
+        "visualGoal": "Make it feel like a real engineering workbench where one active artifact is being assembled, tested, inspected, and prepared for handoff—not a monitoring dashboard.",
+        "focalPoint": "CENTRAL_FORGE_BENCH",
+        "layout": {
+          "topLeft": {
+            "name": "MISSION CLAMP",
+            "purpose": "Pinned Work Card, requested result, source refs, constraints; readable at a glance but visually secondary."
+          },
+          "topRight": {
+            "name": "BUILD RECIPE",
+            "purpose": "Current plan / intended change / must-keep / must-not-change / target result."
+          },
+          "center": {
+            "name": "FORGE BENCH",
+            "purpose": "Large active working surface showing the current artifact/module, diff/assembly layers, selected component, and direct manipulations."
+          },
+          "leftRail": {
+            "name": "MATERIAL RACK",
+            "purpose": "Files, modules, branches, dependencies, reusable components; drag or select into the bench."
+          },
+          "rightRail": {
+            "name": "TEST BAY",
+            "purpose": "Functional checks, integration checks, permission boundary, recovery, unknowns; PASS/FAIL/UNKNOWN shown with evidence."
+          },
+          "bottom": {
+            "name": "EVIDENCE TRACK",
+            "purpose": "Builds/versions V1 V2 V3, hashes, test receipts, snapshots, rollback points; current version obvious."
+          },
+          "handoff": {
+            "name": "FACTORY DOCK",
+            "purpose": "A single deliberate exit from Forge Lab to Factory when evidence is ready; never visually mixed with editing controls."
+          }
+        },
+        "interactionModel": [
+          "One Work Card owns the bench.",
+          "One primary artifact is in focus at a time.",
+          "Selecting a material shows where it came from and what it changes.",
+          "Every test result has evidence or remains UNKNOWN.",
+          "Factory handoff is a separate deliberate action, not an accidental button."
+        ],
+        "visualHierarchy": [
+          "Central artifact first",
+          "Current requested result second",
+          "Test/evidence state third",
+          "Materials/history/supporting context fourth"
+        ],
+        "style": {
+          "mood": "precision workshop / compact forge / engineering lab",
+          "density": "information-rich but spatially calm",
+          "shapes": "physical worktable metaphor, trays, clamps, racks, dock",
+          "avoid": [
+            "generic dashboard tiles",
+            "too many equal-weight panels",
+            "decorative sci-fi clutter",
+            "command-center wall of metrics",
+            "neon overload"
+          ],
+          "typography": "clean technical labels with large human-readable status",
+          "colorBehavior": "neutral workspace; reserve strong color for state/evidence only"
+        },
+        "states": {
+          "EMPTY": "Bench clear, Mission Clamp waiting for Work Card.",
+          "ACTIVE": "Artifact centered; recipe and selected materials visible.",
+          "TESTING": "Test Bay becomes visually active while bench remains readable.",
+          "BLOCKED": "The exact blocker is pinned beside the artifact; unrelated panels dim.",
+          "READY_FOR_FACTORY": "Factory Dock lights up only after evidence/unknown rules are satisfied."
+        }
+      },
+      "workingSpec": {
+        "name": "FORGE LAB",
+        "role": "INTERACTIVE_BUILD_AND_TEST_WORKSPACE_BEFORE_FACTORY",
+        "visualGoal": "Make it feel like a real engineering workbench where one active artifact is being assembled, tested, inspected, and prepared for handoff—not a monitoring dashboard.",
+        "focalPoint": "CENTRAL_FORGE_BENCH",
+        "layout": {
+          "topLeft": {
+            "name": "MISSION CLAMP",
+            "purpose": "Pinned Work Card, requested result, source refs, constraints; readable at a glance but visually secondary."
+          },
+          "topRight": {
+            "name": "BUILD RECIPE",
+            "purpose": "Current plan / intended change / must-keep / must-not-change / target result."
+          },
+          "center": {
+            "name": "FORGE BENCH",
+            "purpose": "Large active working surface showing the current artifact/module, diff/assembly layers, selected component, and direct manipulations."
+          },
+          "leftRail": {
+            "name": "MATERIAL RACK",
+            "purpose": "Files, modules, branches, dependencies, reusable components; drag or select into the bench."
+          },
+          "rightRail": {
+            "name": "TEST BAY",
+            "purpose": "Functional checks, integration checks, permission boundary, recovery, unknowns; PASS/FAIL/UNKNOWN shown with evidence."
+          },
+          "bottom": {
+            "name": "EVIDENCE TRACK",
+            "purpose": "Builds/versions V1 V2 V3, hashes, test receipts, snapshots, rollback points; current version obvious."
+          },
+          "handoff": {
+            "name": "FACTORY DOCK",
+            "purpose": "A single deliberate exit from Forge Lab to Factory when evidence is ready; never visually mixed with editing controls."
+          }
+        },
+        "interactionModel": [
+          "One Work Card owns the bench.",
+          "One primary artifact is in focus at a time.",
+          "Selecting a material shows where it came from and what it changes.",
+          "Every test result has evidence or remains UNKNOWN.",
+          "Factory handoff is a separate deliberate action, not an accidental button."
+        ],
+        "visualHierarchy": [
+          "Central artifact first",
+          "Current requested result second",
+          "Test/evidence state third",
+          "Materials/history/supporting context fourth"
+        ],
+        "style": {
+          "mood": "precision workshop / compact forge / engineering lab",
+          "density": "information-rich but spatially calm",
+          "shapes": "physical worktable metaphor, trays, clamps, racks, dock",
+          "avoid": [
+            "generic dashboard tiles",
+            "too many equal-weight panels",
+            "decorative sci-fi clutter",
+            "command-center wall of metrics",
+            "neon overload"
+          ],
+          "typography": "clean technical labels with large human-readable status",
+          "colorBehavior": "neutral workspace; reserve strong color for state/evidence only"
+        },
+        "states": {
+          "EMPTY": "Bench clear, Mission Clamp waiting for Work Card.",
+          "ACTIVE": "Artifact centered; recipe and selected materials visible.",
+          "TESTING": "Test Bay becomes visually active while bench remains readable.",
+          "BLOCKED": "The exact blocker is pinned beside the artifact; unrelated panels dim.",
+          "READY_FOR_FACTORY": "Factory Dock lights up only after evidence/unknown rules are satisfied."
+        }
+      },
+      "scans": [],
+      "edits": [],
+      "renderPacketRefs": [],
+      "createdAt": "2026-09-27T23:25:34.373Z",
+      "updatedAt": "2026-09-27T23:25:34.373Z"
     }
   ],
   "visualRenderPackets": [],
