@@ -1,21 +1,18 @@
 {
-  "requestId": "PIXIE-PRISM-INTENT-REFINER-EDIT-20260927-001",
-  "command": "logic_edit",
+  "requestId": "PIXIE-PRISM-INTENT-REFINER-COMPARE-20260927-001",
+  "command": "logic_compare",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "logic_edit",
-    "mutated": true,
+    "command": "logic_compare",
+    "mutated": false,
     "result": {
       "draftId": "DRAFT-PRISM-SPECTRUM-001",
       "logicId": "PRISM_SPECTRUM_CORE",
-      "sourceRef": "github://pureekangraw-ops/ygph-metropolis/pull/178@01b8816002a31b9e00e66306756b4045c7670060",
-      "sourceVersion": "LIGHTHOUSE-owner.18 / PR-178-head",
-      "labOwned": true,
-      "status": "DRAFT",
+      "changed": true,
       "original": {
         "product": "LIGHTHOUSE",
         "role": "MOBILE_OBSERVER_AND_RIDE_CLIENT",
@@ -293,27 +290,10 @@
           }
         }
       },
-      "edits": [
-        {
-          "op": "SET",
-          "path": [
-            "proposal"
-          ],
-          "at": "2026-09-27T13:27:50.924Z"
-        },
-        {
-          "op": "SET",
-          "path": [
-            "proposal",
-            "intentRefiner"
-          ],
-          "at": "2026-09-27T13:36:27.205Z"
-        }
-      ],
-      "createdAt": "2026-09-27T13:26:42.956Z",
-      "updatedAt": "2026-09-27T13:36:27.205Z"
+      "editCount": 2,
+      "approval": "NOT_AN_APPROVAL"
     }
   },
   "error": null,
-  "completedAt": "2026-09-27T13:36:27.239Z"
+  "completedAt": "2026-09-27T13:38:23.242Z"
 }
