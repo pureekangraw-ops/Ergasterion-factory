@@ -607,11 +607,165 @@
         "authority": {
           "owner": "BIG",
           "externalMutation": "GOVERNED"
+        },
+        "proposal": {
+          "product": "PRISM",
+          "logic": "SPECTRUM",
+          "role": "BIG_MOBILE_COPILOT_AND_GO_HUB_CLIENT",
+          "principle": "ONE_SURFACE_MANY_CAPABILITIES_GO_HUB_REMAINS_TRUTH",
+          "coreFlow": [
+            "INTENT",
+            "CONTEXT",
+            "WORK",
+            "ROUTE",
+            "AUTHORITY",
+            "DISPATCH",
+            "VERIFY"
+          ],
+          "surfaces": {
+            "COPILOT": "PRIMARY",
+            "HUB": "WORK_ROUTE_COUNTER_STATUS",
+            "MAP": {
+              "primary": true,
+              "RIDE": "OPTIONAL_MODE"
+            },
+            "BROWSER": "GECKOVIEW_PLUS_OBSERVER",
+            "LEDGER": "ALL_FINANCE_DATA_OWNER",
+            "LAB": "PIXIE_ENTRY",
+            "CALENDAR": "REMOVED_FROM_PRISM"
+          },
+          "copilot": {
+            "generalHelp": true,
+            "projectSummary": "ALL_OPEN_WAIT_VERIFY_BLOCKED",
+            "planning": true,
+            "appSwitchingRequired": false,
+            "unknownPolicy": "ASK_OR_RETURN_UNKNOWN_NEVER_GUESS"
+          },
+          "workResolver": {
+            "exactFirst": [
+              "workId",
+              "jobCode"
+            ],
+            "semantic": "CANDIDATE_ONLY",
+            "duplicatePrevention": true,
+            "createOnlyWhenNoExactWork": true
+          },
+          "route": {
+            "targets": [
+              "GO",
+              "LIGHT",
+              "PIXIE_LAB",
+              "FACTORY",
+              "BROWSER",
+              "MAP",
+              "LEDGER"
+            ],
+            "preserveCurrentRoute": true,
+            "sourceOfTruth": "GO_HUB_CENTRE"
+          },
+          "authority": {
+            "owner": "BIG",
+            "prismMayCoordinate": true,
+            "prismMayApproveForBig": false,
+            "strongActionsRequireOwner": true,
+            "externalMutation": "GOVERNED"
+          },
+          "dispatcher": {
+            "counterBound": true,
+            "handoffPacket": [
+              "workId",
+              "checkpointId",
+              "counterId",
+              "objective",
+              "contextRefs"
+            ],
+            "pickupTrigger": "รับสาย <CounterId>",
+            "returnTrigger": "คืนสาย <CounterId>",
+            "ownerTrigger": "รอบิ๊ก <CounterId>",
+            "autoDispatch": "ALLOWLIST_ONLY"
+          },
+          "conference": {
+            "participants": [
+              "GO",
+              "LIGHT"
+            ],
+            "moderator": "SPECTRUM",
+            "relay": "BOUNDED",
+            "mustBind": [
+              "workId",
+              "counterId",
+              "objective"
+            ],
+            "stop": [
+              "ANSWERED",
+              "BLOCKED",
+              "NEED_BIG",
+              "DONE",
+              "MAX_TURNS",
+              "TIMEOUT"
+            ],
+            "noInfiniteLoop": true
+          },
+          "deviceBridge": {
+            "preferredOrder": [
+              "NATIVE_API_OR_GO_HUB",
+              "DEEPLINK_OR_INTENT",
+              "ACCESSIBILITY_PLUS_IME"
+            ],
+            "actions": [
+              "OPEN",
+              "FOCUS",
+              "TYPE",
+              "TAP",
+              "OBSERVE"
+            ],
+            "signer": "SPECTRUM_DISPATCH_PACKET",
+            "arbitraryTyping": false,
+            "verifyBeforeAndAfterSend": true
+          },
+          "verify": {
+            "doNotTreatDispatchAsDone": true,
+            "receipts": [
+              "DELIVERED",
+              "PICKED_UP",
+              "RETURNED",
+              "READBACK"
+            ],
+            "observerEvidence": true,
+            "hubReceiptPreferred": true
+          },
+          "mobileFirst": {
+            "primaryDevice": "ANDROID",
+            "cloudDoesHeavyWork": true,
+            "localRoles": [
+              "COPILOT",
+              "DEVICE_BRIDGE",
+              "BROWSER",
+              "MAP",
+              "LEDGER",
+              "OBSERVER"
+            ],
+            "tolerateNoComputer": true
+          },
+          "migration": {
+            "from": "LIGHTHOUSE",
+            "pr178Base": true,
+            "preserveLegacyAliasesUntilVerified": true,
+            "noProductionMutationInLab": true
+          }
         }
       },
-      "edits": [],
+      "edits": [
+        {
+          "op": "SET",
+          "path": [
+            "proposal"
+          ],
+          "at": "2026-09-27T13:27:50.924Z"
+        }
+      ],
       "createdAt": "2026-09-27T13:26:42.956Z",
-      "updatedAt": "2026-09-27T13:26:42.956Z"
+      "updatedAt": "2026-09-27T13:27:50.924Z"
     }
   ],
   "factoryHandoffs": [],
