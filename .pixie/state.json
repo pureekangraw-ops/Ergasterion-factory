@@ -195,6 +195,43 @@
         }
       ],
       "at": "2026-09-26T06:19:39.285Z"
+    },
+    {
+      "checkId": "CROSS-2026-09-27T08:18:35.348Z",
+      "experimentId": "PLAY-FALSE-GREEN-20260927",
+      "subjectRef": "fixture://go-hub-public-entry/false-green",
+      "source": "example-zone://GOHUB-ENTRY-FALSE-GREEN",
+      "status": "FAIL",
+      "observations": [
+        {
+          "roomId": "ROOM-A",
+          "status": "PASS",
+          "observed": {
+            "backendHealth": "PASS",
+            "userEntry": "PASS",
+            "httpStatus": 200
+          }
+        },
+        {
+          "roomId": "ROOM-B",
+          "status": "FAIL",
+          "observed": {
+            "backendHealth": "FAIL",
+            "userEntry": "FAIL",
+            "httpStatus": 404
+          }
+        },
+        {
+          "roomId": "ROOM-C",
+          "status": "FAIL",
+          "observed": {
+            "backendHealth": "PASS",
+            "userEntry": "FAIL",
+            "httpStatus": 404
+          }
+        }
+      ],
+      "at": "2026-09-27T08:18:35.348Z"
     }
   ],
   "contradictions": [],
