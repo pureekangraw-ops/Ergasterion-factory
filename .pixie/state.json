@@ -895,6 +895,135 @@
             },
             "authority": "LAB_ONLY_NOT_AN_APPROVAL",
             "productionMutation": false
+          },
+          "intentRefinerTrial": {
+            "trialId": "INTENT-TRIAL-PRISM-001",
+            "originalIntent": "PRISM is BIG's mobile-first Copilot and GO Hub client. SPECTRUM should let BIG access and coordinate GO Hub from one surface, use GO/LIGHT without app-switching, keep Ledger as finance owner, Map as the main map surface with Ride optional, remove the appointment-calendar surface, retain Browser/Observer, and use a Device Bridge as BIG's bounded on-device fingers.",
+            "rounds": [
+              {
+                "round": 1,
+                "focus": "ARCHITECTURE",
+                "challenges": [
+                  "If SPECTRUM owns every domain rule it becomes another bloated Lighthouse.",
+                  "One Copilot surface can hide provenance if capability ownership is not explicit."
+                ],
+                "newKnowledge": [
+                  "Keep SPECTRUM thin: orchestration only.",
+                  "Introduce a Capability Registry/Manifest: capability owner, source of truth, read/write contract, authority requirement, adapter, verification method.",
+                  "Use a Context Broker so Copilot receives only the relevant working set instead of dumping all GO Hub state into the model."
+                ]
+              },
+              {
+                "round": 2,
+                "focus": "HANDOFF_AND_DEVICE_ACTUATION",
+                "challenges": [
+                  "Using screen typing as the message transport risks duplicate sends, context drift, and UI breakage.",
+                  "GO↔LIGHT relay can become an infinite conversational loop."
+                ],
+                "newKnowledge": [
+                  "Counter/GO Hub remains the canonical handoff transcript; Device Bridge is only a wake/delivery layer.",
+                  "Every device action needs an idempotent signed dispatch envelope with counterId/workId/checkpointId/target/action/expectedUi/timeout.",
+                  "GO↔LIGHT conference must be objective-bound and terminate on ANSWERED/BLOCKED/NEED_BIG/DONE/MAX_TURNS/TIMEOUT."
+                ]
+              },
+              {
+                "round": 3,
+                "focus": "SECURITY_AND_RECOVERY",
+                "challenges": [
+                  "PRISM concentrates device control, GO Hub access, and financial data in one app.",
+                  "BIG has no computer, so a bad mobile update could remove the only control surface."
+                ],
+                "newKnowledge": [
+                  "Ledger needs a separate encrypted financial vault and prompt-minimization boundary; Copilot gets scoped summaries, not raw finance by default.",
+                  "Secrets/tokens stay outside model context and use device-backed secure storage where available.",
+                  "Migration needs a recovery/rollback path independent of the new PRISM shell; preserve Lighthouse legacy aliases until device verification succeeds.",
+                  "Cloud build artifacts need provenance/hash verification before device install."
+                ]
+              },
+              {
+                "round": 4,
+                "focus": "COPILOT_UX_AND_AUTO_REFINEMENT",
+                "challenges": [
+                  "Auto-refining every tiny command could make PRISM slow and annoying.",
+                  "A single Copilot surface could become opaque if work state is hidden."
+                ],
+                "newKnowledge": [
+                  "Intent Refiner depth should be saturation-driven: trivial intent can saturate in one pass; project-level/ambiguous intent continues.",
+                  "Expose inline route/authority/receipt evidence in Copilot instead of forcing BIG into dashboards.",
+                  "Calendar surface is removed from PRISM; do not silently delete the underlying Hub calendar capability unless BIG explicitly asks."
+                ]
+              },
+              {
+                "round": 5,
+                "focus": "FAILURE_COUNTEREXAMPLES",
+                "challenges": [
+                  "GO Hub offline or route unresolved.",
+                  "Accessibility target changes.",
+                  "Duplicate pickup trigger.",
+                  "Two candidate Works look similar.",
+                  "Agent reply never returns."
+                ],
+                "newKnowledge": [
+                  "Fail closed on unresolved Work/Route/Authority; queue locally rather than inventing truth.",
+                  "Never create a new Work from similarity alone.",
+                  "Device Bridge must verify before/after actuation and dedupe by dispatch id.",
+                  "Missing receipt remains WAIT/UNKNOWN, never DONE."
+                ]
+              },
+              {
+                "round": 6,
+                "focus": "SATURATION_CHECK",
+                "challenges": [
+                  "Search for a new material contradiction across architecture, authority, handoff, security, recovery and UX."
+                ],
+                "newKnowledge": [],
+                "saturation": {
+                  "materialNewInsight": false,
+                  "criticalUnknownsBounded": true,
+                  "contradictionsResolvedOrDocumented": true,
+                  "workingIntentStableAcrossRounds": 2,
+                  "actionableNextRouteKnown": true
+                }
+              }
+            ],
+            "workingIntent": {
+              "product": "PRISM",
+              "kernel": "SPECTRUM",
+              "definition": "A mobile-first owner cockpit where BIG uses one Copilot surface while SPECTRUM orchestrates governed GO Hub capabilities without owning their domain truth.",
+              "architecture": [
+                "COPILOT",
+                "SPECTRUM_THIN_ORCHESTRATOR",
+                "CAPABILITY_REGISTRY",
+                "CONTEXT_BROKER",
+                "GO_HUB_CENTRE_TRUTH",
+                "COUNTER_HANDOFF",
+                "DEVICE_BRIDGE_LAST_MILE",
+                "VERIFY_RECEIPTS"
+              ],
+              "surfaces": [
+                "COPILOT",
+                "HUB",
+                "MAP_WITH_OPTIONAL_RIDE",
+                "BROWSER_OBSERVER",
+                "LEDGER",
+                "LAB"
+              ],
+              "calendarSurface": "REMOVED",
+              "calendarHubCapability": "UNCHANGED_UNLESS_EXPLICITLY_REMOVED",
+              "agentCoordination": "Counter is canonical; device typing only wakes/routes the correct agent.",
+              "finance": "Ledger owns finance data behind a separate protected boundary; Copilot receives scoped finance context.",
+              "device": "API/Hub first, then deeplink/intent, Accessibility+IME only as verified last-mile actuation.",
+              "resilience": "Cloud does heavy work; mobile remains recoverable with verified build provenance and rollback/legacy path.",
+              "authority": "BIG remains owner; PRISM coordinates but never self-approves owner-only actions."
+            },
+            "unknowns": [
+              "Actual Android Device Bridge behavior against the target chat app has not been exercised.",
+              "A live inventory of every GO Hub capability/adapter still needs to be mapped into the Capability Registry.",
+              "PRISM migration/build/install/rollback from LIGHTHOUSE PR #178 has not been device-tested."
+            ],
+            "stopReason": "KNOWLEDGE_SATURATION",
+            "result": "REFINED_WITHOUT_CHANGING_OWNER_INTENT",
+            "authority": "LAB_ONLY_NOT_AN_APPROVAL"
           }
         }
       },
@@ -913,10 +1042,18 @@
             "intentRefiner"
           ],
           "at": "2026-09-27T13:36:27.205Z"
+        },
+        {
+          "op": "SET",
+          "path": [
+            "proposal",
+            "intentRefinerTrial"
+          ],
+          "at": "2026-09-27T13:44:10.400Z"
         }
       ],
       "createdAt": "2026-09-27T13:26:42.956Z",
-      "updatedAt": "2026-09-27T13:36:27.205Z"
+      "updatedAt": "2026-09-27T13:44:10.400Z"
     }
   ],
   "factoryHandoffs": [],
