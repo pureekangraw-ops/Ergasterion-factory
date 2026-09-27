@@ -1,31 +1,26 @@
-# PIXIE Workshop Toolkit
+# PYRO Forge Toolkit
 
-A/B/C are the free-play workshop for GO + PIXIE.
+This is the operational toolkit for PYRO-B.
 
-This toolkit is intentionally implemented from a clean contract, not copied from Factory behavior.
-
-## Built-in capabilities
+## Built-in forge capabilities
 
 - inspect repository
 - read file
 - compare refs/diffs
-- create feature branch
-- write file
-- delete file
-- run tests
-- read CI
-- read failure evidence
-- open PR
-- merge inside A/B/C
-- snapshot
-- rollback
+- create candidate branch
+- write candidate file
+- delete candidate file inside the allowed workspace
+- open PR candidate
+- room-local merge where permitted by the host boundary
+- snapshot / rollback
 - record lessons
 - emit evidence
-- extension hooks for future room tools
 
-## Boundary
+## Delegated ownership
 
-Anything under `room/pixie-a|b|c` and `feature/room-a|b|c-*` is workshop space.
-`main`, production, deploy, secrets, and external authority are not workshop tools.
+- **Board / work projection / dependency triage:** Heimdall V4
+- **Debug / tests / CI failure diagnosis / system probes:** Maintenance System Scanner
 
-Inside A/B/C the toolkit carries no Factory gate/policy semantics. The host only supplies concrete I/O.
+PYRO consumes the evidence those systems return; it does not duplicate their logic.
+
+No production/main behavior is implied.
