@@ -529,6 +529,89 @@
       ],
       "createdAt": "2026-09-27T10:55:30.545Z",
       "updatedAt": "2026-09-27T10:57:04.748Z"
+    },
+    {
+      "draftId": "DRAFT-PRISM-SPECTRUM-001",
+      "logicId": "PRISM_SPECTRUM_CORE",
+      "sourceRef": "github://pureekangraw-ops/ygph-metropolis/pull/178@01b8816002a31b9e00e66306756b4045c7670060",
+      "sourceVersion": "LIGHTHOUSE-owner.18 / PR-178-head",
+      "labOwned": true,
+      "status": "DRAFT",
+      "original": {
+        "product": "LIGHTHOUSE",
+        "role": "MOBILE_OBSERVER_AND_RIDE_CLIENT",
+        "surfaces": [
+          "MAP",
+          "RIDE",
+          "BROWSER",
+          "OBSERVER",
+          "CONTROL_PORT",
+          "FINANCE",
+          "CHAT",
+          "CALENDAR"
+        ],
+        "orchestration": {
+          "copilot": false,
+          "intentRouting": false,
+          "workResolution": false,
+          "agentHandoff": false,
+          "readback": false
+        },
+        "deviceBridge": {
+          "openApp": false,
+          "focus": false,
+          "type": false,
+          "tap": false,
+          "observe": true
+        },
+        "hubAccess": {
+          "singleSurface": false,
+          "goHubCapabilities": "PARTIAL"
+        },
+        "authority": {
+          "owner": "BIG",
+          "externalMutation": "GOVERNED"
+        }
+      },
+      "workingCopy": {
+        "product": "LIGHTHOUSE",
+        "role": "MOBILE_OBSERVER_AND_RIDE_CLIENT",
+        "surfaces": [
+          "MAP",
+          "RIDE",
+          "BROWSER",
+          "OBSERVER",
+          "CONTROL_PORT",
+          "FINANCE",
+          "CHAT",
+          "CALENDAR"
+        ],
+        "orchestration": {
+          "copilot": false,
+          "intentRouting": false,
+          "workResolution": false,
+          "agentHandoff": false,
+          "readback": false
+        },
+        "deviceBridge": {
+          "openApp": false,
+          "focus": false,
+          "type": false,
+          "tap": false,
+          "observe": true
+        },
+        "hubAccess": {
+          "singleSurface": false,
+          "goHubCapabilities": "PARTIAL"
+        },
+        "authority": {
+          "owner": "BIG",
+          "externalMutation": "GOVERNED"
+        }
+      },
+      "edits": [],
+      "createdAt": "2026-09-27T13:26:42.956Z",
+      "updatedAt": "2026-09-27T13:26:42.956Z"
     }
   ],
   "factoryHandoffs": [],

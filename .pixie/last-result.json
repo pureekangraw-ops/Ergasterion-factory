@@ -1,190 +1,98 @@
 {
-  "requestId": "PIXIE-PRISM-EXAMPLES-20260927-001",
-  "command": "examples",
+  "requestId": "PIXIE-PRISM-LOGIC-CREATE-20260927-001",
+  "command": "logic_create",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "examples",
-    "mutated": false,
-    "result": [
-      {
-        "exampleId": "GOHUB-ENTRY-HEALTHY",
-        "name": "GO Hub public entry healthy",
-        "subjectRef": "fixture://go-hub-public-entry/healthy",
-        "observations": [
-          {
-            "roomId": "ROOM-A",
-            "status": "PASS",
-            "observed": {
-              "backendHealth": "PASS",
-              "userEntry": "PASS",
-              "httpStatus": 200,
-              "hasGoHubTitle": true,
-              "hasCentre": true
-            }
-          },
-          {
-            "roomId": "ROOM-B",
-            "status": "PASS",
-            "observed": {
-              "backendHealth": "PASS",
-              "userEntry": "PASS",
-              "httpStatus": 200,
-              "hasGoHubTitle": true,
-              "hasCentre": true
-            }
-          },
-          {
-            "roomId": "ROOM-C",
-            "status": "PASS",
-            "observed": {
-              "backendHealth": "PASS",
-              "userEntry": "PASS",
-              "httpStatus": 200,
-              "hasGoHubTitle": true,
-              "hasCentre": true
-            }
-          }
-        ]
+    "command": "logic_create",
+    "mutated": true,
+    "result": {
+      "draftId": "DRAFT-PRISM-SPECTRUM-001",
+      "logicId": "PRISM_SPECTRUM_CORE",
+      "sourceRef": "github://pureekangraw-ops/ygph-metropolis/pull/178@01b8816002a31b9e00e66306756b4045c7670060",
+      "sourceVersion": "LIGHTHOUSE-owner.18 / PR-178-head",
+      "labOwned": true,
+      "status": "DRAFT",
+      "original": {
+        "product": "LIGHTHOUSE",
+        "role": "MOBILE_OBSERVER_AND_RIDE_CLIENT",
+        "surfaces": [
+          "MAP",
+          "RIDE",
+          "BROWSER",
+          "OBSERVER",
+          "CONTROL_PORT",
+          "FINANCE",
+          "CHAT",
+          "CALENDAR"
+        ],
+        "orchestration": {
+          "copilot": false,
+          "intentRouting": false,
+          "workResolution": false,
+          "agentHandoff": false,
+          "readback": false
+        },
+        "deviceBridge": {
+          "openApp": false,
+          "focus": false,
+          "type": false,
+          "tap": false,
+          "observe": true
+        },
+        "hubAccess": {
+          "singleSurface": false,
+          "goHubCapabilities": "PARTIAL"
+        },
+        "authority": {
+          "owner": "BIG",
+          "externalMutation": "GOVERNED"
+        }
       },
-      {
-        "exampleId": "GOHUB-ENTRY-404",
-        "name": "GO Hub public entry missing",
-        "subjectRef": "fixture://go-hub-public-entry/404",
-        "observations": [
-          {
-            "roomId": "ROOM-A",
-            "status": "PASS",
-            "observed": {
-              "backendHealth": "PASS",
-              "userEntry": "PASS",
-              "httpStatus": 200
-            }
-          },
-          {
-            "roomId": "ROOM-B",
-            "status": "FAIL",
-            "observed": {
-              "backendHealth": "FAIL",
-              "userEntry": "FAIL",
-              "httpStatus": 404
-            }
-          },
-          {
-            "roomId": "ROOM-C",
-            "status": "FAIL",
-            "observed": {
-              "backendHealth": "FAIL",
-              "userEntry": "FAIL",
-              "httpStatus": 404
-            }
-          }
-        ]
+      "workingCopy": {
+        "product": "LIGHTHOUSE",
+        "role": "MOBILE_OBSERVER_AND_RIDE_CLIENT",
+        "surfaces": [
+          "MAP",
+          "RIDE",
+          "BROWSER",
+          "OBSERVER",
+          "CONTROL_PORT",
+          "FINANCE",
+          "CHAT",
+          "CALENDAR"
+        ],
+        "orchestration": {
+          "copilot": false,
+          "intentRouting": false,
+          "workResolution": false,
+          "agentHandoff": false,
+          "readback": false
+        },
+        "deviceBridge": {
+          "openApp": false,
+          "focus": false,
+          "type": false,
+          "tap": false,
+          "observe": true
+        },
+        "hubAccess": {
+          "singleSurface": false,
+          "goHubCapabilities": "PARTIAL"
+        },
+        "authority": {
+          "owner": "BIG",
+          "externalMutation": "GOVERNED"
+        }
       },
-      {
-        "exampleId": "GOHUB-ENTRY-FALSE-GREEN",
-        "name": "Backend green while user entry is down",
-        "subjectRef": "fixture://go-hub-public-entry/false-green",
-        "observations": [
-          {
-            "roomId": "ROOM-A",
-            "status": "PASS",
-            "observed": {
-              "backendHealth": "PASS",
-              "userEntry": "PASS",
-              "httpStatus": 200
-            }
-          },
-          {
-            "roomId": "ROOM-B",
-            "status": "FAIL",
-            "observed": {
-              "backendHealth": "FAIL",
-              "userEntry": "FAIL",
-              "httpStatus": 404
-            }
-          },
-          {
-            "roomId": "ROOM-C",
-            "status": "FAIL",
-            "observed": {
-              "backendHealth": "PASS",
-              "userEntry": "FAIL",
-              "httpStatus": 404
-            }
-          }
-        ]
-      },
-      {
-        "exampleId": "GOHUB-ENTRY-RECOVERED",
-        "name": "Recovered public entry after repair",
-        "subjectRef": "fixture://go-hub-public-entry/recovered",
-        "observations": [
-          {
-            "roomId": "ROOM-A",
-            "status": "PASS",
-            "observed": {
-              "backendHealth": "PASS",
-              "userEntry": "PASS",
-              "httpStatus": 200
-            }
-          },
-          {
-            "roomId": "ROOM-B",
-            "status": "PASS",
-            "observed": {
-              "backendHealth": "PASS",
-              "userEntry": "PASS",
-              "httpStatus": 200
-            }
-          },
-          {
-            "roomId": "ROOM-C",
-            "status": "PASS",
-            "observed": {
-              "backendHealth": "PASS",
-              "userEntry": "PASS",
-              "httpStatus": 200
-            }
-          }
-        ]
-      },
-      {
-        "exampleId": "CRITICAL-UNKNOWN",
-        "name": "Critical unknown blocks the gate",
-        "subjectRef": "fixture://critical-unknown",
-        "observations": [
-          {
-            "roomId": "ROOM-A",
-            "status": "UNKNOWN",
-            "observed": {
-              "result": "UNKNOWN",
-              "reason": "EVIDENCE_UNAVAILABLE"
-            }
-          },
-          {
-            "roomId": "ROOM-B",
-            "status": "UNKNOWN",
-            "observed": {
-              "result": "UNKNOWN",
-              "reason": "EVIDENCE_UNAVAILABLE"
-            }
-          },
-          {
-            "roomId": "ROOM-C",
-            "status": "UNKNOWN",
-            "observed": {
-              "result": "UNKNOWN",
-              "reason": "EVIDENCE_UNAVAILABLE"
-            }
-          }
-        ]
-      }
-    ]
+      "edits": [],
+      "createdAt": "2026-09-27T13:26:42.956Z",
+      "updatedAt": "2026-09-27T13:26:42.956Z"
+    }
   },
   "error": null,
-  "completedAt": "2026-09-27T13:25:30.479Z"
+  "completedAt": "2026-09-27T13:26:42.991Z"
 }
