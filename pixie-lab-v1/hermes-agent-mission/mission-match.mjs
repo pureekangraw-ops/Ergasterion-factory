@@ -3,11 +3,9 @@ const text = value => String(value ?? "").trim().toLocaleLowerCase("th-TH");
 function compact(value) {
   return text(value).replace(/[\s\p{P}\p{S}]+/gu, "");
 }
-
 function tokens(value) {
   return [...new Set(text(value).split(/[^\p{L}\p{N}]+/u).map(x => x.trim()).filter(Boolean))];
 }
-
 function grams(value, size = 2) {
   const source = compact(value);
   if (!source) return [];
@@ -16,7 +14,6 @@ function grams(value, size = 2) {
   for (let i = 0; i <= source.length - size; i += 1) out.push(source.slice(i, i + size));
   return [...new Set(out)];
 }
-
 function jaccard(left = [], right = []) {
   const a = new Set(left), b = new Set(right);
   if (!a.size && !b.size) return 1;
@@ -25,42 +22,46 @@ function jaccard(left = [], right = []) {
   for (const item of a) if (b.has(item)) common += 1;
   return common / (a.size + b.size - common);
 }
-
-function missionText(card = {}) {
-  return [card.mission, card.requestedResult, ...(card.tags || [])].filter(Boolean).join(" ");
+function sourceText(record = {}) {
+  const card = record.card || record;
+  const memory = record.memory || {};
+  return [memory.mission, memory.requestedResult, card.title, card.detail].filter(Boolean).join(" ");
 }
-
-function statusWeight(status) {
-  const normalized = String(status || "").toUpperCase();
-  if (normalized === "ON_PROCESS") return 0.10;
-  if (normalized === "WAIT" || normalized === "WAIT_VERIFY") return 0.07;
-  if (normalized === "DRAFT") return 0.05;
-  if (normalized === "COMPLETE") return -0.03;
-  if (normalized === "CANCEL") return -0.10;
+function statusWeight(record = {}) {
+  const status = String((record.card || record)?.sourceStatus || "").toUpperCase();
+  if (status === "ON PROCESS") return 0.10;
+  if (status === "WAIT CONFIRM") return 0.07;
+  if (status === "OPEN" || status === "READY" || status === "ARRIVED") return 0.05;
+  if (status === "COMPLETE" || status === "RETURNED") return -0.03;
+  if (status === "CANCEL") return -0.10;
   return 0;
 }
 
-export function missionSimilarity(query, card) {
-  const source = missionText(card);
-  const tokenScore = jaccard(tokens(query), tokens(source));
-  const bigramScore = jaccard(grams(query, 2), grams(source, 2));
-  const trigramScore = jaccard(grams(query, 3), grams(source, 3));
-  const lexical = (tokenScore * 0.30) + (bigramScore * 0.40) + (trigramScore * 0.30);
-  return Math.max(0, Math.min(1, lexical + statusWeight(card?.status)));
+export function missionSimilarity(query, record) {
+  const source = sourceText(record);
+  const lexical = (jaccard(tokens(query), tokens(source)) * 0.30)
+    + (jaccard(grams(query,2), grams(source,2)) * 0.40)
+    + (jaccard(grams(query,3), grams(source,3)) * 0.30);
+  return Math.max(0, Math.min(1, lexical + statusWeight(record)));
 }
 
-export function rankMissionCards(query, cards = [], { threshold = 0.24, limit = 5 } = {}) {
-  return cards
-    .map(card => ({ card, score:missionSimilarity(query, card) }))
+export function rankMissionCards(query, records = [], { threshold = 0.24, limit = 5 } = {}) {
+  return records
+    .map(record => ({ record, score:missionSimilarity(query, record) }))
     .filter(item => item.score >= threshold)
-    .sort((a,b) => b.score - a.score || String(b.card?.updatedAt || "").localeCompare(String(a.card?.updatedAt || "")))
+    .sort((a,b) => b.score - a.score || String((b.record.card || b.record)?.lastUpdated || "").localeCompare(String((a.record.card || a.record)?.lastUpdated || "")))
     .slice(0, limit)
-    .map(({ card, score }) => Object.freeze({
-      cardId:String(card.cardId || ""),
-      mission:String(card.mission || ""),
-      status:String(card.status || ""),
-      revision:Number(card.revision || 0),
-      score:Number(score.toFixed(4)),
-      updatedAt:card.updatedAt || null,
-    }));
+    .map(({ record, score }) => {
+      const card = record.card || record;
+      return Object.freeze({
+        cardId:String(card.cardId || ""),
+        workId:String(card.workId || ""),
+        jobCode:String(card.jobCode || ""),
+        title:String(card.title || ""),
+        status:String(card.status || ""),
+        sourceStatus:String(card.sourceStatus || ""),
+        score:Number(score.toFixed(4)),
+        lastUpdated:card.lastUpdated || null,
+      });
+    });
 }
