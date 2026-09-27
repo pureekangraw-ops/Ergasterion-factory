@@ -3,34 +3,19 @@ const clone = value => value == null ? value : structuredClone(value);
 const unique = values => [...new Set((values || []).map(text).filter(Boolean))];
 
 export const HERMES_CONTRACT = "HERMES_AGENT_MISSION_V1";
-export const MISSION_CARD_CONTRACT = "HERMES_MISSION_CARD_V1";
 export const HERMES_SESSION_CONTRACT = "HERMES_SESSION_V1";
+export const HERMES_CARD_ISSUE_REQUEST_CONTRACT = "HERMES_CARD_ISSUE_REQUEST_V1";
+export const HERMES_RETURN_REQUEST_CONTRACT = "HERMES_CARD_RETURN_REQUEST_V1";
 export const HEIMDALL_FIRST_OPEN_CONTRACT = "HERMES_HEIMDALL_FIRST_OPEN_V1";
 export const LIGHT_CONTEXT_REQUEST_CONTRACT = "HERMES_LIGHT_CONTEXT_REQUEST_V1";
 
-export const CARD_STATUS = Object.freeze([
-  "DRAFT","ON_PROCESS","WAIT","WAIT_VERIFY","COMPLETE","CANCEL"
-]);
-
 export const SESSION_STATUS = Object.freeze([
-  "ENTERED","CARD_READY","FIRST_OPEN_READY","IN_MISSION","RETURNED","EXITED"
+  "ENTERED","CARD_ISSUE_PENDING","CARD_READY","FIRST_OPEN_READY","IN_MISSION","RETURN_PENDING","RETURNED","EXITED"
 ]);
 
 export const FIRST_OPEN_STATUS = Object.freeze([
   "OPENED","ALREADY_OPEN","BLOCKED","UNKNOWN"
 ]);
-
-export function assertCardStatus(value) {
-  const status = text(value).toUpperCase();
-  if (!CARD_STATUS.includes(status)) throw new Error("HERMES_CARD_STATUS_INVALID");
-  return status;
-}
-
-export function assertSessionStatus(value) {
-  const status = text(value).toUpperCase();
-  if (!SESSION_STATUS.includes(status)) throw new Error("HERMES_SESSION_STATUS_INVALID");
-  return status;
-}
 
 export function requireText(value, label) {
   const result = text(value);
