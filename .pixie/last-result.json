@@ -1,50 +1,82 @@
 {
-  "requestId": "PIXIE-CLEAN-20260927-B2",
-  "command": "clean_room",
+  "requestId": "PIXIE-HERMES-DRAFT-20260927-002",
+  "command": "logic_create",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "clean_room",
+    "command": "logic_create",
     "mutated": true,
     "result": {
-      "cleanId": "CLEAN-ROOM-B-2026-09-27T08:20:59.956Z",
-      "roomId": "ROOM-B",
-      "status": "PASS",
-      "cleanupKind": "LAB_TRANSIENT_RESET",
-      "reason": "Prepare clean isolated rooms for upcoming core Intent processing experiment",
-      "stages": [
-        "ZERO",
-        "STERILIZE",
-        "VERIFY_CLEAN",
-        "LOAD_CLEAN_SEED",
-        "READY"
-      ],
-      "discardedSessionIds": [
-        "S-ENTRY-404-001"
-      ],
-      "discardedCycleIds": [],
-      "clearedRoomReports": 0,
-      "archiveCreated": false,
-      "cleanSeedRef": "pixie://clean-seed/intent-core",
-      "before": {
-        "status": "RESERVED",
-        "lifecycleStage": "READY",
-        "activeSessionId": "S-ENTRY-404-001",
-        "currentCycleId": null
+      "draftId": "DRAFT-HERMES-VNEXT-001",
+      "logicId": "HERMES_AGENT_MISSION",
+      "sourceRef": "github://pureekangraw-ops/standard-/go-hub-agent-mission.mjs@main",
+      "sourceVersion": "main",
+      "labOwned": true,
+      "status": "DRAFT",
+      "original": {
+        "role": "MISSION_ORCHESTRATOR",
+        "workResolution": {
+          "exactIdentitySupported": true,
+          "missionSearch": "SIMILARITY_CANDIDATES",
+          "autoEnterFromSimilarity": false
+        },
+        "workCreation": {
+          "idSource": "HERMES_LOCAL_CREATE_ID",
+          "formatGuard": false
+        },
+        "currentRoute": {
+          "explicitContract": false,
+          "destinationMayBeNull": true
+        },
+        "permissionOpen": {
+          "path": "HERMES_TO_CENTRE_V4_OPEN_PASS",
+          "heimdallReceiptRequired": false
+        },
+        "diagnostics": {
+          "directCapabilityRoute": false,
+          "policy": "NONE"
+        },
+        "returnReadback": {
+          "evidenceRequiredForComplete": true,
+          "centreReturn": true
+        }
       },
-      "after": {
-        "status": "READY",
-        "lifecycleStage": "READY",
-        "activeSessionId": null,
-        "currentCycleId": null
+      "workingCopy": {
+        "role": "MISSION_ORCHESTRATOR",
+        "workResolution": {
+          "exactIdentitySupported": true,
+          "missionSearch": "SIMILARITY_CANDIDATES",
+          "autoEnterFromSimilarity": false
+        },
+        "workCreation": {
+          "idSource": "HERMES_LOCAL_CREATE_ID",
+          "formatGuard": false
+        },
+        "currentRoute": {
+          "explicitContract": false,
+          "destinationMayBeNull": true
+        },
+        "permissionOpen": {
+          "path": "HERMES_TO_CENTRE_V4_OPEN_PASS",
+          "heimdallReceiptRequired": false
+        },
+        "diagnostics": {
+          "directCapabilityRoute": false,
+          "policy": "NONE"
+        },
+        "returnReadback": {
+          "evidenceRequiredForComplete": true,
+          "centreReturn": true
+        }
       },
-      "startedAt": "2026-09-27T08:20:59.956Z",
-      "completedAt": "2026-09-27T08:20:59.956Z"
+      "edits": [],
+      "createdAt": "2026-09-27T10:55:18.798Z",
+      "updatedAt": "2026-09-27T10:55:18.798Z"
     }
   },
   "error": null,
-  "completedAt": "2026-09-27T08:20:59.992Z"
+  "completedAt": "2026-09-27T10:55:18.835Z"
 }

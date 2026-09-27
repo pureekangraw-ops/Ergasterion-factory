@@ -302,6 +302,73 @@
       ],
       "createdAt": "2026-09-26T07:46:07.991Z",
       "updatedAt": "2026-09-26T07:47:18.989Z"
+    },
+    {
+      "draftId": "DRAFT-HERMES-VNEXT-001",
+      "logicId": "HERMES_AGENT_MISSION",
+      "sourceRef": "github://pureekangraw-ops/standard-/go-hub-agent-mission.mjs@main",
+      "sourceVersion": "main",
+      "labOwned": true,
+      "status": "DRAFT",
+      "original": {
+        "role": "MISSION_ORCHESTRATOR",
+        "workResolution": {
+          "exactIdentitySupported": true,
+          "missionSearch": "SIMILARITY_CANDIDATES",
+          "autoEnterFromSimilarity": false
+        },
+        "workCreation": {
+          "idSource": "HERMES_LOCAL_CREATE_ID",
+          "formatGuard": false
+        },
+        "currentRoute": {
+          "explicitContract": false,
+          "destinationMayBeNull": true
+        },
+        "permissionOpen": {
+          "path": "HERMES_TO_CENTRE_V4_OPEN_PASS",
+          "heimdallReceiptRequired": false
+        },
+        "diagnostics": {
+          "directCapabilityRoute": false,
+          "policy": "NONE"
+        },
+        "returnReadback": {
+          "evidenceRequiredForComplete": true,
+          "centreReturn": true
+        }
+      },
+      "workingCopy": {
+        "role": "MISSION_ORCHESTRATOR",
+        "workResolution": {
+          "exactIdentitySupported": true,
+          "missionSearch": "SIMILARITY_CANDIDATES",
+          "autoEnterFromSimilarity": false
+        },
+        "workCreation": {
+          "idSource": "HERMES_LOCAL_CREATE_ID",
+          "formatGuard": false
+        },
+        "currentRoute": {
+          "explicitContract": false,
+          "destinationMayBeNull": true
+        },
+        "permissionOpen": {
+          "path": "HERMES_TO_CENTRE_V4_OPEN_PASS",
+          "heimdallReceiptRequired": false
+        },
+        "diagnostics": {
+          "directCapabilityRoute": false,
+          "policy": "NONE"
+        },
+        "returnReadback": {
+          "evidenceRequiredForComplete": true,
+          "centreReturn": true
+        }
+      },
+      "edits": [],
+      "createdAt": "2026-09-27T10:55:18.798Z",
+      "updatedAt": "2026-09-27T10:55:18.798Z"
     }
   ],
   "factoryHandoffs": [],
