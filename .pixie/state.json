@@ -357,6 +357,274 @@
       "renderPacketRefs": [],
       "createdAt": "2026-09-26T09:00:56.736Z",
       "updatedAt": "2026-09-26T09:00:56.737Z"
+    },
+    {
+      "visualDraftId": "VIS-LOST-ERA-SALES-20260927-001",
+      "sourceRef": "work://WORK-REALITY-RENDERING-SALES-VISUALS-20260926-001/final-sales-concept",
+      "sourceVersion": "final-concept-v1",
+      "sourceHash": null,
+      "sourceLocked": true,
+      "labOwned": true,
+      "status": "DRAFT",
+      "originalSpec": {
+        "ideaBoard": {
+          "title": "Lost Era — Final Sales Visual Direction",
+          "pinned": [
+            "Normal first. Strange second.",
+            "One continuous location.",
+            "One simple anomaly per image.",
+            "Do not look like a tourism campaign.",
+            "Product proof uses a real screenshot later."
+          ]
+        },
+        "creativeBrief": {
+          "product": "Lost Era",
+          "purpose": "Product Showcase for a real digital worldbuilding product sales page",
+          "coreIdea": "A normal working urban district gradually reveals that an older layout still occupies the same physical space. Lost Era helps turn that anomaly into a usable, coherent story.",
+          "location": {
+            "type": "ordinary canal-side urban service/transit district",
+            "recurringAnchors": [
+              "same narrow canal",
+              "same small stone bridge",
+              "same main occupied building",
+              "same old stone arch doorway at ground level",
+              "same modern pedestrian/transit infrastructure"
+            ]
+          },
+          "visualRules": [
+            "80% ordinary reality, 20% anomaly",
+            "eye-level or near eye-level camera",
+            "medium/close framing; no sightseeing vista",
+            "one anomaly per image",
+            "warm dusk light, believable architecture, restrained fantasy",
+            "same place and anchors across the sequence",
+            "no generated text inside images"
+          ],
+          "avoid": [
+            "portal",
+            "floating buildings",
+            "cosmic sky",
+            "apocalypse",
+            "large destruction",
+            "generic glitch effects",
+            "grand skyline",
+            "tourism-poster composition",
+            "fake Notion UI",
+            "fake readable text",
+            "random letters",
+            "logos",
+            "watermarks",
+            "clutter"
+          ],
+          "salesSet": [
+            {
+              "id": 1,
+              "name": "Hero",
+              "goal": "Stop the viewer. Normal place, one wrong-era detail."
+            },
+            {
+              "id": 2,
+              "name": "Before",
+              "goal": "Establish the same location as completely usable and ordinary."
+            },
+            {
+              "id": 3,
+              "name": "First Clue",
+              "goal": "Reveal a short old stone staircase where modern solid ground should be."
+            },
+            {
+              "id": 4,
+              "name": "Old Access",
+              "goal": "Open the same stone doorway into an older corridor belonging to the same building."
+            },
+            {
+              "id": 5,
+              "name": "Functional Mismatch",
+              "goal": "Show modern infrastructure physically conflicting with the older layout."
+            },
+            {
+              "id": 6,
+              "name": "Product Proof",
+              "goal": "Keep a clean illuminated insert area for a real template screenshot added later; generate no device or UI."
+            }
+          ]
+        },
+        "promptSet": {
+          "master": "Grounded cinematic editorial illustration, photorealistic believable architecture, ordinary canal-side urban service district at warm dusk, restrained color palette, eye-level camera, medium framing, same narrow canal, same small stone bridge, same occupied main building, same old stone arch doorway, same modern pedestrian/transit infrastructure. The location is functional and lived-in, not picturesque. Keep 80% ordinary present-day reality and only 20% anomaly. No text, labels, logos, UI, watermarks, portals, cosmic effects, giant skyline, apocalypse, or clutter.",
+          "images": [
+            {
+              "id": 1,
+              "name": "Hero",
+              "prompt": "Show the ordinary district in use. The old stone arch doorway is visually clear but believable; introduce exactly one subtle wrong-era detail near it, such as a few old stone steps interrupting the modern pavement. Leave calm negative space for title added later. No sightseeing panorama."
+            },
+            {
+              "id": 2,
+              "name": "Before",
+              "prompt": "Show the exact same camera family and recurring anchors before anything is obviously wrong. Canal, bridge, main building, arch doorway, pavement and transit elements all function normally. Quiet everyday realism; the doorway reads as old but not mysterious."
+            },
+            {
+              "id": 3,
+              "name": "First Clue",
+              "prompt": "Same place and anchors. A short weathered stone staircase now emerges where the modern street plan should be solid ground. Make the contradiction physically clear but modest enough that a passerby might rationalize it. Everything else stays normal."
+            },
+            {
+              "id": 4,
+              "name": "Old Access",
+              "prompt": "Same stone arch doorway, now open. Behind it is a physically continuous older corridor inside the same building footprint: stone floor, old masonry, believable depth and construction. It must not resemble a portal or another dimension."
+            },
+            {
+              "id": 5,
+              "name": "Functional Mismatch",
+              "prompt": "Same district. Show one clear infrastructure consequence: a modern transit/service corridor follows its normal path but terminates at an older masonry wall or old passage alignment, forcing two incompatible routes through the same physical location. No explosion, collapse, or spectacle."
+            },
+            {
+              "id": 6,
+              "name": "Product Proof",
+              "prompt": "Use the same visual identity but simplify the scene heavily. Provide a clean, well-lit editorial composition with a large empty rectangular insert area intended for a real Notion template screenshot added later. Do not generate a laptop, phone, browser window, fake interface, fake writing, or placeholder text."
+            }
+          ]
+        },
+        "executionOrder": [
+          "Hero",
+          "Before",
+          "First Clue",
+          "Old Access",
+          "Functional Mismatch",
+          "Product Proof"
+        ]
+      },
+      "workingSpec": {
+        "ideaBoard": {
+          "title": "Lost Era — Final Sales Visual Direction",
+          "pinned": [
+            "Normal first. Strange second.",
+            "One continuous location.",
+            "One simple anomaly per image.",
+            "Do not look like a tourism campaign.",
+            "Product proof uses a real screenshot later."
+          ]
+        },
+        "creativeBrief": {
+          "product": "Lost Era",
+          "purpose": "Product Showcase for a real digital worldbuilding product sales page",
+          "coreIdea": "A normal working urban district gradually reveals that an older layout still occupies the same physical space. Lost Era helps turn that anomaly into a usable, coherent story.",
+          "location": {
+            "type": "ordinary canal-side urban service/transit district",
+            "recurringAnchors": [
+              "same narrow canal",
+              "same small stone bridge",
+              "same main occupied building",
+              "same old stone arch doorway at ground level",
+              "same modern pedestrian/transit infrastructure"
+            ]
+          },
+          "visualRules": [
+            "80% ordinary reality, 20% anomaly",
+            "eye-level or near eye-level camera",
+            "medium/close framing; no sightseeing vista",
+            "one anomaly per image",
+            "warm dusk light, believable architecture, restrained fantasy",
+            "same place and anchors across the sequence",
+            "no generated text inside images"
+          ],
+          "avoid": [
+            "portal",
+            "floating buildings",
+            "cosmic sky",
+            "apocalypse",
+            "large destruction",
+            "generic glitch effects",
+            "grand skyline",
+            "tourism-poster composition",
+            "fake Notion UI",
+            "fake readable text",
+            "random letters",
+            "logos",
+            "watermarks",
+            "clutter"
+          ],
+          "salesSet": [
+            {
+              "id": 1,
+              "name": "Hero",
+              "goal": "Stop the viewer. Normal place, one wrong-era detail."
+            },
+            {
+              "id": 2,
+              "name": "Before",
+              "goal": "Establish the same location as completely usable and ordinary."
+            },
+            {
+              "id": 3,
+              "name": "First Clue",
+              "goal": "Reveal a short old stone staircase where modern solid ground should be."
+            },
+            {
+              "id": 4,
+              "name": "Old Access",
+              "goal": "Open the same stone doorway into an older corridor belonging to the same building."
+            },
+            {
+              "id": 5,
+              "name": "Functional Mismatch",
+              "goal": "Show modern infrastructure physically conflicting with the older layout."
+            },
+            {
+              "id": 6,
+              "name": "Product Proof",
+              "goal": "Keep a clean illuminated insert area for a real template screenshot added later; generate no device or UI."
+            }
+          ]
+        },
+        "promptSet": {
+          "master": "Grounded cinematic editorial illustration, photorealistic believable architecture, ordinary canal-side urban service district at warm dusk, restrained color palette, eye-level camera, medium framing, same narrow canal, same small stone bridge, same occupied main building, same old stone arch doorway, same modern pedestrian/transit infrastructure. The location is functional and lived-in, not picturesque. Keep 80% ordinary present-day reality and only 20% anomaly. No text, labels, logos, UI, watermarks, portals, cosmic effects, giant skyline, apocalypse, or clutter.",
+          "images": [
+            {
+              "id": 1,
+              "name": "Hero",
+              "prompt": "Show the ordinary district in use. The old stone arch doorway is visually clear but believable; introduce exactly one subtle wrong-era detail near it, such as a few old stone steps interrupting the modern pavement. Leave calm negative space for title added later. No sightseeing panorama."
+            },
+            {
+              "id": 2,
+              "name": "Before",
+              "prompt": "Show the exact same camera family and recurring anchors before anything is obviously wrong. Canal, bridge, main building, arch doorway, pavement and transit elements all function normally. Quiet everyday realism; the doorway reads as old but not mysterious."
+            },
+            {
+              "id": 3,
+              "name": "First Clue",
+              "prompt": "Same place and anchors. A short weathered stone staircase now emerges where the modern street plan should be solid ground. Make the contradiction physically clear but modest enough that a passerby might rationalize it. Everything else stays normal."
+            },
+            {
+              "id": 4,
+              "name": "Old Access",
+              "prompt": "Same stone arch doorway, now open. Behind it is a physically continuous older corridor inside the same building footprint: stone floor, old masonry, believable depth and construction. It must not resemble a portal or another dimension."
+            },
+            {
+              "id": 5,
+              "name": "Functional Mismatch",
+              "prompt": "Same district. Show one clear infrastructure consequence: a modern transit/service corridor follows its normal path but terminates at an older masonry wall or old passage alignment, forcing two incompatible routes through the same physical location. No explosion, collapse, or spectacle."
+            },
+            {
+              "id": 6,
+              "name": "Product Proof",
+              "prompt": "Use the same visual identity but simplify the scene heavily. Provide a clean, well-lit editorial composition with a large empty rectangular insert area intended for a real Notion template screenshot added later. Do not generate a laptop, phone, browser window, fake interface, fake writing, or placeholder text."
+            }
+          ]
+        },
+        "executionOrder": [
+          "Hero",
+          "Before",
+          "First Clue",
+          "Old Access",
+          "Functional Mismatch",
+          "Product Proof"
+        ]
+      },
+      "scans": [],
+      "edits": [],
+      "renderPacketRefs": [],
+      "createdAt": "2026-09-27T06:12:00.783Z",
+      "updatedAt": "2026-09-27T06:12:00.783Z"
     }
   ],
   "visualRenderPackets": [],
