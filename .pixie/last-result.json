@@ -1,9 +1,9 @@
 {
-  "requestId": "GNOME-POLISH-PRISM-002",
-  "command": "logic_create",
+  "requestId": "GNOME-WORKBENCH-POLISH-003",
+  "command": "logic_edit",
   "exitCode": 1,
   "ok": false,
   "output": null,
-  "error": "{\n  \"ok\": false,\n  \"error\": \"draftId is required\"\n}",
-  "completedAt": "2026-09-28T13:11:30.625Z"
+  "error": "{\n  \"ok\": false,\n  \"error\": \"LOGIC_DRAFT_NOT_FOUND\"\n}",
+  "completedAt": "2026-09-28T13:31:06.677Z"
 }
