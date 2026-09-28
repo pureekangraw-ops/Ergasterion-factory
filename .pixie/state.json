@@ -179,6 +179,68 @@
       "lifecycle": "READY_TO_RUN",
       "createdAt": "2026-09-27T13:30:16.072Z",
       "updatedAt": "2026-09-27T13:30:16.072Z"
+    },
+    {
+      "matrixId": "MATRIX-PRISM-CLEAN-BASE-003",
+      "subjectRef": "logic-draft://DRAFT-PRISM-CLEAN-BASE-002",
+      "logicVersion": "PRISM-CLEAN-BASE-002",
+      "roomId": null,
+      "rows": [
+        {
+          "testTypeId": "contract",
+          "caseRefs": [
+            "foundation-independence"
+          ],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "functional",
+          "caseRefs": [
+            "receipt-replay",
+            "mobile-surface"
+          ],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "permission_boundary",
+          "caseRefs": [
+            "unknown-fail-closed",
+            "owner-boundaries"
+          ],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "migration",
+          "caseRefs": [
+            "capability-migration"
+          ],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "recovery",
+          "caseRefs": [
+            "recovery"
+          ],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "integration",
+          "caseRefs": [
+            "same-work-handoff"
+          ],
+          "status": "UNRUN",
+          "required": true
+        }
+      ],
+      "overallStatus": "INCONCLUSIVE",
+      "lifecycle": "READY_TO_RUN",
+      "createdAt": "2026-09-28T09:12:51.540Z",
+      "updatedAt": "2026-09-28T09:12:51.540Z"
     }
   ],
   "testRuns": [],
