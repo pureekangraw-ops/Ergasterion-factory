@@ -1,9 +1,9 @@
 {
-  "requestId": "GNOME-WORKBENCH-POLISH-003",
-  "command": "logic_edit",
+  "requestId": "GNOME-WORKBENCH-CREATE-004",
+  "command": "logic_create",
   "exitCode": 1,
   "ok": false,
   "output": null,
-  "error": "{\n  \"ok\": false,\n  \"error\": \"LOGIC_DRAFT_NOT_FOUND\"\n}",
-  "completedAt": "2026-09-28T13:31:06.677Z"
+  "error": "{\n  \"ok\": false,\n  \"error\": \"draftId is required\"\n}",
+  "completedAt": "2026-09-28T13:32:04.838Z"
 }
