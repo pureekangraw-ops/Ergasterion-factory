@@ -1960,6 +1960,112 @@
       ],
       "createdAt": "2026-09-27T23:25:34.373Z",
       "updatedAt": "2026-09-27T23:27:01.771Z"
+    },
+    {
+      "visualDraftId": "VISUAL-PRISM-CLEAN-001",
+      "sourceRef": "logic-draft://DRAFT-PRISM-CLEAN-BASE-002",
+      "sourceVersion": "PRISM-CLEAN-BASE-002",
+      "sourceHash": null,
+      "sourceLocked": true,
+      "labOwned": true,
+      "status": "DRAFT",
+      "originalSpec": {
+        "product": "PRISM",
+        "platform": "ANDROID_MOBILE",
+        "surface": "COPILOT_HOME",
+        "intent": "Owner cockpit that feels like talking to GO, not operating an admin dashboard.",
+        "layout": {
+          "top": "small contextual header",
+          "focus": "large Copilot conversation/action area",
+          "support": "1-3 contextual cards only when relevant",
+          "bottomNav": [
+            "COPILOT",
+            "PROJECTS",
+            "MAP",
+            "LEDGER"
+          ],
+          "deep": [
+            "HANDOFF",
+            "MONITOR"
+          ]
+        },
+        "behavior": {
+          "default": "conversation first",
+          "progress": "inline evidence/receipt chips",
+          "unknown": "show concise WAIT/UNKNOWN with next safe action",
+          "projects": "current work and next action, not board dump",
+          "map": "map-first; Ride appears inside Map",
+          "ledger": "scoped financial summary; raw finance stays Ledger-owned"
+        },
+        "visualLanguage": {
+          "density": "LOW",
+          "hierarchy": "ONE_FOCAL_POINT",
+          "chrome": "MINIMAL",
+          "cards": "CONTEXTUAL_NOT_DASHBOARD",
+          "touch": "LARGE_MOBILE_TARGETS",
+          "systemJargon": "HIDDEN_BY_DEFAULT"
+        },
+        "mustAvoid": [
+          "dashboard wall",
+          "admin console",
+          "GO Hub internal route names on primary surface",
+          "LIGHTHOUSE branding/layout inheritance",
+          "calendar tab",
+          "Ride as top-level tab",
+          "permanent status-card clutter"
+        ]
+      },
+      "workingSpec": {
+        "product": "PRISM",
+        "platform": "ANDROID_MOBILE",
+        "surface": "COPILOT_HOME",
+        "intent": "Owner cockpit that feels like talking to GO, not operating an admin dashboard.",
+        "layout": {
+          "top": "small contextual header",
+          "focus": "large Copilot conversation/action area",
+          "support": "1-3 contextual cards only when relevant",
+          "bottomNav": [
+            "COPILOT",
+            "PROJECTS",
+            "MAP",
+            "LEDGER"
+          ],
+          "deep": [
+            "HANDOFF",
+            "MONITOR"
+          ]
+        },
+        "behavior": {
+          "default": "conversation first",
+          "progress": "inline evidence/receipt chips",
+          "unknown": "show concise WAIT/UNKNOWN with next safe action",
+          "projects": "current work and next action, not board dump",
+          "map": "map-first; Ride appears inside Map",
+          "ledger": "scoped financial summary; raw finance stays Ledger-owned"
+        },
+        "visualLanguage": {
+          "density": "LOW",
+          "hierarchy": "ONE_FOCAL_POINT",
+          "chrome": "MINIMAL",
+          "cards": "CONTEXTUAL_NOT_DASHBOARD",
+          "touch": "LARGE_MOBILE_TARGETS",
+          "systemJargon": "HIDDEN_BY_DEFAULT"
+        },
+        "mustAvoid": [
+          "dashboard wall",
+          "admin console",
+          "GO Hub internal route names on primary surface",
+          "LIGHTHOUSE branding/layout inheritance",
+          "calendar tab",
+          "Ride as top-level tab",
+          "permanent status-card clutter"
+        ]
+      },
+      "scans": [],
+      "edits": [],
+      "renderPacketRefs": [],
+      "createdAt": "2026-09-28T09:36:46.925Z",
+      "updatedAt": "2026-09-28T09:36:46.925Z"
     }
   ],
   "visualRenderPackets": [

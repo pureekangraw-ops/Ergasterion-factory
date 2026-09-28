@@ -1,52 +1,121 @@
 {
-  "requestId": "PRISM-TEST-PERMISSION-001",
-  "command": "add_test_run",
+  "requestId": "PRISM-VISUAL-CREATE-001",
+  "command": "visual_create",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "add_test_run",
+    "command": "visual_create",
     "mutated": true,
     "result": {
-      "runId": "PRISM-TEST-PERMISSION-001",
-      "runClass": "ROOM_TEST_RUN",
-      "initiatedBy": "GO",
-      "executedBy": "PIXIE-01",
-      "scope": "LOGIC_DRAFT",
-      "purpose": "PRISM clean-base acceptance: unknown-fail-closed,owner-boundaries",
-      "roomId": null,
-      "sourceRoomRefs": [],
-      "matrixRef": "MATRIX-PRISM-CLEAN-BASE-003",
-      "testTypeId": "permission_boundary",
-      "caseRef": null,
-      "fixtureRef": null,
-      "snapshotRef": null,
-      "logicVersion": "PRISM-CLEAN-BASE-002",
-      "expected": {
-        "cases": [
-          "unknown-fail-closed",
-          "owner-boundaries"
+      "visualDraftId": "VISUAL-PRISM-CLEAN-001",
+      "sourceRef": "logic-draft://DRAFT-PRISM-CLEAN-BASE-002",
+      "sourceVersion": "PRISM-CLEAN-BASE-002",
+      "sourceHash": null,
+      "sourceLocked": true,
+      "labOwned": true,
+      "status": "DRAFT",
+      "originalSpec": {
+        "product": "PRISM",
+        "platform": "ANDROID_MOBILE",
+        "surface": "COPILOT_HOME",
+        "intent": "Owner cockpit that feels like talking to GO, not operating an admin dashboard.",
+        "layout": {
+          "top": "small contextual header",
+          "focus": "large Copilot conversation/action area",
+          "support": "1-3 contextual cards only when relevant",
+          "bottomNav": [
+            "COPILOT",
+            "PROJECTS",
+            "MAP",
+            "LEDGER"
+          ],
+          "deep": [
+            "HANDOFF",
+            "MONITOR"
+          ]
+        },
+        "behavior": {
+          "default": "conversation first",
+          "progress": "inline evidence/receipt chips",
+          "unknown": "show concise WAIT/UNKNOWN with next safe action",
+          "projects": "current work and next action, not board dump",
+          "map": "map-first; Ride appears inside Map",
+          "ledger": "scoped financial summary; raw finance stays Ledger-owned"
+        },
+        "visualLanguage": {
+          "density": "LOW",
+          "hierarchy": "ONE_FOCAL_POINT",
+          "chrome": "MINIMAL",
+          "cards": "CONTEXTUAL_NOT_DASHBOARD",
+          "touch": "LARGE_MOBILE_TARGETS",
+          "systemJargon": "HIDDEN_BY_DEFAULT"
+        },
+        "mustAvoid": [
+          "dashboard wall",
+          "admin console",
+          "GO Hub internal route names on primary surface",
+          "LIGHTHOUSE branding/layout inheritance",
+          "calendar tab",
+          "Ride as top-level tab",
+          "permanent status-card clutter"
         ]
       },
-      "observed": {
-        "unknownPolicy": "FAIL_CLOSED",
-        "owner": "BIG",
-        "ledger": "FINANCE_OWNER",
-        "map": "PRIMARY"
+      "workingSpec": {
+        "product": "PRISM",
+        "platform": "ANDROID_MOBILE",
+        "surface": "COPILOT_HOME",
+        "intent": "Owner cockpit that feels like talking to GO, not operating an admin dashboard.",
+        "layout": {
+          "top": "small contextual header",
+          "focus": "large Copilot conversation/action area",
+          "support": "1-3 contextual cards only when relevant",
+          "bottomNav": [
+            "COPILOT",
+            "PROJECTS",
+            "MAP",
+            "LEDGER"
+          ],
+          "deep": [
+            "HANDOFF",
+            "MONITOR"
+          ]
+        },
+        "behavior": {
+          "default": "conversation first",
+          "progress": "inline evidence/receipt chips",
+          "unknown": "show concise WAIT/UNKNOWN with next safe action",
+          "projects": "current work and next action, not board dump",
+          "map": "map-first; Ride appears inside Map",
+          "ledger": "scoped financial summary; raw finance stays Ledger-owned"
+        },
+        "visualLanguage": {
+          "density": "LOW",
+          "hierarchy": "ONE_FOCAL_POINT",
+          "chrome": "MINIMAL",
+          "cards": "CONTEXTUAL_NOT_DASHBOARD",
+          "touch": "LARGE_MOBILE_TARGETS",
+          "systemJargon": "HIDDEN_BY_DEFAULT"
+        },
+        "mustAvoid": [
+          "dashboard wall",
+          "admin console",
+          "GO Hub internal route names on primary surface",
+          "LIGHTHOUSE branding/layout inheritance",
+          "calendar tab",
+          "Ride as top-level tab",
+          "permanent status-card clutter"
+        ]
       },
-      "status": "PASS",
-      "evidenceRefs": [
-        "logic-draft://DRAFT-PRISM-CLEAN-BASE-002"
-      ],
-      "bugCapsuleRef": null,
-      "unknowns": [],
-      "rerunOf": null,
-      "immutable": true,
-      "createdAt": "2026-09-28T09:15:24.438Z"
+      "scans": [],
+      "edits": [],
+      "renderPacketRefs": [],
+      "createdAt": "2026-09-28T09:36:46.925Z",
+      "updatedAt": "2026-09-28T09:36:46.925Z"
     }
   },
   "error": null,
-  "completedAt": "2026-09-28T09:15:24.467Z"
+  "completedAt": "2026-09-28T09:36:46.963Z"
 }
