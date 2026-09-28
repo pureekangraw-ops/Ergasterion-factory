@@ -1,165 +1,53 @@
 {
-  "requestId": "GNOME-PRISM-COMPARE-011",
-  "command": "logic_compare",
-  "exitCode": 0,
-  "ok": true,
+  "requestId": "GNOME-RUNTIME-CHECK-SALES-001",
+  "command": "inspect",
+  "exitCode": 2,
+  "ok": false,
   "output": {
-    "ok": true,
-    "pixieId": "PIXIE-01",
-    "labId": "PIXIE-LAB",
-    "command": "logic_compare",
-    "mutated": false,
-    "result": {
-      "draftId": "DRAFT-GNOME-WORKBENCH-002",
-      "logicId": "GNOME-V1",
-      "changed": true,
-      "original": {
-        "identity": {
-          "name": "Gnome",
-          "role": "GO_VISUAL_ASSISTANT",
-          "independentImageGenerator": false
-        },
-        "workspace": {
-          "referencePin": "IDEA_REFERENCE",
-          "briefPin": "BRIEF_PROMPT",
-          "main": "VISUAL_WORKSPACE",
-          "history": "V1_V2_V3_PLUS"
-        },
-        "loop": [
-          "PIN_REFERENCE",
-          "PIN_BRIEF",
-          "GNOME_PRECHECK",
-          "GO_CREATE_OR_EDIT",
-          "GNOME_CHECK_INTENT_AND_DRIFT",
-          "COMPARE_ITERATIONS",
-          "TRY_AGAIN_FAST",
-          "BIG_SELECTS",
-          "MARK_SELECTED",
-          "REUSE_OR_HANDOFF"
-        ],
-        "behaviors": {
-          "reference": "preserve and never silently rewrite",
-          "brief": "editable independently from reference",
-          "iteration": "fast experiments; record meaningful deltas",
-          "selection": "BIG selected variant becomes canonical",
-          "handoff": "carry selected visual plus intent/reference/context to another room or output"
-        },
-        "useCases": [
-          "sales visual",
-          "wallpaper",
-          "product imagery",
-          "app asset",
-          "other room visual request"
-        ],
-        "rules": [
-          "TRY_IT_NOW",
-          "NO_EXTRA_WORKBENCH_GATES",
-          "GO_USES_IMAGE_TOOLS",
-          "GNOME_ASSISTS_GO",
-          "BIG_SELECTION_IS_CANONICAL",
-          "KEEP_VARIANT_HISTORY",
-          "DO_NOT_INVENT_UNKNOWN_VISUAL_FACTS"
-        ]
-      },
-      "workingCopy": {
-        "identity": {
-          "name": "Gnome",
-          "role": "GO_VISUAL_ASSISTANT",
-          "independentImageGenerator": false
-        },
-        "workspace": {
-          "referencePin": "IDEA_REFERENCE",
-          "briefPin": "BRIEF_PROMPT",
-          "main": "VISUAL_WORKSPACE",
-          "history": "V1_V2_V3_PLUS"
-        },
-        "loop": [
-          "PIN_REFERENCE",
-          "PIN_BRIEF",
-          "GNOME_PRECHECK",
-          "GO_CREATE_OR_EDIT",
-          "GNOME_CHECK_INTENT_AND_DRIFT",
-          "COMPARE_ITERATIONS",
-          "TRY_AGAIN_FAST",
-          "BIG_SELECTS",
-          "MARK_SELECTED",
-          "REUSE_OR_HANDOFF"
-        ],
-        "behaviors": {
-          "reference": "preserve and never silently rewrite",
-          "brief": "editable independently from reference",
-          "iteration": "fast experiments; record meaningful deltas",
-          "selection": "BIG selected variant becomes canonical",
-          "handoff": "carry selected visual plus intent/reference/context to another room or output"
-        },
-        "useCases": [
-          "sales visual",
-          "wallpaper",
-          "product imagery",
-          "app asset",
-          "other room visual request"
-        ],
-        "rules": [
-          "TRY_IT_NOW",
-          "NO_EXTRA_WORKBENCH_GATES",
-          "GO_USES_IMAGE_TOOLS",
-          "GNOME_ASSISTS_GO",
-          "BIG_SELECTION_IS_CANONICAL",
-          "KEEP_VARIANT_HISTORY",
-          "DO_NOT_INVENT_UNKNOWN_VISUAL_FACTS"
-        ],
-        "training": {
-          "prismCase": {
-            "caseId": "PRISM-CRYSTAL-REAL-001",
-            "goal": "Use the real PRISM crystal visual case to train Gnome as GO's visual-table assistant, not as an independent generator.",
-            "reference": {
-              "subject": "approved light crystalline PRISM direction",
-              "mustKeep": [
-                "clear/faceted crystal",
-                "optical dispersion / seven-color light inside or through crystal",
-                "sharp premium geometry",
-                "light white/silver/glass feeling"
-              ],
-              "mustAvoid": [
-                "triangle placeholder",
-                "mascot",
-                "text",
-                "cute/feminine styling",
-                "neon gaming/cyberpunk-heavy drift"
-              ]
-            },
-            "brief": {
-              "task": "help GO iterate from reference toward a usable PRISM visual while keeping reference fixed and brief editable",
-              "outputs": [
-                "app icon candidate",
-                "wallpaper adaptation",
-                "sales/hero visual adaptation"
-              ]
-            },
-            "exercise": [
-              "Gnome pins reference separately from brief",
-              "GO creates or edits image",
-              "Gnome checks each iteration for intent drift",
-              "Gnome states meaningful delta between V1/V2/V3",
-              "BIG-selected variant becomes canonical",
-              "Gnome derives new-use briefs without silently redesigning canonical visual",
-              "Gnome preserves history and can return to selected variant"
-            ],
-            "failureCases": [
-              "reference overwritten by brief",
-              "variant preference treated as owner approval",
-              "triangle/placeholder accepted as equivalent",
-              "wallpaper or sales adaptation silently changes crystal identity",
-              "Gnome attempts to replace GO as image generator"
-            ],
-            "success": "Gnome makes GO faster and more consistent at the table, while BIG remains selector and GO remains image-tool operator."
-          }
-        }
-      },
-      "editCount": 1,
-      "approval": "NOT_AN_APPROVAL"
-    }
+    "ok": false,
+    "command": "inspect",
+    "error": "COMMAND_NOT_ALLOWED",
+    "allowedCommands": [
+      "status",
+      "ask",
+      "start_session",
+      "archive_session",
+      "close_session",
+      "clean_room",
+      "start_cycle",
+      "cycle_action",
+      "add_matrix",
+      "start_matrix",
+      "update_matrix",
+      "add_test_run",
+      "rerun_test_run",
+      "add_bug",
+      "add_attention",
+      "update_attention",
+      "add_golden_case",
+      "replay_golden",
+      "debug_start",
+      "debug_step",
+      "debug_complete",
+      "self_test",
+      "cross_room",
+      "master_gate",
+      "examples",
+      "run_example",
+      "logic_create",
+      "logic_edit",
+      "logic_compare",
+      "visual_create",
+      "visual_scan",
+      "visual_edit",
+      "visual_compare",
+      "visual_render_packet",
+      "visual_verify",
+      "candidate_passport",
+      "door_guard",
+      "persist"
+    ]
   },
   "error": null,
-  "completedAt": "2026-09-28T13:48:39.978Z"
+  "completedAt": "2026-09-28T15:20:43.923Z"
 }
