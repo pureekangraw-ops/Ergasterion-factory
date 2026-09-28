@@ -278,6 +278,40 @@
       "rerunOf": null,
       "immutable": true,
       "createdAt": "2026-09-28T09:14:08.301Z"
+    },
+    {
+      "runId": "PRISM-TEST-RECOVERY-001",
+      "runClass": "ROOM_TEST_RUN",
+      "initiatedBy": "GO",
+      "executedBy": "PIXIE-01",
+      "scope": "LOGIC_DRAFT",
+      "purpose": "PRISM clean-base acceptance: recovery",
+      "roomId": null,
+      "sourceRoomRefs": [],
+      "matrixRef": "MATRIX-PRISM-CLEAN-BASE-003",
+      "testTypeId": "recovery",
+      "caseRef": null,
+      "fixtureRef": null,
+      "snapshotRef": null,
+      "logicVersion": "PRISM-CLEAN-BASE-002",
+      "expected": {
+        "cases": [
+          "recovery"
+        ]
+      },
+      "observed": {
+        "recoveryPoint": "LAST_VERIFIED",
+        "unknownEffect": "WAIT_VERIFY"
+      },
+      "status": "PASS",
+      "evidenceRefs": [
+        "logic-draft://DRAFT-PRISM-CLEAN-BASE-002"
+      ],
+      "bugCapsuleRef": null,
+      "unknowns": [],
+      "rerunOf": null,
+      "immutable": true,
+      "createdAt": "2026-09-28T09:14:21.959Z"
     }
   ],
   "proposals": [],

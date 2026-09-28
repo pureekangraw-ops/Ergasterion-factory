@@ -1,5 +1,5 @@
 {
-  "requestId": "PRISM-TEST-CONTRACT-001",
+  "requestId": "PRISM-TEST-RECOVERY-001",
   "command": "add_test_run",
   "exitCode": 0,
   "ok": true,
@@ -10,29 +10,28 @@
     "command": "add_test_run",
     "mutated": true,
     "result": {
-      "runId": "PRISM-TEST-CONTRACT-001",
+      "runId": "PRISM-TEST-RECOVERY-001",
       "runClass": "ROOM_TEST_RUN",
       "initiatedBy": "GO",
       "executedBy": "PIXIE-01",
       "scope": "LOGIC_DRAFT",
-      "purpose": "PRISM clean-base acceptance: foundation-independence",
+      "purpose": "PRISM clean-base acceptance: recovery",
       "roomId": null,
       "sourceRoomRefs": [],
       "matrixRef": "MATRIX-PRISM-CLEAN-BASE-003",
-      "testTypeId": "contract",
+      "testTypeId": "recovery",
       "caseRef": null,
       "fixtureRef": null,
       "snapshotRef": null,
       "logicVersion": "PRISM-CLEAN-BASE-002",
       "expected": {
         "cases": [
-          "foundation-independence"
+          "recovery"
         ]
       },
       "observed": {
-        "parentArchitecture": "NONE",
-        "sourceRef": "owner-intent://PRISM-clean-base",
-        "legacyRole": "REFERENCE_ONLY"
+        "recoveryPoint": "LAST_VERIFIED",
+        "unknownEffect": "WAIT_VERIFY"
       },
       "status": "PASS",
       "evidenceRefs": [
@@ -42,9 +41,9 @@
       "unknowns": [],
       "rerunOf": null,
       "immutable": true,
-      "createdAt": "2026-09-28T09:14:08.301Z"
+      "createdAt": "2026-09-28T09:14:21.959Z"
     }
   },
   "error": null,
-  "completedAt": "2026-09-28T09:14:08.342Z"
+  "completedAt": "2026-09-28T09:14:21.998Z"
 }
