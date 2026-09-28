@@ -1,13 +1,13 @@
 {
-  "requestId": "PRISM-CLEAN-MATRIX-003",
-  "command": "add_matrix",
+  "requestId": "PRISM-CLEAN-MATRIX-START-001",
+  "command": "start_matrix",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "add_matrix",
+    "command": "start_matrix",
     "mutated": true,
     "result": {
       "matrixId": "MATRIX-PRISM-CLEAN-BASE-003",
@@ -67,11 +67,11 @@
         }
       ],
       "overallStatus": "INCONCLUSIVE",
-      "lifecycle": "READY_TO_RUN",
+      "lifecycle": "RUNNING",
       "createdAt": "2026-09-28T09:12:51.540Z",
-      "updatedAt": "2026-09-28T09:12:51.540Z"
+      "updatedAt": "2026-09-28T09:13:24.501Z"
     }
   },
   "error": null,
-  "completedAt": "2026-09-28T09:12:51.577Z"
+  "completedAt": "2026-09-28T09:13:24.541Z"
 }
