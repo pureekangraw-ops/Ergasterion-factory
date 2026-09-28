@@ -1,9 +1,9 @@
 {
-  "requestId": "PRISM-CLEAN-MATRIX-001",
+  "requestId": "PRISM-CLEAN-MATRIX-002",
   "command": "add_matrix",
   "exitCode": 1,
   "ok": false,
   "output": null,
-  "error": "{\n  \"ok\": false,\n  \"error\": \"row.testTypeId is required\"\n}",
-  "completedAt": "2026-09-28T09:10:36.921Z"
+  "error": "{\n  \"ok\": false,\n  \"error\": \"MODE_FIELD_FORBIDDEN:$.logicDrafts.3.workingCopy.proposal.intentRefiner.mode\"\n}",
+  "completedAt": "2026-09-28T09:11:23.000Z"
 }
