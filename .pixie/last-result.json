@@ -1,9 +1,9 @@
 {
-  "requestId": "GNOME-WORKBENCH-CREATE-004",
+  "requestId": "GNOME-WORKBENCH-CREATE-005",
   "command": "logic_create",
   "exitCode": 1,
   "ok": false,
   "output": null,
-  "error": "{\n  \"ok\": false,\n  \"error\": \"draftId is required\"\n}",
-  "completedAt": "2026-09-28T13:32:04.838Z"
+  "error": "{\n  \"ok\": false,\n  \"error\": \"sourceRef is required\"\n}",
+  "completedAt": "2026-09-28T13:33:39.135Z"
 }
