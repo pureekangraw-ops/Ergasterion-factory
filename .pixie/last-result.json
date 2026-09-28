@@ -1,28 +1,9 @@
 {
-  "requestId": "GNOME-WORKBENCH-CREATE-006",
-  "command": "logic_create",
-  "exitCode": 0,
-  "ok": true,
-  "output": {
-    "ok": true,
-    "pixieId": "PIXIE-01",
-    "labId": "PIXIE-LAB",
-    "command": "logic_create",
-    "mutated": true,
-    "result": {
-      "draftId": "DRAFT-GNOME-WORKBENCH-001",
-      "logicId": "GNOME-V1",
-      "sourceRef": "owner-intent://GNOME-visual-workbench",
-      "sourceVersion": "workbench-v1",
-      "labOwned": true,
-      "status": "DRAFT",
-      "original": null,
-      "workingCopy": null,
-      "edits": [],
-      "createdAt": "2026-09-28T13:34:34.916Z",
-      "updatedAt": "2026-09-28T13:34:34.916Z"
-    }
-  },
-  "error": null,
-  "completedAt": "2026-09-28T13:34:34.942Z"
+  "requestId": "GNOME-WORKBENCH-EDIT-007",
+  "command": "logic_edit",
+  "exitCode": 1,
+  "ok": false,
+  "output": null,
+  "error": "{\n  \"ok\": false,\n  \"error\": \"WORKBENCH_OPERATION_NOT_ALLOWED\"\n}",
+  "completedAt": "2026-09-28T13:35:24.149Z"
 }
