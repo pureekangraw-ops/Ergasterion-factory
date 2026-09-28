@@ -1,11 +1,11 @@
 {
-  "requestId": "PIXIE-LAB-INSPECT-DRAFTS-001",
-  "command": "logic.draft.list",
+  "requestId": "PIXIE-FIND-ROOM-inspect-001",
+  "command": "inspect",
   "exitCode": 2,
   "ok": false,
   "output": {
     "ok": false,
-    "command": "logic.draft.list",
+    "command": "inspect",
     "error": "COMMAND_NOT_ALLOWED",
     "allowedCommands": [
       "status",
@@ -49,5 +49,5 @@
     ]
   },
   "error": null,
-  "completedAt": "2026-09-28T12:13:14.623Z"
+  "completedAt": "2026-09-28T12:13:44.361Z"
 }
