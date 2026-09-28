@@ -1,21 +1,18 @@
 {
-  "requestId": "GNOME-WORKBENCH-CREATE-008",
-  "command": "logic_create",
+  "requestId": "GNOME-WORKBENCH-COMPARE-009",
+  "command": "logic_compare",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "logic_create",
-    "mutated": true,
+    "command": "logic_compare",
+    "mutated": false,
     "result": {
       "draftId": "DRAFT-GNOME-WORKBENCH-002",
       "logicId": "GNOME-V1",
-      "sourceRef": "owner-intent://GNOME-visual-workbench",
-      "sourceVersion": "workbench-v2",
-      "labOwned": true,
-      "status": "DRAFT",
+      "changed": false,
       "original": {
         "identity": {
           "name": "Gnome",
@@ -112,11 +109,10 @@
           "DO_NOT_INVENT_UNKNOWN_VISUAL_FACTS"
         ]
       },
-      "edits": [],
-      "createdAt": "2026-09-28T13:36:22.396Z",
-      "updatedAt": "2026-09-28T13:36:22.396Z"
+      "editCount": 0,
+      "approval": "NOT_AN_APPROVAL"
     }
   },
   "error": null,
-  "completedAt": "2026-09-28T13:36:22.429Z"
+  "completedAt": "2026-09-28T13:37:11.016Z"
 }
