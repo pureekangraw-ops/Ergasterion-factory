@@ -1,68 +1,20 @@
 {
-  "requestId": "PRISM-VISUAL-SCAN-001",
-  "command": "visual_scan",
+  "requestId": "PRISM-VISUAL-PACKET-001",
+  "command": "visual_render_packet",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "visual_scan",
+    "command": "visual_render_packet",
     "mutated": true,
     "result": {
+      "packetId": "PACKET-PRISM-CLEAN-001",
       "visualDraftId": "VISUAL-PRISM-CLEAN-001",
       "sourceRef": "logic-draft://DRAFT-PRISM-CLEAN-BASE-002",
       "sourceVersion": "PRISM-CLEAN-BASE-002",
       "sourceHash": null,
-      "sourceLocked": true,
-      "labOwned": true,
-      "status": "DRAFT",
-      "originalSpec": {
-        "product": "PRISM",
-        "platform": "ANDROID_MOBILE",
-        "surface": "COPILOT_HOME",
-        "intent": "Owner cockpit that feels like talking to GO, not operating an admin dashboard.",
-        "layout": {
-          "top": "small contextual header",
-          "focus": "large Copilot conversation/action area",
-          "support": "1-3 contextual cards only when relevant",
-          "bottomNav": [
-            "COPILOT",
-            "PROJECTS",
-            "MAP",
-            "LEDGER"
-          ],
-          "deep": [
-            "HANDOFF",
-            "MONITOR"
-          ]
-        },
-        "behavior": {
-          "default": "conversation first",
-          "progress": "inline evidence/receipt chips",
-          "unknown": "show concise WAIT/UNKNOWN with next safe action",
-          "projects": "current work and next action, not board dump",
-          "map": "map-first; Ride appears inside Map",
-          "ledger": "scoped financial summary; raw finance stays Ledger-owned"
-        },
-        "visualLanguage": {
-          "density": "LOW",
-          "hierarchy": "ONE_FOCAL_POINT",
-          "chrome": "MINIMAL",
-          "cards": "CONTEXTUAL_NOT_DASHBOARD",
-          "touch": "LARGE_MOBILE_TARGETS",
-          "systemJargon": "HIDDEN_BY_DEFAULT"
-        },
-        "mustAvoid": [
-          "dashboard wall",
-          "admin console",
-          "GO Hub internal route names on primary surface",
-          "LIGHTHOUSE branding/layout inheritance",
-          "calendar tab",
-          "Ride as top-level tab",
-          "permanent status-card clutter"
-        ]
-      },
       "workingSpec": {
         "product": "PRISM",
         "platform": "ANDROID_MOBILE",
@@ -109,34 +61,49 @@
           "permanent status-card clutter"
         ]
       },
-      "scans": [
-        {
-          "scanId": "SCAN-PRISM-CLEAN-001",
-          "observations": [
-            "Single focal Copilot area is explicit",
-            "Bottom navigation is limited to four owner-facing surfaces",
-            "Ride is nested under Map",
-            "Internal system jargon is hidden by default",
-            "Deep Handoff/Monitor surfaces are not primary navigation",
-            "No LIGHTHOUSE visual inheritance is specified"
-          ],
-          "evidenceRefs": [
-            "logic-draft://DRAFT-PRISM-CLEAN-BASE-002",
-            "visual-draft://VISUAL-PRISM-CLEAN-001"
-          ],
-          "unknowns": [
-            "No rendered Android screen exists yet; spacing, typography and actual touch ergonomics remain unverified"
-          ],
-          "status": "UNKNOWN",
-          "scannedAt": "2026-09-28T09:37:33.649Z"
-        }
+      "intent": "Render a credible Android PRISM Copilot home candidate that feels conversational and calm, not like a control dashboard.",
+      "requestedResult": "One mobile screen candidate suitable for evaluating hierarchy, navigation, contextual work cards and inline evidence states before implementation.",
+      "mustKeep": [
+        "Copilot as dominant focal surface",
+        "bottom nav: Copilot, Projects, Map, Ledger",
+        "Map primary with Ride inside Map",
+        "1-3 contextual cards maximum",
+        "WAIT/UNKNOWN shown with safe next action",
+        "mobile touch targets"
       ],
-      "edits": [],
-      "renderPacketRefs": [],
-      "createdAt": "2026-09-28T09:36:46.925Z",
-      "updatedAt": "2026-09-28T09:37:33.649Z"
+      "mustRemove": [
+        "LIGHTHOUSE visual inheritance",
+        "dashboard wall",
+        "admin-console styling",
+        "calendar tab",
+        "Ride top-level tab",
+        "raw GO Hub route jargon"
+      ],
+      "copy": [],
+      "constraints": [
+        "ANDROID_MOBILE",
+        "LOW_DENSITY",
+        "ONE_FOCAL_POINT",
+        "NO_PRODUCTION_AUTHORITY",
+        "LAB_ONLY"
+      ],
+      "evidenceRefs": [
+        "logic-draft://DRAFT-PRISM-CLEAN-BASE-002",
+        "visual-draft://VISUAL-PRISM-CLEAN-001"
+      ],
+      "unknowns": [
+        "No rendered Android screen exists yet; spacing, typography and actual touch ergonomics remain unverified",
+        "Typography/color system not yet selected",
+        "Actual device dimensions not yet bound"
+      ],
+      "targetTool": "GO_IMAGE_TOOL",
+      "externalExecutionRequired": true,
+      "imageGenerationAuthority": false,
+      "productionAuthority": false,
+      "approval": "NOT_AN_APPROVAL",
+      "createdAt": "2026-09-28T09:37:45.454Z"
     }
   },
   "error": null,
-  "completedAt": "2026-09-28T09:37:33.685Z"
+  "completedAt": "2026-09-28T09:37:45.501Z"
 }
