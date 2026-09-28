@@ -1482,11 +1482,41 @@
           "CALENDAR": "ABSENT",
           "HANDOFF": "SAME_WORK",
           "MONITOR": "DEEP_ONLY"
+        },
+        "entrySecurity": {
+          "type": "OWNER_PIN",
+          "entryFlow": [
+            "APP_LAUNCH",
+            "PIN_SCREEN",
+            "LOCAL_VERIFY",
+            "COPILOT"
+          ],
+          "setup": "OWNER_SETS_OR_CHANGES_FROM_APP",
+          "storage": "DEVICE_SECURE_STORAGE",
+          "repositorySecret": false,
+          "logging": "NEVER_LOG_PIN",
+          "failClosed": true,
+          "recovery": "OWNER_AUTHORITY_REQUIRED_NO_BYPASS",
+          "acceptance": [
+            "PIN_REQUIRED_ON_PROTECTED_LAUNCH",
+            "CORRECT_PIN_UNLOCKS",
+            "WRONG_PIN_STAYS_LOCKED",
+            "PIN_NOT_IN_REPO_LOG_OR_EVIDENCE",
+            "OWNER_CAN_CHANGE_PIN_IN_APP"
+          ]
         }
       },
-      "edits": [],
+      "edits": [
+        {
+          "op": "SET",
+          "path": [
+            "entrySecurity"
+          ],
+          "at": "2026-09-28T10:45:24.998Z"
+        }
+      ],
       "createdAt": "2026-09-28T09:09:44.973Z",
-      "updatedAt": "2026-09-28T09:09:44.973Z"
+      "updatedAt": "2026-09-28T10:45:24.998Z"
     }
   ],
   "factoryHandoffs": [],
