@@ -1642,11 +1642,67 @@
           "BIG_SELECTION_IS_CANONICAL",
           "KEEP_VARIANT_HISTORY",
           "DO_NOT_INVENT_UNKNOWN_VISUAL_FACTS"
-        ]
+        ],
+        "training": {
+          "prismCase": {
+            "caseId": "PRISM-CRYSTAL-REAL-001",
+            "goal": "Use the real PRISM crystal visual case to train Gnome as GO's visual-table assistant, not as an independent generator.",
+            "reference": {
+              "subject": "approved light crystalline PRISM direction",
+              "mustKeep": [
+                "clear/faceted crystal",
+                "optical dispersion / seven-color light inside or through crystal",
+                "sharp premium geometry",
+                "light white/silver/glass feeling"
+              ],
+              "mustAvoid": [
+                "triangle placeholder",
+                "mascot",
+                "text",
+                "cute/feminine styling",
+                "neon gaming/cyberpunk-heavy drift"
+              ]
+            },
+            "brief": {
+              "task": "help GO iterate from reference toward a usable PRISM visual while keeping reference fixed and brief editable",
+              "outputs": [
+                "app icon candidate",
+                "wallpaper adaptation",
+                "sales/hero visual adaptation"
+              ]
+            },
+            "exercise": [
+              "Gnome pins reference separately from brief",
+              "GO creates or edits image",
+              "Gnome checks each iteration for intent drift",
+              "Gnome states meaningful delta between V1/V2/V3",
+              "BIG-selected variant becomes canonical",
+              "Gnome derives new-use briefs without silently redesigning canonical visual",
+              "Gnome preserves history and can return to selected variant"
+            ],
+            "failureCases": [
+              "reference overwritten by brief",
+              "variant preference treated as owner approval",
+              "triangle/placeholder accepted as equivalent",
+              "wallpaper or sales adaptation silently changes crystal identity",
+              "Gnome attempts to replace GO as image generator"
+            ],
+            "success": "Gnome makes GO faster and more consistent at the table, while BIG remains selector and GO remains image-tool operator."
+          }
+        }
       },
-      "edits": [],
+      "edits": [
+        {
+          "op": "SET",
+          "path": [
+            "training",
+            "prismCase"
+          ],
+          "at": "2026-09-28T13:47:49.366Z"
+        }
+      ],
       "createdAt": "2026-09-28T13:36:22.396Z",
-      "updatedAt": "2026-09-28T13:36:22.396Z"
+      "updatedAt": "2026-09-28T13:47:49.366Z"
     }
   ],
   "factoryHandoffs": [],
