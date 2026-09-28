@@ -1054,6 +1054,19 @@
       ],
       "createdAt": "2026-09-27T13:26:42.956Z",
       "updatedAt": "2026-09-27T13:44:10.400Z"
+    },
+    {
+      "draftId": "DRAFT-PRISM-CLEAN-BASE-001",
+      "logicId": "PRISM-CLEAN-BASE-001",
+      "sourceRef": "owner-intent://PRISM-clean-base",
+      "sourceVersion": "unknown",
+      "labOwned": true,
+      "status": "DRAFT",
+      "original": null,
+      "workingCopy": null,
+      "edits": [],
+      "createdAt": "2026-09-28T09:08:15.896Z",
+      "updatedAt": "2026-09-28T09:08:15.896Z"
     }
   ],
   "factoryHandoffs": [],

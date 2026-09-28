@@ -1,9 +1,28 @@
 {
-  "requestId": "PRISM-CLEAN-BASE-PLAY-003",
+  "requestId": "PRISM-CLEAN-BASE-PLAY-004",
   "command": "logic_create",
-  "exitCode": 1,
-  "ok": false,
-  "output": null,
-  "error": "{\n  \"ok\": false,\n  \"error\": \"draftId is required\"\n}",
-  "completedAt": "2026-09-28T09:07:40.301Z"
+  "exitCode": 0,
+  "ok": true,
+  "output": {
+    "ok": true,
+    "pixieId": "PIXIE-01",
+    "labId": "PIXIE-LAB",
+    "command": "logic_create",
+    "mutated": true,
+    "result": {
+      "draftId": "DRAFT-PRISM-CLEAN-BASE-001",
+      "logicId": "PRISM-CLEAN-BASE-001",
+      "sourceRef": "owner-intent://PRISM-clean-base",
+      "sourceVersion": "unknown",
+      "labOwned": true,
+      "status": "DRAFT",
+      "original": null,
+      "workingCopy": null,
+      "edits": [],
+      "createdAt": "2026-09-28T09:08:15.896Z",
+      "updatedAt": "2026-09-28T09:08:15.896Z"
+    }
+  },
+  "error": null,
+  "completedAt": "2026-09-28T09:08:15.938Z"
 }
