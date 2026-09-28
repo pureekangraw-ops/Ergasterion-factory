@@ -1,9 +1,122 @@
 {
-  "requestId": "GNOME-WORKBENCH-EDIT-007",
-  "command": "logic_edit",
-  "exitCode": 1,
-  "ok": false,
-  "output": null,
-  "error": "{\n  \"ok\": false,\n  \"error\": \"WORKBENCH_OPERATION_NOT_ALLOWED\"\n}",
-  "completedAt": "2026-09-28T13:35:24.149Z"
+  "requestId": "GNOME-WORKBENCH-CREATE-008",
+  "command": "logic_create",
+  "exitCode": 0,
+  "ok": true,
+  "output": {
+    "ok": true,
+    "pixieId": "PIXIE-01",
+    "labId": "PIXIE-LAB",
+    "command": "logic_create",
+    "mutated": true,
+    "result": {
+      "draftId": "DRAFT-GNOME-WORKBENCH-002",
+      "logicId": "GNOME-V1",
+      "sourceRef": "owner-intent://GNOME-visual-workbench",
+      "sourceVersion": "workbench-v2",
+      "labOwned": true,
+      "status": "DRAFT",
+      "original": {
+        "identity": {
+          "name": "Gnome",
+          "role": "GO_VISUAL_ASSISTANT",
+          "independentImageGenerator": false
+        },
+        "workspace": {
+          "referencePin": "IDEA_REFERENCE",
+          "briefPin": "BRIEF_PROMPT",
+          "main": "VISUAL_WORKSPACE",
+          "history": "V1_V2_V3_PLUS"
+        },
+        "loop": [
+          "PIN_REFERENCE",
+          "PIN_BRIEF",
+          "GNOME_PRECHECK",
+          "GO_CREATE_OR_EDIT",
+          "GNOME_CHECK_INTENT_AND_DRIFT",
+          "COMPARE_ITERATIONS",
+          "TRY_AGAIN_FAST",
+          "BIG_SELECTS",
+          "MARK_SELECTED",
+          "REUSE_OR_HANDOFF"
+        ],
+        "behaviors": {
+          "reference": "preserve and never silently rewrite",
+          "brief": "editable independently from reference",
+          "iteration": "fast experiments; record meaningful deltas",
+          "selection": "BIG selected variant becomes canonical",
+          "handoff": "carry selected visual plus intent/reference/context to another room or output"
+        },
+        "useCases": [
+          "sales visual",
+          "wallpaper",
+          "product imagery",
+          "app asset",
+          "other room visual request"
+        ],
+        "rules": [
+          "TRY_IT_NOW",
+          "NO_EXTRA_WORKBENCH_GATES",
+          "GO_USES_IMAGE_TOOLS",
+          "GNOME_ASSISTS_GO",
+          "BIG_SELECTION_IS_CANONICAL",
+          "KEEP_VARIANT_HISTORY",
+          "DO_NOT_INVENT_UNKNOWN_VISUAL_FACTS"
+        ]
+      },
+      "workingCopy": {
+        "identity": {
+          "name": "Gnome",
+          "role": "GO_VISUAL_ASSISTANT",
+          "independentImageGenerator": false
+        },
+        "workspace": {
+          "referencePin": "IDEA_REFERENCE",
+          "briefPin": "BRIEF_PROMPT",
+          "main": "VISUAL_WORKSPACE",
+          "history": "V1_V2_V3_PLUS"
+        },
+        "loop": [
+          "PIN_REFERENCE",
+          "PIN_BRIEF",
+          "GNOME_PRECHECK",
+          "GO_CREATE_OR_EDIT",
+          "GNOME_CHECK_INTENT_AND_DRIFT",
+          "COMPARE_ITERATIONS",
+          "TRY_AGAIN_FAST",
+          "BIG_SELECTS",
+          "MARK_SELECTED",
+          "REUSE_OR_HANDOFF"
+        ],
+        "behaviors": {
+          "reference": "preserve and never silently rewrite",
+          "brief": "editable independently from reference",
+          "iteration": "fast experiments; record meaningful deltas",
+          "selection": "BIG selected variant becomes canonical",
+          "handoff": "carry selected visual plus intent/reference/context to another room or output"
+        },
+        "useCases": [
+          "sales visual",
+          "wallpaper",
+          "product imagery",
+          "app asset",
+          "other room visual request"
+        ],
+        "rules": [
+          "TRY_IT_NOW",
+          "NO_EXTRA_WORKBENCH_GATES",
+          "GO_USES_IMAGE_TOOLS",
+          "GNOME_ASSISTS_GO",
+          "BIG_SELECTION_IS_CANONICAL",
+          "KEEP_VARIANT_HISTORY",
+          "DO_NOT_INVENT_UNKNOWN_VISUAL_FACTS"
+        ]
+      },
+      "edits": [],
+      "createdAt": "2026-09-28T13:36:22.396Z",
+      "updatedAt": "2026-09-28T13:36:22.396Z"
+    }
+  },
+  "error": null,
+  "completedAt": "2026-09-28T13:36:22.429Z"
 }
