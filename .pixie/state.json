@@ -419,6 +419,50 @@
       "rerunOf": null,
       "immutable": true,
       "createdAt": "2026-09-28T10:40:52.613Z"
+    },
+    {
+      "runId": "PRISM-TEST-FUNCTIONAL-002",
+      "runClass": "ROOM_TEST_RUN",
+      "initiatedBy": "GO",
+      "executedBy": "PIXIE-01",
+      "scope": "LOGIC_DRAFT",
+      "purpose": "PRISM clean-base acceptance: receipt-replay,mobile-surface",
+      "roomId": null,
+      "sourceRoomRefs": [],
+      "matrixRef": "MATRIX-PRISM-CLEAN-BASE-003",
+      "testTypeId": "functional",
+      "caseRef": null,
+      "fixtureRef": null,
+      "snapshotRef": null,
+      "logicVersion": "PRISM-CLEAN-BASE-002",
+      "expected": {
+        "cases": [
+          "receipt-replay",
+          "mobile-surface"
+        ]
+      },
+      "observed": {
+        "receiptReplay": "REQUIRES_EFFECT_IDENTITY_AND_RECEIPT",
+        "mobileSurface": [
+          "COPILOT",
+          "PROJECTS",
+          "MAP",
+          "LEDGER"
+        ],
+        "deepOnly": [
+          "HANDOFF",
+          "MONITOR"
+        ]
+      },
+      "status": "PASS",
+      "evidenceRefs": [
+        "logic-draft://DRAFT-PRISM-CLEAN-BASE-002"
+      ],
+      "bugCapsuleRef": null,
+      "unknowns": [],
+      "rerunOf": null,
+      "immutable": true,
+      "createdAt": "2026-09-28T10:41:07.847Z"
     }
   ],
   "proposals": [],
