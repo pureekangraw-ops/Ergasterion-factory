@@ -384,6 +384,41 @@
       "rerunOf": null,
       "immutable": true,
       "createdAt": "2026-09-28T09:15:24.438Z"
+    },
+    {
+      "runId": "PRISM-TEST-MIGRATION-002",
+      "runClass": "ROOM_TEST_RUN",
+      "initiatedBy": "GO",
+      "executedBy": "PIXIE-01",
+      "scope": "LOGIC_DRAFT",
+      "purpose": "PRISM clean-base acceptance: capability-migration",
+      "roomId": null,
+      "sourceRoomRefs": [],
+      "matrixRef": "MATRIX-PRISM-CLEAN-BASE-003",
+      "testTypeId": "migration",
+      "caseRef": null,
+      "fixtureRef": null,
+      "snapshotRef": null,
+      "logicVersion": "PRISM-CLEAN-BASE-002",
+      "expected": {
+        "cases": [
+          "capability-migration"
+        ]
+      },
+      "observed": {
+        "legacyRole": "REFERENCE_ONLY",
+        "exposureRule": "PROVEN_CAPABILITY_ONLY",
+        "parentArchitecture": "PRISM_NATIVE_V1"
+      },
+      "status": "PASS",
+      "evidenceRefs": [
+        "logic-draft://DRAFT-PRISM-CLEAN-BASE-002"
+      ],
+      "bugCapsuleRef": null,
+      "unknowns": [],
+      "rerunOf": null,
+      "immutable": true,
+      "createdAt": "2026-09-28T10:40:52.613Z"
     }
   ],
   "proposals": [],
