@@ -116,5 +116,20 @@ test('close_session only closes and leaves a DIRTY room until explicit clean', (
 test('command surface exposes Archive and Clean as separate actions', () => {
   assert.equal(PIXIE_COMMANDS.includes('archive_session'), true);
   assert.equal(PIXIE_COMMANDS.includes('clean_room'), true);
+  assert.equal(PIXIE_COMMANDS.includes('clean_all'), true);
   assert.equal(PIXIE_COMMANDS.includes('close_session'), true);
+});
+
+
+test('clean_all clears A B C while preserving debug room and Archive Zone', async () => {
+  const lab = new PixieLab({ now: clock() });
+  for (const roomId of ['ROOM-A','ROOM-B','ROOM-C']) {
+    lab.startSession({ roomId, sessionId:`S-${roomId}`, purpose:'clean all', activityType:'CHECK' });
+  }
+  lab.startSession({ roomId:'ROOM-D', sessionId:'S-D', purpose:'debug survives', activityType:'DEBUG' });
+  lab.archiveSession('S-ROOM-A', { archiveId:'ARCHIVE-KEEP' });
+  for (const roomId of ['ROOM-A','ROOM-B','ROOM-C']) lab.cleanRoom(roomId, { reason:'OWNER_CLEAN_ALL' });
+  for (const roomId of ['ROOM-A','ROOM-B','ROOM-C']) assert.equal(lab.room(roomId).status, 'READY');
+  assert.equal(lab.room('ROOM-D').activeSessionId, 'S-D');
+  assert.equal(lab.board().archives.some((x) => x.archiveId === 'ARCHIVE-KEEP'), true);
 });
