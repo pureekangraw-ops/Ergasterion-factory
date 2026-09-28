@@ -1,11 +1,11 @@
 {
-  "requestId": "PIXIE-FIND-ROOM-clean_room-inspect-001",
-  "command": "clean_room.inspect",
+  "requestId": "PIXIE-FIND-ROOM-state-inspect-001",
+  "command": "state.inspect",
   "exitCode": 2,
   "ok": false,
   "output": {
     "ok": false,
-    "command": "clean_room.inspect",
+    "command": "state.inspect",
     "error": "COMMAND_NOT_ALLOWED",
     "allowedCommands": [
       "status",
@@ -49,5 +49,5 @@
     ]
   },
   "error": null,
-  "completedAt": "2026-09-28T12:13:57.346Z"
+  "completedAt": "2026-09-28T12:14:09.568Z"
 }
