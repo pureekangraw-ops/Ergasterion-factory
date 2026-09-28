@@ -1,9 +1,22 @@
 {
-  "requestId": "PRISM-CLEAN-MATRIX-002",
-  "command": "add_matrix",
-  "exitCode": 1,
-  "ok": false,
-  "output": null,
-  "error": "{\n  \"ok\": false,\n  \"error\": \"MODE_FIELD_FORBIDDEN:$.logicDrafts.3.workingCopy.proposal.intentRefiner.mode\"\n}",
-  "completedAt": "2026-09-28T09:11:23.000Z"
+  "requestId": "PRISM-LAB-SELFTEST-001",
+  "command": "self_test",
+  "exitCode": 0,
+  "ok": true,
+  "output": {
+    "ok": true,
+    "pixieId": "PIXIE-01",
+    "labId": "PIXIE-LAB",
+    "command": "self_test",
+    "mutated": true,
+    "result": {
+      "selfTestId": "SELF-2026-09-28T09:11:59.920Z",
+      "actor": "PIXIE-01",
+      "checks": [],
+      "status": "PASS",
+      "createdAt": "2026-09-28T09:11:59.920Z"
+    }
+  },
+  "error": null,
+  "completedAt": "2026-09-28T09:11:59.952Z"
 }

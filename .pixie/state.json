@@ -195,7 +195,15 @@
   "factorySimulations": [],
   "evidence": [],
   "debugSessions": [],
-  "selfTests": [],
+  "selfTests": [
+    {
+      "selfTestId": "SELF-2026-09-28T09:11:59.920Z",
+      "actor": "PIXIE-01",
+      "checks": [],
+      "status": "PASS",
+      "createdAt": "2026-09-28T09:11:59.920Z"
+    }
+  ],
   "crossRoomChecks": [
     {
       "checkId": "CROSS-2026-09-26T05:01:50.066Z",
