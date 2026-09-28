@@ -2061,11 +2061,32 @@
           "permanent status-card clutter"
         ]
       },
-      "scans": [],
+      "scans": [
+        {
+          "scanId": "SCAN-PRISM-CLEAN-001",
+          "observations": [
+            "Single focal Copilot area is explicit",
+            "Bottom navigation is limited to four owner-facing surfaces",
+            "Ride is nested under Map",
+            "Internal system jargon is hidden by default",
+            "Deep Handoff/Monitor surfaces are not primary navigation",
+            "No LIGHTHOUSE visual inheritance is specified"
+          ],
+          "evidenceRefs": [
+            "logic-draft://DRAFT-PRISM-CLEAN-BASE-002",
+            "visual-draft://VISUAL-PRISM-CLEAN-001"
+          ],
+          "unknowns": [
+            "No rendered Android screen exists yet; spacing, typography and actual touch ergonomics remain unverified"
+          ],
+          "status": "UNKNOWN",
+          "scannedAt": "2026-09-28T09:37:33.649Z"
+        }
+      ],
       "edits": [],
       "renderPacketRefs": [],
       "createdAt": "2026-09-28T09:36:46.925Z",
-      "updatedAt": "2026-09-28T09:36:46.925Z"
+      "updatedAt": "2026-09-28T09:37:33.649Z"
     }
   ],
   "visualRenderPackets": [
