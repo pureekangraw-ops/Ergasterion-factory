@@ -1,77 +1,50 @@
 {
-  "requestId": "PRISM-CLEAN-MATRIX-START-001",
-  "command": "start_matrix",
+  "requestId": "PRISM-TEST-CONTRACT-001",
+  "command": "add_test_run",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "start_matrix",
+    "command": "add_test_run",
     "mutated": true,
     "result": {
-      "matrixId": "MATRIX-PRISM-CLEAN-BASE-003",
-      "subjectRef": "logic-draft://DRAFT-PRISM-CLEAN-BASE-002",
-      "logicVersion": "PRISM-CLEAN-BASE-002",
+      "runId": "PRISM-TEST-CONTRACT-001",
+      "runClass": "ROOM_TEST_RUN",
+      "initiatedBy": "GO",
+      "executedBy": "PIXIE-01",
+      "scope": "LOGIC_DRAFT",
+      "purpose": "PRISM clean-base acceptance: foundation-independence",
       "roomId": null,
-      "rows": [
-        {
-          "testTypeId": "contract",
-          "caseRefs": [
-            "foundation-independence"
-          ],
-          "status": "UNRUN",
-          "required": true
-        },
-        {
-          "testTypeId": "functional",
-          "caseRefs": [
-            "receipt-replay",
-            "mobile-surface"
-          ],
-          "status": "UNRUN",
-          "required": true
-        },
-        {
-          "testTypeId": "permission_boundary",
-          "caseRefs": [
-            "unknown-fail-closed",
-            "owner-boundaries"
-          ],
-          "status": "UNRUN",
-          "required": true
-        },
-        {
-          "testTypeId": "migration",
-          "caseRefs": [
-            "capability-migration"
-          ],
-          "status": "UNRUN",
-          "required": true
-        },
-        {
-          "testTypeId": "recovery",
-          "caseRefs": [
-            "recovery"
-          ],
-          "status": "UNRUN",
-          "required": true
-        },
-        {
-          "testTypeId": "integration",
-          "caseRefs": [
-            "same-work-handoff"
-          ],
-          "status": "UNRUN",
-          "required": true
-        }
+      "sourceRoomRefs": [],
+      "matrixRef": "MATRIX-PRISM-CLEAN-BASE-003",
+      "testTypeId": "contract",
+      "caseRef": null,
+      "fixtureRef": null,
+      "snapshotRef": null,
+      "logicVersion": "PRISM-CLEAN-BASE-002",
+      "expected": {
+        "cases": [
+          "foundation-independence"
+        ]
+      },
+      "observed": {
+        "parentArchitecture": "NONE",
+        "sourceRef": "owner-intent://PRISM-clean-base",
+        "legacyRole": "REFERENCE_ONLY"
+      },
+      "status": "PASS",
+      "evidenceRefs": [
+        "logic-draft://DRAFT-PRISM-CLEAN-BASE-002"
       ],
-      "overallStatus": "INCONCLUSIVE",
-      "lifecycle": "RUNNING",
-      "createdAt": "2026-09-28T09:12:51.540Z",
-      "updatedAt": "2026-09-28T09:13:24.501Z"
+      "bugCapsuleRef": null,
+      "unknowns": [],
+      "rerunOf": null,
+      "immutable": true,
+      "createdAt": "2026-09-28T09:14:08.301Z"
     }
   },
   "error": null,
-  "completedAt": "2026-09-28T09:13:24.541Z"
+  "completedAt": "2026-09-28T09:14:08.342Z"
 }
