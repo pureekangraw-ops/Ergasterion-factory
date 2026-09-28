@@ -1,5 +1,5 @@
 {
-  "requestId": "PRISM-TEST-INTEGRATION-001",
+  "requestId": "PRISM-TEST-PERMISSION-001",
   "command": "add_test_run",
   "exitCode": 0,
   "ok": true,
@@ -10,29 +10,31 @@
     "command": "add_test_run",
     "mutated": true,
     "result": {
-      "runId": "PRISM-TEST-INTEGRATION-001",
+      "runId": "PRISM-TEST-PERMISSION-001",
       "runClass": "ROOM_TEST_RUN",
       "initiatedBy": "GO",
       "executedBy": "PIXIE-01",
       "scope": "LOGIC_DRAFT",
-      "purpose": "PRISM clean-base acceptance: same-work-handoff",
+      "purpose": "PRISM clean-base acceptance: unknown-fail-closed,owner-boundaries",
       "roomId": null,
       "sourceRoomRefs": [],
       "matrixRef": "MATRIX-PRISM-CLEAN-BASE-003",
-      "testTypeId": "integration",
+      "testTypeId": "permission_boundary",
       "caseRef": null,
       "fixtureRef": null,
       "snapshotRef": null,
       "logicVersion": "PRISM-CLEAN-BASE-002",
       "expected": {
         "cases": [
-          "same-work-handoff"
+          "unknown-fail-closed",
+          "owner-boundaries"
         ]
       },
       "observed": {
-        "workId": "WORK-f53b698c-6039-4839-899e-40b72294ac3d",
-        "checkpointId": "CP-WORK-f53b698c-6039-4839-899e-40b72294ac3d",
-        "identityContinuity": "SAME_WORK"
+        "unknownPolicy": "FAIL_CLOSED",
+        "owner": "BIG",
+        "ledger": "FINANCE_OWNER",
+        "map": "PRIMARY"
       },
       "status": "PASS",
       "evidenceRefs": [
@@ -42,9 +44,9 @@
       "unknowns": [],
       "rerunOf": null,
       "immutable": true,
-      "createdAt": "2026-09-28T09:14:38.272Z"
+      "createdAt": "2026-09-28T09:15:24.438Z"
     }
   },
   "error": null,
-  "completedAt": "2026-09-28T09:14:38.309Z"
+  "completedAt": "2026-09-28T09:15:24.467Z"
 }
