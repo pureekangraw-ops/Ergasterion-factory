@@ -1,5 +1,5 @@
 {
-  "requestId": "PRISM-TEST-RECOVERY-001",
+  "requestId": "PRISM-TEST-INTEGRATION-001",
   "command": "add_test_run",
   "exitCode": 0,
   "ok": true,
@@ -10,28 +10,29 @@
     "command": "add_test_run",
     "mutated": true,
     "result": {
-      "runId": "PRISM-TEST-RECOVERY-001",
+      "runId": "PRISM-TEST-INTEGRATION-001",
       "runClass": "ROOM_TEST_RUN",
       "initiatedBy": "GO",
       "executedBy": "PIXIE-01",
       "scope": "LOGIC_DRAFT",
-      "purpose": "PRISM clean-base acceptance: recovery",
+      "purpose": "PRISM clean-base acceptance: same-work-handoff",
       "roomId": null,
       "sourceRoomRefs": [],
       "matrixRef": "MATRIX-PRISM-CLEAN-BASE-003",
-      "testTypeId": "recovery",
+      "testTypeId": "integration",
       "caseRef": null,
       "fixtureRef": null,
       "snapshotRef": null,
       "logicVersion": "PRISM-CLEAN-BASE-002",
       "expected": {
         "cases": [
-          "recovery"
+          "same-work-handoff"
         ]
       },
       "observed": {
-        "recoveryPoint": "LAST_VERIFIED",
-        "unknownEffect": "WAIT_VERIFY"
+        "workId": "WORK-f53b698c-6039-4839-899e-40b72294ac3d",
+        "checkpointId": "CP-WORK-f53b698c-6039-4839-899e-40b72294ac3d",
+        "identityContinuity": "SAME_WORK"
       },
       "status": "PASS",
       "evidenceRefs": [
@@ -41,9 +42,9 @@
       "unknowns": [],
       "rerunOf": null,
       "immutable": true,
-      "createdAt": "2026-09-28T09:14:21.959Z"
+      "createdAt": "2026-09-28T09:14:38.272Z"
     }
   },
   "error": null,
-  "completedAt": "2026-09-28T09:14:21.998Z"
+  "completedAt": "2026-09-28T09:14:38.309Z"
 }
