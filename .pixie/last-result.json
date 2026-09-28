@@ -1,9 +1,9 @@
 {
-  "requestId": "PRISM-GOLDEN-REPLAY-001",
+  "requestId": "PRISM-GOLDEN-REPLAY-002",
   "command": "add_golden_case",
   "exitCode": 1,
   "ok": false,
   "output": null,
-  "error": "{\n  \"ok\": false,\n  \"error\": \"goldenCaseId is required\"\n}",
-  "completedAt": "2026-09-28T10:42:44.640Z"
+  "error": "{\n  \"ok\": false,\n  \"error\": \"sourceBugId is required\"\n}",
+  "completedAt": "2026-09-28T10:44:31.811Z"
 }
