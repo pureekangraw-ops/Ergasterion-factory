@@ -1,48 +1,9 @@
 {
-  "requestId": "PIXIE-CLEAN-ROOM-B-RETRY-20260928",
-  "command": "clean_room",
-  "exitCode": 0,
-  "ok": true,
-  "output": {
-    "ok": true,
-    "pixieId": "PIXIE-01",
-    "labId": "PIXIE-LAB",
-    "command": "clean_room",
-    "mutated": true,
-    "result": {
-      "cleanId": "CLEAN-ROOM-B-2026-09-28T12:22:00.035Z",
-      "roomId": "ROOM-B",
-      "status": "PASS",
-      "cleanupKind": "LAB_TRANSIENT_RESET",
-      "reason": "MANUAL_CLEAN",
-      "stages": [
-        "ZERO",
-        "STERILIZE",
-        "VERIFY_CLEAN",
-        "LOAD_CLEAN_SEED",
-        "READY"
-      ],
-      "discardedSessionIds": [],
-      "discardedCycleIds": [],
-      "clearedRoomReports": 0,
-      "archiveCreated": false,
-      "cleanSeedRef": "pixie-clean-seed://ROOM-B/2026-09-28T12:22:00.035Z",
-      "before": {
-        "status": "READY",
-        "lifecycleStage": "READY",
-        "activeSessionId": null,
-        "currentCycleId": null
-      },
-      "after": {
-        "status": "READY",
-        "lifecycleStage": "READY",
-        "activeSessionId": null,
-        "currentCycleId": null
-      },
-      "startedAt": "2026-09-28T12:22:00.035Z",
-      "completedAt": "2026-09-28T12:22:00.035Z"
-    }
-  },
-  "error": null,
-  "completedAt": "2026-09-28T12:22:00.068Z"
+  "requestId": "GNOME-POLISH-PRISM-002",
+  "command": "logic_create",
+  "exitCode": 1,
+  "ok": false,
+  "output": null,
+  "error": "{\n  \"ok\": false,\n  \"error\": \"draftId is required\"\n}",
+  "completedAt": "2026-09-28T13:11:30.625Z"
 }
