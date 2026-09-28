@@ -1,21 +1,18 @@
 {
-  "requestId": "GNOME-PRISM-TRAIN-010",
-  "command": "logic_edit",
+  "requestId": "GNOME-PRISM-COMPARE-011",
+  "command": "logic_compare",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "logic_edit",
-    "mutated": true,
+    "command": "logic_compare",
+    "mutated": false,
     "result": {
       "draftId": "DRAFT-GNOME-WORKBENCH-002",
       "logicId": "GNOME-V1",
-      "sourceRef": "owner-intent://GNOME-visual-workbench",
-      "sourceVersion": "workbench-v2",
-      "labOwned": true,
-      "status": "DRAFT",
+      "changed": true,
       "original": {
         "identity": {
           "name": "Gnome",
@@ -159,20 +156,10 @@
           }
         }
       },
-      "edits": [
-        {
-          "op": "SET",
-          "path": [
-            "training",
-            "prismCase"
-          ],
-          "at": "2026-09-28T13:47:49.366Z"
-        }
-      ],
-      "createdAt": "2026-09-28T13:36:22.396Z",
-      "updatedAt": "2026-09-28T13:47:49.366Z"
+      "editCount": 1,
+      "approval": "NOT_AN_APPROVAL"
     }
   },
   "error": null,
-  "completedAt": "2026-09-28T13:47:49.403Z"
+  "completedAt": "2026-09-28T13:48:39.978Z"
 }
