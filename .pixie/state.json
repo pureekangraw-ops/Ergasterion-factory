@@ -847,7 +847,6 @@
           },
           "intentRefiner": {
             "name": "PIXIE_INTENT_REFINER",
-            "mode": "AUTO_LAB_REFINEMENT",
             "preservesOwnerIntent": true,
             "mayRewriteOwnerIntent": false,
             "loop": {
@@ -1058,10 +1057,19 @@
             "intentRefinerTrial"
           ],
           "at": "2026-09-27T13:44:10.400Z"
+        },
+        {
+          "op": "DELETE",
+          "path": [
+            "proposal",
+            "intentRefiner",
+            "mode"
+          ],
+          "at": "2026-09-28T09:12:16.293Z"
         }
       ],
       "createdAt": "2026-09-27T13:26:42.956Z",
-      "updatedAt": "2026-09-27T13:44:10.400Z"
+      "updatedAt": "2026-09-28T09:12:16.293Z"
     },
     {
       "draftId": "DRAFT-PRISM-CLEAN-BASE-001",
