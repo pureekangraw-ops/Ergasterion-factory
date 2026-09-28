@@ -1067,6 +1067,127 @@
       "edits": [],
       "createdAt": "2026-09-28T09:08:15.896Z",
       "updatedAt": "2026-09-28T09:08:15.896Z"
+    },
+    {
+      "draftId": "DRAFT-PRISM-CLEAN-BASE-002",
+      "logicId": "PRISM-CLEAN-BASE-002",
+      "sourceRef": "owner-intent://PRISM-clean-base",
+      "sourceVersion": "clean-v1",
+      "labOwned": true,
+      "status": "DRAFT",
+      "original": {
+        "architecture": "PRISM_NATIVE_V1",
+        "flow": [
+          "INTENT",
+          "CONTEXT",
+          "WORK",
+          "CAPABILITY",
+          "AUTHORITY",
+          "ACTION_IDENTITY",
+          "DISPATCH",
+          "RECEIPT",
+          "VERIFY",
+          "RETURN"
+        ],
+        "surfaces": {
+          "root": [
+            "COPILOT",
+            "PROJECTS",
+            "MAP",
+            "LEDGER"
+          ],
+          "deep": [
+            "HANDOFF",
+            "MONITOR"
+          ]
+        },
+        "services": {
+          "SPECTRUM": "THIN_ORCHESTRATOR",
+          "CONTEXT_BROKER": "NO_GUESS_BINDING",
+          "CAPABILITY_REGISTRY": "PROVEN_ONLY",
+          "RECEIPT_STORE": "EFFECT_IDENTITY_EVIDENCE",
+          "RECOVERY_ROLLBACK": "LAST_VERIFIED_POINT"
+        },
+        "rules": [
+          "BIG_OWNER_AUTHORITY",
+          "FAIL_CLOSED_UNKNOWN",
+          "RECEIPT_BACKED_REPLAY",
+          "NO_DUPLICATE_WORK",
+          "DO_NOT_EQUAL_DONE",
+          "CAPABILITY_MIGRATION_BY_PROOF",
+          "LEGACY_REFERENCE_ONLY"
+        ],
+        "ux": {
+          "frontDoor": "COPILOT",
+          "mobileFirst": true,
+          "internalJargonHidden": true
+        },
+        "boundaries": {
+          "MAP": "PRIMARY_WITH_RIDE_INSIDE",
+          "LEDGER": "FINANCE_OWNER",
+          "CALENDAR": "ABSENT",
+          "HANDOFF": "SAME_WORK",
+          "MONITOR": "DEEP_ONLY"
+        }
+      },
+      "workingCopy": {
+        "architecture": "PRISM_NATIVE_V1",
+        "flow": [
+          "INTENT",
+          "CONTEXT",
+          "WORK",
+          "CAPABILITY",
+          "AUTHORITY",
+          "ACTION_IDENTITY",
+          "DISPATCH",
+          "RECEIPT",
+          "VERIFY",
+          "RETURN"
+        ],
+        "surfaces": {
+          "root": [
+            "COPILOT",
+            "PROJECTS",
+            "MAP",
+            "LEDGER"
+          ],
+          "deep": [
+            "HANDOFF",
+            "MONITOR"
+          ]
+        },
+        "services": {
+          "SPECTRUM": "THIN_ORCHESTRATOR",
+          "CONTEXT_BROKER": "NO_GUESS_BINDING",
+          "CAPABILITY_REGISTRY": "PROVEN_ONLY",
+          "RECEIPT_STORE": "EFFECT_IDENTITY_EVIDENCE",
+          "RECOVERY_ROLLBACK": "LAST_VERIFIED_POINT"
+        },
+        "rules": [
+          "BIG_OWNER_AUTHORITY",
+          "FAIL_CLOSED_UNKNOWN",
+          "RECEIPT_BACKED_REPLAY",
+          "NO_DUPLICATE_WORK",
+          "DO_NOT_EQUAL_DONE",
+          "CAPABILITY_MIGRATION_BY_PROOF",
+          "LEGACY_REFERENCE_ONLY"
+        ],
+        "ux": {
+          "frontDoor": "COPILOT",
+          "mobileFirst": true,
+          "internalJargonHidden": true
+        },
+        "boundaries": {
+          "MAP": "PRIMARY_WITH_RIDE_INSIDE",
+          "LEDGER": "FINANCE_OWNER",
+          "CALENDAR": "ABSENT",
+          "HANDOFF": "SAME_WORK",
+          "MONITOR": "DEEP_ONLY"
+        }
+      },
+      "edits": [],
+      "createdAt": "2026-09-28T09:09:44.973Z",
+      "updatedAt": "2026-09-28T09:09:44.973Z"
     }
   ],
   "factoryHandoffs": [],
