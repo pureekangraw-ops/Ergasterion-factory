@@ -9,7 +9,7 @@ const requireObject = (value, label = 'args') => {
 
 export const PIXIE_COMMANDS = Object.freeze([
   'status', 'ask',
-  'start_session', 'archive_session', 'close_session', 'clean_room',
+  'start_session', 'archive_session', 'close_session', 'clean_room', 'clean_all', 'clean_all',
   'start_cycle', 'cycle_action',
   'add_matrix', 'start_matrix', 'update_matrix',
   'add_test_run', 'rerun_test_run',
@@ -82,6 +82,12 @@ export function createPixieCommander({ persistence, evidenceVerifier = null, now
       case 'clean_room':
         result = lab.cleanRoom(args.roomId, { reason: args.reason, seedRef: args.seedRef });
         break;
+      case 'clean_all': {
+        const roomIds = ['ROOM-A', 'ROOM-B', 'ROOM-C'];
+        const rooms = roomIds.map((roomId) => lab.cleanRoom(roomId, { reason: args.reason || 'OWNER_CLEAN_ALL', seedRef: args.seedRef }));
+        result = { status: rooms.every((room) => room.status === 'PASS') ? 'PASS' : 'FAIL', roomIds, rooms, debugRoomPreserved: true, archivePreserved: true };
+        break;
+      }
       case 'start_cycle':
         result = lab.startCycle(args);
         break;
