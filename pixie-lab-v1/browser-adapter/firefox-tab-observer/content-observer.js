@@ -1,4 +1,5 @@
 (() => {
+  const CONTENT_SCRIPT_VERSION = '0.2.3';
   const clean = (value, max = 240) => String(value ?? '').replace(/\s+/g, ' ').trim().slice(0, max);
 
   function visible(element) {
@@ -125,6 +126,9 @@
       fields: collectFields(),
       landmarks: collectLandmarks(),
       capturedAt: new Date().toISOString(),
+      observerVersion: CONTENT_SCRIPT_VERSION,
+      visibilityState: document.visibilityState,
+      documentFocused: document.hasFocus(),
       capturesInputValues: false,
       createsAuthority: false,
     };
@@ -159,7 +163,9 @@
       await browser.runtime.sendMessage({
         type: 'ERGASTERION_FACTORY_EYE_CONTENT_PULSE',
         reason,
+        contentScriptVersion: CONTENT_SCRIPT_VERSION,
         visible: true,
+        focused: document.hasFocus(),
         page: pageSummary(),
       });
     } catch {
