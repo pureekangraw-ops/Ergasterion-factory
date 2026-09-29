@@ -90,9 +90,9 @@ test('Coding and Runtime views tell the truth about host/runtime execution', () 
   assert.equal(coding.reality, 'CHECK_CODING_STATUS');
   assert.equal(coding.runtimeCheck, 'coding_status');
   assert.equal(coding.mergeAuthority, false);
-  assert.equal(runtime.status, 'PARTIAL');
-  assert.equal(runtime.executionReality, 'UNKNOWN');
-  assert.equal(runtime.missing.includes('INTERACT_RUNTIME'), true);
+  assert.equal(runtime.status, 'HOST_DEPENDENT');
+  assert.equal(runtime.evidenceBridge, 'ACTIVE');
+  assert.equal(runtime.directInteraction, 'CHECK_RUNTIME_STATUS');
 });
 
 test('unknown workbench never creates a fallback surface', () => {
