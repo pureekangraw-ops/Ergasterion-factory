@@ -8,7 +8,7 @@ async function read(name) {
   return readFile(new URL(name, root), 'utf8');
 }
 
-test('Factory Eye v0.2.1 targets GO Hub remote bridge rather than localhost', async () => {
+test('Factory Eye v0.2.2 targets GO Hub remote bridge rather than localhost', async () => {
   const background = await read('background.js');
   assert.match(background, /https:\/\/go-hub\.pureekangraw\.workers\.dev/);
   assert.match(background, /\/hub\/api\/factory-eye/);
@@ -42,4 +42,32 @@ test('Factory Eye pairing screen keeps owner passcode in a password field', asyn
   assert.match(html, /autocomplete="current-password"/);
   assert.match(js, /ERGASTERION_FACTORY_EYE_PAIR/);
   assert.match(js, /passcode/);
+});
+
+
+test('Factory Eye visible content pulses wake the Android event page', async () => {
+  const background = await read('background.js');
+  const content = await read('content-observer.js');
+
+  assert.match(content, /ERGASTERION_FACTORY_EYE_CONTENT_PULSE/);
+  assert.match(content, /document\.visibilityState !== 'visible'/);
+  assert.match(content, /CONTENT_PULSE_MS = 8000/);
+  assert.match(content, /visibilitychange/);
+  assert.match(content, /pageshow/);
+  assert.match(content, /foreground-keepalive/);
+
+  assert.match(background, /observeFromContentPulse\(message, sender\)/);
+  assert.match(background, /sender\?\.tab/);
+  assert.match(background, /page\.capturesInputValues !== false/);
+  assert.match(background, /page\.createsAuthority !== false/);
+  assert.match(background, /new URL\(senderUrl\)\.origin === new URL\(pageUrl\)\.origin/);
+});
+
+test('Factory Eye remote pulse does not expand write capabilities', async () => {
+  const background = await read('background.js');
+  assert.match(background, /navigate:\s*false/);
+  assert.match(background, /activateTab:\s*false/);
+  assert.match(background, /click:\s*false/);
+  assert.match(background, /type:\s*false/);
+  assert.match(background, /scroll:\s*false/);
 });

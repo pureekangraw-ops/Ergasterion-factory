@@ -9,7 +9,7 @@ Neutral Firefox WebExtension for the Runtime Workbench.
 - observes HTTP/HTTPS page structure through a neutral content observer
 - captures the currently visible active-tab screenshot when Firefox allows it
 - sends observations over HTTPS to the owner-paired GO Hub Factory Eye bridge
-- keeps the remote bridge **eyes-only** in v0.2.1
+- keeps the remote bridge **eyes-only** in v0.2.2
 - stores only the issued Factory Eye session id/token/expiry; the owner passcode is never stored
 - reports stale/disconnected reality instead of pretending the eye is live
 
@@ -29,7 +29,7 @@ Firefox privileged pages that normal extensions cannot inspect are reported as u
 
 ## Remote Hub bridge — Firefox Android
 
-v0.2.1 uses the dedicated neutral Factory Eye ingress:
+v0.2.2 uses the dedicated neutral Factory Eye ingress:
 
 ```text
 https://go-hub.pureekangraw.workers.dev/hub/api/factory-eye/*
@@ -53,7 +53,7 @@ The bridge is currently **eyes-only**:
 - neutral page summary
 - active visible-tab screenshot when Firefox allows capture
 
-Remote navigate/click/type/scroll are not declared available in v0.2.1.
+Remote navigate/click/type/scroll are not declared available in v0.2.2.
 
 ### Readback
 
@@ -107,3 +107,16 @@ Factory Eye is accepted as the real Runtime eye only after physical Firefox test
 - Runtime Workbench reads the same current observation
 - screenshot/readback reflects the active page
 - unsupported Firefox pages remain UNKNOWN/UNSUPPORTED rather than fabricated PASS
+
+
+## Firefox Android foreground wake
+
+Firefox for Android can suspend or kill idle extension background/event processes. Factory Eye v0.2.2 therefore does not treat background timers as the only liveness source.
+
+When an ordinary HTTP/HTTPS page is visible, the content observer sends a sanitized foreground pulse every 8 seconds and immediately on `pageshow` / returning to `visible`. That message wakes the extension event page, which validates the sender tab and same-origin page summary before forwarding a fresh observation to GO Hub.
+
+This pulse:
+- never reads ordinary input values
+- does not add click/type/navigation authority
+- only runs for visible HTTP/HTTPS content
+- retries naturally after Android suspends the background process
