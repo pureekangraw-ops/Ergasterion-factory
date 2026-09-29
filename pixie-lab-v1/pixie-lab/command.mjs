@@ -8,7 +8,7 @@ const requireObject = (value, label = 'args') => {
 };
 
 export const PIXIE_COMMANDS = Object.freeze([
-  'status', 'ask', 'capabilities',
+  'status', 'ask', 'capabilities', 'workbench_floor',
   'idea_create', 'experiment_create', 'variant_create', 'variant_evaluate', 'experiment_select',
   'app_prototype_create', 'app_preview_record', 'app_compare',
   'start_session', 'archive_session', 'close_session', 'clean_room',
@@ -80,6 +80,9 @@ export function createPixieCommander({ persistence, evidenceVerifier = null, now
         break;
       case 'capabilities':
         result = lab.capabilities();
+        break;
+      case 'workbench_floor':
+        result = lab.workbenchFloor();
         break;
       case 'idea_create':
         result = lab.createIdea(args);
