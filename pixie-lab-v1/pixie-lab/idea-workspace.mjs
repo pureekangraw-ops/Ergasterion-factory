@@ -210,3 +210,30 @@ export function recordAppPreview(prototype, {
     updatedAt: now(),
   });
 }
+
+
+export function compareAppPrototypes(left, right, { comparisonId, now = nowIso } = {}) {
+  if (!left?.prototypeId || !right?.prototypeId) throw new Error('APP_PROTOTYPES_REQUIRED');
+  if (left.experimentId !== right.experimentId) throw new Error('APP_PROTOTYPE_EXPERIMENT_MISMATCH');
+  return freeze({
+    comparisonId: required(comparisonId, 'comparisonId'),
+    experimentId: left.experimentId,
+    leftPrototypeId: left.prototypeId,
+    rightPrototypeId: right.prototypeId,
+    changed: JSON.stringify(left.spec) !== JSON.stringify(right.spec),
+    left: {
+      variantId: left.variantId,
+      spec: clone(left.spec),
+      status: left.status,
+      latestPreview: clone((left.previews || []).at(-1) || null),
+    },
+    right: {
+      variantId: right.variantId,
+      spec: clone(right.spec),
+      status: right.status,
+      latestPreview: clone((right.previews || []).at(-1) || null),
+    },
+    comparedAt: now(),
+    approval: 'NOT_AN_APPROVAL',
+  });
+}

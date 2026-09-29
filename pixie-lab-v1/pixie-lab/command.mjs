@@ -10,7 +10,7 @@ const requireObject = (value, label = 'args') => {
 export const PIXIE_COMMANDS = Object.freeze([
   'status', 'ask', 'capabilities',
   'idea_create', 'experiment_create', 'variant_create', 'variant_evaluate', 'experiment_select',
-  'app_prototype_create', 'app_preview_record',
+  'app_prototype_create', 'app_preview_record', 'app_compare',
   'start_session', 'archive_session', 'close_session', 'clean_room',
   'start_cycle', 'cycle_action',
   'add_matrix', 'start_matrix', 'update_matrix',
@@ -23,6 +23,7 @@ export const PIXIE_COMMANDS = Object.freeze([
   'logic_create', 'logic_edit', 'logic_compare',
   'visual_create', 'visual_scan', 'visual_edit', 'visual_compare', 'visual_render_packet', 'visual_verify',
   'image_request', 'image_result',
+  'production_handoff_prepare',
   'candidate_passport', 'door_guard',
   'persist',
 ]);
@@ -41,6 +42,7 @@ const MUTATING = new Set([
   'logic_create', 'logic_edit',
   'visual_create', 'visual_scan', 'visual_edit', 'visual_render_packet', 'visual_verify',
   'image_request', 'image_result',
+  'production_handoff_prepare',
   'candidate_passport',
   'persist',
 ]);
@@ -99,6 +101,9 @@ export function createPixieCommander({ persistence, evidenceVerifier = null, now
         break;
       case 'app_preview_record':
         result = lab.recordAppPreview(args.prototypeId, requireObject(args.preview, 'args.preview'));
+        break;
+      case 'app_compare':
+        result = lab.compareAppPrototypes(args.leftPrototypeId, args.rightPrototypeId, requireObject(args.comparison, 'args.comparison'));
         break;
       case 'start_session':
         result = lab.startSession(args);
@@ -204,6 +209,9 @@ export function createPixieCommander({ persistence, evidenceVerifier = null, now
         break;
       case 'image_result':
         result = lab.acceptImageResult(args.actionId, requireObject(args.result, 'args.result'));
+        break;
+      case 'production_handoff_prepare':
+        result = lab.prepareProductionHandoff(args);
         break;
       case 'candidate_passport':
         result = lab.candidatePassport(args.artifactId);
