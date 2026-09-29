@@ -14,6 +14,11 @@ test('Factory Eye manifest observes generic HTTP and HTTPS tabs', async () => {
   assert.deepEqual(matches, ['http://*/*', 'https://*/*']);
   assert.ok(manifest.permissions.includes('tabs'));
   assert.ok(manifest.host_permissions.includes('<all_urls>'));
+  assert.equal(manifest.version, '0.2.0');
+  assert.equal(
+    manifest.browser_specific_settings?.gecko?.id,
+    'ergasterion-factory-eye@pureekangraw.local',
+  );
 });
 
 test('Factory Eye source contains no site-specific profile or domain binding', async () => {
