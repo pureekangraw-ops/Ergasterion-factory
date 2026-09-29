@@ -141,4 +141,53 @@
       });
     }
   });
+
+  const CONTENT_PULSE_MS = 8000;
+  let pulseBusy = false;
+  let lastPulseAt = 0;
+
+  async function sendVisiblePulse(reason, { force = false } = {}) {
+    if (pulseBusy || document.visibilityState !== 'visible') return;
+    if (!['http:', 'https:'].includes(location.protocol)) return;
+
+    const now = Date.now();
+    if (!force && now - lastPulseAt < 2500) return;
+
+    pulseBusy = true;
+    lastPulseAt = now;
+    try {
+      await browser.runtime.sendMessage({
+        type: 'ERGASTERION_FACTORY_EYE_CONTENT_PULSE',
+        reason,
+        visible: true,
+        page: pageSummary(),
+      });
+    } catch {
+      // Background/event-page availability is best-effort; the next pulse retries.
+    } finally {
+      pulseBusy = false;
+    }
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      void sendVisiblePulse('visibilitychange', { force: true });
+    }
+  });
+
+  window.addEventListener('pageshow', () => {
+    void sendVisiblePulse('pageshow', { force: true });
+  });
+
+  window.addEventListener('focus', () => {
+    void sendVisiblePulse('focus');
+  });
+
+  setInterval(() => {
+    void sendVisiblePulse('foreground-keepalive');
+  }, CONTENT_PULSE_MS);
+
+  setTimeout(() => {
+    void sendVisiblePulse('content-ready', { force: true });
+  }, 250);
 })();
