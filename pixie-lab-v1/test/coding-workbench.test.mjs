@@ -81,6 +81,29 @@ test('Coding apply writes tests commits on a branch without merge authority', as
   assert.equal(message, 'test: coding workbench apply');
 });
 
+test('Coding apply can push its branch to a Git remote without merging', async () => {
+  const root = await tempRepo();
+  const remote = await mkdtemp(join(tmpdir(), 'ergasterion-coding-remote-'));
+  await git(remote, ['init', '--bare']);
+  await git(root, ['remote', 'add', 'origin', remote]);
+  await git(root, ['push', '-u', 'origin', 'main']);
+
+  const executor = createLocalCodingExecutor({ root, allowWrite: true, allowGitPush: true });
+  const result = await executor.apply({
+    branch: 'factory/push-test',
+    baseRef: 'main',
+    writes: [{ path: 'source.txt', content: 'pushed\n' }],
+    runs: [{ argv: ['npm', 'test'] }],
+    commitMessage: 'test: push coding branch',
+    push: true,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.pushed, true);
+  const remoteHead = (await execFile('git', ['--git-dir', remote, 'rev-parse', 'refs/heads/factory/push-test'])).stdout.trim();
+  assert.equal(remoteHead, result.headSha);
+});
+
 test('Coding apply refuses direct main and refuses writes when host opt-in is off', async () => {
   const root = await tempRepo();
   const disabled = createLocalCodingExecutor({ root, allowWrite: false });
