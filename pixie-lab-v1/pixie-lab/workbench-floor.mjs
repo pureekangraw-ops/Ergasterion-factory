@@ -104,7 +104,7 @@ export function projectWorkbenchFloor({
         id: 'LOGIC_WORKBENCH',
         status: 'ACTIVE',
         source: 'logic-workbench.mjs',
-        migration: 'REFRAME_SURFACE_ONLY',
+        migration: 'CANONICAL_WORKBENCH_LEGACY_ALIAS',
         count: count(state, 'logicDrafts'),
         currentDraftId: latestLogic?.draftId || null,
       }),
@@ -135,7 +135,7 @@ export function projectWorkbenchFloor({
       }),
       debugInspection: Object.freeze({
         id: 'DEBUG_INSPECTION_WORKBENCH',
-        status: 'MIGRATION_TARGET',
+        status: 'ACTIVE',
         source: 'debug-inspection-workbench.mjs',
         debugSessionCount: count(state, 'debugSessions'),
         bugCount: count(state, 'bugs'),
