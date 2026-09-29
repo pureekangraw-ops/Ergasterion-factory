@@ -65,8 +65,11 @@ jobs:
           node cli.mjs reality_screen > "$RUNNER_TEMP/reality-screen.json"
           node cli.mjs big_view > "$RUNNER_TEMP/big-view.json"
           node cli.mjs intent_review > "$RUNNER_TEMP/intent-review.json"
+          node cli.mjs coding_status > "$RUNNER_TEMP/coding-status.json"
+          node cli.mjs '{"command":"coding_read","args":{"path":"README.md"}}' > "$RUNNER_TEMP/coding-read.json"
+          node cli.mjs '{"command":"coding_search","args":{"query":"ERGASTERION","path":"README.md"}}' > "$RUNNER_TEMP/coding-search.json"
 
-          STATUS_FILE="$RUNNER_TEMP/status.json" CAP_FILE="$RUNNER_TEMP/capabilities.json" FLOOR_FILE="$RUNNER_TEMP/workbench-floor.json" OPEN_FILE="$RUNNER_TEMP/workbench-open.json" DOCK_FILE="$RUNNER_TEMP/checkpoint-dock.json" REALITY_FILE="$RUNNER_TEMP/reality-screen.json" BIG_FILE="$RUNNER_TEMP/big-view.json" INTENT_FILE="$RUNNER_TEMP/intent-review.json" node --input-type=module <<'NODE'
+          STATUS_FILE="$RUNNER_TEMP/status.json" CAP_FILE="$RUNNER_TEMP/capabilities.json" FLOOR_FILE="$RUNNER_TEMP/workbench-floor.json" OPEN_FILE="$RUNNER_TEMP/workbench-open.json" DOCK_FILE="$RUNNER_TEMP/checkpoint-dock.json" REALITY_FILE="$RUNNER_TEMP/reality-screen.json" BIG_FILE="$RUNNER_TEMP/big-view.json" INTENT_FILE="$RUNNER_TEMP/intent-review.json" CODING_STATUS_FILE="$RUNNER_TEMP/coding-status.json" CODING_READ_FILE="$RUNNER_TEMP/coding-read.json" CODING_SEARCH_FILE="$RUNNER_TEMP/coding-search.json" node --input-type=module <<'NODE'
           import { readFile } from 'node:fs/promises';
 
           const status = JSON.parse(await readFile(process.env.STATUS_FILE, 'utf8'));
@@ -77,6 +80,9 @@ jobs:
           const reality = JSON.parse(await readFile(process.env.REALITY_FILE, 'utf8'));
           const big = JSON.parse(await readFile(process.env.BIG_FILE, 'utf8'));
           const intent = JSON.parse(await readFile(process.env.INTENT_FILE, 'utf8'));
+          const codingStatus = JSON.parse(await readFile(process.env.CODING_STATUS_FILE, 'utf8'));
+          const codingRead = JSON.parse(await readFile(process.env.CODING_READ_FILE, 'utf8'));
+          const codingSearch = JSON.parse(await readFile(process.env.CODING_SEARCH_FILE, 'utf8'));
 
           if (!status.ok) throw new Error('STATUS_NOT_OK');
           if (status.result?.counts?.ideas !== 1) throw new Error('IDEA_PERSISTENCE_FAILED');
@@ -91,7 +97,7 @@ jobs:
           if (!floor.ok || floor.mutated !== false) throw new Error('WORKBENCH_FLOOR_COMMAND_FAILED');
           if (floor.result?.schema !== 'ERGASTERION_WORKBENCH_FLOOR_V1') throw new Error('WORKBENCH_FLOOR_SCHEMA_FAILED');
           if (floor.result?.labs?.experimental?.map((room) => room.roomId).join(',') !== 'ROOM-A,ROOM-B,ROOM-C') throw new Error('EXPERIMENTAL_LAB_BOUNDARY_FAILED');
-          if (floor.result?.workbenches?.coding?.status !== 'GAP') throw new Error('CODING_GAP_TRUTH_FAILED');
+          if (floor.result?.workbenches?.coding?.status !== 'HOST_DEPENDENT') throw new Error('CODING_HOST_TRUTH_FAILED');
           if (floor.result?.authority?.createsAuthority !== false) throw new Error('WORKBENCH_FLOOR_AUTHORITY_EXPANSION');
           if (!open.ok || open.mutated !== false) throw new Error('WORKBENCH_OPEN_COMMAND_FAILED');
           if (open.result?.workbenchId !== 'VISUAL_WORKBENCH') throw new Error('WORKBENCH_OPEN_VISUAL_FAILED');
@@ -106,6 +112,10 @@ jobs:
           if (intent.result?.excess?.status !== 'UNKNOWN') throw new Error('INTENT_REVIEW_EXCESS_INVENTED');
           if (capabilities.result?.layout?.canonicalUnit !== 'WORKBENCH') throw new Error('WORKBENCH_LAYOUT_MANIFEST_FAILED');
           if (capabilities.result?.layout?.experimentalLabs?.join(',') !== 'ROOM-A,ROOM-B,ROOM-C') throw new Error('EXPERIMENTAL_LAB_MANIFEST_FAILED');
+          if (!codingStatus.ok || codingStatus.result?.status !== 'ACTIVE') throw new Error('CODING_STATUS_FAILED');
+          if (codingStatus.result?.executor?.writeEnabled !== false) throw new Error('CODING_TEST_WRITE_SHOULD_BE_DISABLED');
+          if (!codingRead.ok || !codingRead.result?.result?.content?.includes('ERGASTERION')) throw new Error('CODING_READ_FAILED');
+          if (!codingSearch.ok || !codingSearch.result?.result?.matches?.length) throw new Error('CODING_SEARCH_FAILED');
           NODE
 
   command:
@@ -143,6 +153,10 @@ jobs:
         env:
           PIXIE_COMMAND_JSON: ${{ inputs.command_json }}
           PIXIE_REQUEST_ID: ${{ inputs.request_id }}
+          ERGASTERION_CODING_WRITE: "1"
+          ERGASTERION_CODING_GIT_PUSH: "1"
+          ERGASTERION_CODING_EXECUTABLES: "npm,node"
+          GIT_TERMINAL_PROMPT: "0"
         run: |
           set -uo pipefail
           set +e
