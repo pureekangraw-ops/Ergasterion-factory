@@ -100,11 +100,13 @@ function targetAt(root, path, { create = false } = {}) {
   return { parent: cursor, key, value: cursor?.[key] };
 }
 
-export function createLogicDraft({ draftId, logicId, sourceRef, sourceVersion = 'unknown', content, now = nowIso } = {}) {
+export function createLogicDraft({ draftId, logicId, experimentId = null, variantId = null, sourceRef, sourceVersion = 'unknown', content, now = nowIso } = {}) {
   const original = clone(content ?? null);
   return freeze({
     draftId: required(draftId, 'draftId'),
     logicId: required(logicId, 'logicId'),
+    experimentId: text(experimentId) || null,
+    variantId: text(variantId) || null,
     sourceRef: required(sourceRef, 'sourceRef'),
     sourceVersion: required(sourceVersion, 'sourceVersion'),
     labOwned: true,
@@ -156,6 +158,8 @@ export function compareLogicDraft(draft) {
   return freeze({
     draftId: draft.draftId,
     logicId: draft.logicId,
+    experimentId: draft.experimentId || null,
+    variantId: draft.variantId || null,
     changed: before !== after,
     original: clone(draft.original),
     workingCopy: clone(draft.workingCopy),

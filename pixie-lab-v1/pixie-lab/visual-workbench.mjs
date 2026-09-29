@@ -41,6 +41,8 @@ function requireDraft(draft) {
 
 export function createVisualDraft({
   visualDraftId,
+  experimentId = null,
+  variantId = null,
   sourceRef,
   sourceVersion = 'unknown',
   sourceHash = null,
@@ -50,6 +52,8 @@ export function createVisualDraft({
   const originalSpec = clone(spec ?? {});
   return freeze({
     visualDraftId: required(visualDraftId, 'visualDraftId'),
+    experimentId: text(experimentId) || null,
+    variantId: text(variantId) || null,
     sourceRef: required(sourceRef, 'sourceRef'),
     sourceVersion: required(sourceVersion, 'sourceVersion'),
     sourceHash: text(sourceHash) || null,
@@ -152,6 +156,8 @@ export function compareVisualDraft(draft) {
   if (!draft?.labOwned) throw new Error('VISUAL_WORKBENCH_DRAFT_REQUIRED');
   return freeze({
     visualDraftId: draft.visualDraftId,
+    experimentId: draft.experimentId || null,
+    variantId: draft.variantId || null,
     sourceRef: draft.sourceRef,
     sourceLocked: draft.sourceLocked === true,
     changed: JSON.stringify(draft.originalSpec) !== JSON.stringify(draft.workingSpec),
@@ -185,6 +191,8 @@ export function createVisualRenderPacket(draft, {
   return freeze({
     packetId: required(packetId, 'packetId'),
     visualDraftId: draft.visualDraftId,
+    experimentId: draft.experimentId || null,
+    variantId: draft.variantId || null,
     sourceRef: draft.sourceRef,
     sourceVersion: draft.sourceVersion,
     sourceHash: draft.sourceHash,
