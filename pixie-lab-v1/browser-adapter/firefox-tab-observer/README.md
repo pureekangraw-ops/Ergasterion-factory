@@ -9,7 +9,7 @@ Neutral Firefox WebExtension for the Runtime Workbench.
 - observes HTTP/HTTPS page structure through a neutral content observer
 - captures the currently visible active-tab screenshot when Firefox allows it
 - sends observations over HTTPS to the owner-paired GO Hub Factory Eye bridge
-- keeps the remote bridge **eyes-only** in v0.2.2
+- keeps the remote bridge **eyes-only** in v0.2.3
 - stores only the issued Factory Eye session id/token/expiry; the owner passcode is never stored
 - reports stale/disconnected reality instead of pretending the eye is live
 
@@ -29,7 +29,7 @@ Firefox privileged pages that normal extensions cannot inspect are reported as u
 
 ## Remote Hub bridge — Firefox Android
 
-v0.2.2 uses the dedicated neutral Factory Eye ingress:
+v0.2.3 uses the dedicated neutral Factory Eye ingress:
 
 ```text
 https://go-hub.pureekangraw.workers.dev/hub/api/factory-eye/*
@@ -53,7 +53,7 @@ The bridge is currently **eyes-only**:
 - neutral page summary
 - active visible-tab screenshot when Firefox allows capture
 
-Remote navigate/click/type/scroll are not declared available in v0.2.2.
+Remote navigate/click/type/scroll are not declared available in v0.2.3.
 
 ### Readback
 
@@ -111,7 +111,7 @@ Factory Eye is accepted as the real Runtime eye only after physical Firefox test
 
 ## Firefox Android foreground wake
 
-Firefox for Android can suspend or kill idle extension background/event processes. Factory Eye v0.2.2 therefore does not treat background timers as the only liveness source.
+Firefox for Android can suspend or kill idle extension background/event processes. Factory Eye v0.2.3 therefore does not treat background timers as the only liveness source.
 
 When an ordinary HTTP/HTTPS page is visible, the content observer sends a sanitized foreground pulse every 8 seconds and immediately on `pageshow` / returning to `visible`. That message wakes the extension event page, which validates the sender tab and same-origin page summary before forwarding a fresh observation to GO Hub.
 
@@ -120,3 +120,16 @@ This pulse:
 - does not add click/type/navigation authority
 - only runs for visible HTTP/HTTPS content
 - retries naturally after Android suspends the background process
+
+
+## Fresh observation contract
+
+Factory Eye v0.2.3 treats a visible-page heartbeat as a candidate observation, not proof by itself.
+
+A web observation is accepted as current only when:
+- the content script reports the same generation as the installed add-on
+- the sender tab is still an actually active browser tab
+- the page is visible
+- the sanitized page summary declares that it captured no input values and creates no authority
+
+The GO Hub side applies the final freshness barrier by checking the active tab, observation age, and script generation before reporting LIVE. Old evidence can remain available for audit, but it must not be represented as the current view.

@@ -2,7 +2,7 @@ const HUB_ORIGIN = 'https://go-hub.pureekangraw.workers.dev';
 const API_ROOT = '/hub/api/factory-eye';
 const PROTOCOL_VERSION = '2';
 const HOST = 'firefox-addon';
-const VERSION = '0.2.2';
+const VERSION = '0.2.3';
 const HEARTBEAT_MS = 5000;
 const COMMAND_POLL_MS = 2500;
 
@@ -252,10 +252,22 @@ async function pageObservation(tab) {
         unknowns: [response?.error || 'CONTENT_OBSERVER_UNAVAILABLE'],
       };
     }
+    const page = response.page || null;
+    const observedVersion = String(page?.observerVersion || response?.contentScriptVersion || '');
+    if (observedVersion !== VERSION) {
+      return {
+        ok: false,
+        status: 'PARTIAL',
+        page: null,
+        contentScriptVersion: observedVersion || null,
+        unknowns: ['STALE_SCRIPT_VERSION'],
+      };
+    }
     return {
       ok: true,
       status: 'OBSERVED',
-      page: response.page || null,
+      page,
+      contentScriptVersion: observedVersion,
       unknowns: [],
     };
   } catch (error) {
@@ -283,6 +295,14 @@ async function captureScreenshot(tab) {
 async function observeFromContentPulse(message, sender) {
   if (!(await ensureRegistered())) return { ok: false, error: 'FACTORY_EYE_PAIRING_REQUIRED' };
 
+  const contentScriptVersion = String(message?.contentScriptVersion || '');
+  if (contentScriptVersion !== VERSION) {
+    return { ok: false, error: 'STALE_SCRIPT_VERSION' };
+  }
+  if (message?.visible !== true) {
+    return { ok: false, error: 'CONTENT_PULSE_NOT_VISIBLE' };
+  }
+
   const senderTab = sender?.tab;
   if (!senderTab || !Number.isInteger(senderTab.id)) {
     return { ok: false, error: 'CONTENT_PULSE_TAB_UNAVAILABLE' };
@@ -307,11 +327,13 @@ async function observeFromContentPulse(message, sender) {
     return { ok: false, error: 'CONTENT_PULSE_URL_MISMATCH' };
   }
 
-  const tab = {
-    ...senderTab,
-    active: message?.visible === true ? true : senderTab.active === true,
-  };
+  const activeTabs = await browser.tabs.query({ active: true });
+  const activeSender = activeTabs.some((tab) => tab.id === senderTab.id);
+  if (!activeSender || senderTab.active !== true) {
+    return { ok: false, error: 'CONTENT_PULSE_TAB_NOT_ACTIVE' };
+  }
 
+  const tab = senderTab;
   const screenshotDataUrl = await captureScreenshot(tab);
   const observationId = `OBS-${Date.now()}-${tab.id}-${idPart().slice(0, 8)}`;
 
@@ -324,6 +346,10 @@ async function observeFromContentPulse(message, sender) {
         observedAt: new Date().toISOString(),
         tab: tabShape(tab),
         page,
+        contentScriptVersion,
+        evidenceReason: String(message?.reason || 'content-pulse'),
+        documentVisible: true,
+        documentFocused: message?.focused === true,
         screenshotDataUrl,
         status: 'OBSERVED',
         unknowns: [],
@@ -365,6 +391,10 @@ async function observeTab(tabId) {
         observedAt: new Date().toISOString(),
         tab: tabShape(tab),
         page: observed.page,
+        contentScriptVersion: observed.contentScriptVersion || observed.page?.observerVersion || null,
+        evidenceReason: 'background-observe',
+        documentVisible: observed.page?.visibilityState === 'visible',
+        documentFocused: observed.page?.documentFocused === true,
         screenshotDataUrl,
         status: observed.status,
         unknowns: observed.unknowns,
