@@ -38,6 +38,13 @@ import {
   applyCodingChange,
 } from './coding-workbench.mjs';
 import {
+  createRuntimeObservation,
+  createRuntimeInteractionReceipt,
+  projectRuntimeWorkbench,
+  inspectRuntimeExecutor,
+  executeRuntimeAction,
+} from './runtime-workbench.mjs';
+import {
   createDebugInspectionSession,
   appendDebugInspectionStep,
   completeDebugInspectionSession,
@@ -67,12 +74,13 @@ function seedRegistry() {
 }
 
 export class PixieLab {
-  constructor({ labId = 'PIXIE-LAB', now = nowIso, persistence = null, evidenceVerifier = null, codingExecutor = null } = {}) {
+  constructor({ labId = 'PIXIE-LAB', now = nowIso, persistence = null, evidenceVerifier = null, codingExecutor = null, runtimeExecutor = null } = {}) {
     this.labId = labId;
     this.now = now;
     this.persistence = persistence || createMemoryPersistence();
     this.evidenceVerifier = evidenceVerifier;
     this.codingExecutor = codingExecutor;
+    this.runtimeExecutor = runtimeExecutor;
     this.testTypes = seedRegistry();
     this.state = {
       schemaVersion: ERGASTERION_STATE_SCHEMA,
@@ -84,6 +92,7 @@ export class PixieLab {
       logicDrafts: [], productionHandoffs: [], factoryHandoffs: [],
       visualDrafts: [], visualRenderPackets: [], visualVerifications: [],
       imageActions: [], imageReceipts: [],
+      runtimeObservations: [], runtimeInteractions: [],
       archives: [], cleanRuns: [],
     };
     this.assertHealthy();
@@ -351,6 +360,32 @@ export class PixieLab {
       ...input,
     });
   }
+  async runtimeStatus() { return inspectRuntimeExecutor({ executor: this.runtimeExecutor }); }
+  async runtimeView(selector = {}) {
+    const executorStatus = this.runtimeExecutor && typeof this.runtimeExecutor.status === 'function'
+      ? await this.runtimeExecutor.status()
+      : null;
+    return projectRuntimeWorkbench({ state: this.state, selector, executorStatus, now: this.now });
+  }
+  recordRuntimeObservation(input = {}) {
+    if (this.state.runtimeObservations.some((item) => item.observationId === input.observationId)) throw new Error('DUPLICATE_RUNTIME_OBSERVATION_ID');
+    const observation = createRuntimeObservation({ ...input, now: this.now });
+    if (observation.prototypeId && !this.state.appPrototypes.some((item) => item.prototypeId === observation.prototypeId)) {
+      throw new Error('APP_PROTOTYPE_NOT_FOUND');
+    }
+    this.state.runtimeObservations.push(observation);
+    return clone(observation);
+  }
+  recordRuntimeInteraction(input = {}) {
+    if (this.state.runtimeInteractions.some((item) => item.interactionId === input.interactionId)) throw new Error('DUPLICATE_RUNTIME_INTERACTION_ID');
+    if (input.observationId && !this.state.runtimeObservations.some((item) => item.observationId === input.observationId)) {
+      throw new Error('RUNTIME_OBSERVATION_NOT_FOUND');
+    }
+    const receipt = createRuntimeInteractionReceipt({ ...input, now: this.now });
+    this.state.runtimeInteractions.push(receipt);
+    return clone(receipt);
+  }
+  async runtimeAction(action = {}) { return executeRuntimeAction({ executor: this.runtimeExecutor, action }); }
 
   createIdea(input = {}) {
     if (this.state.ideas.some((item) => item.ideaId === input.ideaId)) throw new Error('DUPLICATE_IDEA_ID');
@@ -620,6 +655,8 @@ export class PixieLab {
       this.state.visualVerifications = Array.isArray(this.state.visualVerifications) ? this.state.visualVerifications : [];
       this.state.imageActions = Array.isArray(this.state.imageActions) ? this.state.imageActions : [];
       this.state.imageReceipts = Array.isArray(this.state.imageReceipts) ? this.state.imageReceipts : [];
+      this.state.runtimeObservations = Array.isArray(this.state.runtimeObservations) ? this.state.runtimeObservations : [];
+      this.state.runtimeInteractions = Array.isArray(this.state.runtimeInteractions) ? this.state.runtimeInteractions : [];
       this.state.archives = Array.isArray(this.state.archives) ? this.state.archives : [];
       this.state.cleanRuns = Array.isArray(this.state.cleanRuns) ? this.state.cleanRuns : [];
       this.state.evidence = (this.state.evidence || []).flatMap((value) => {
@@ -663,6 +700,8 @@ export class PixieLab {
       visualVerifications: clone(this.state.visualVerifications || []),
       imageActions: clone(this.state.imageActions || []),
       imageReceipts: clone(this.state.imageReceipts || []),
+      runtimeObservations: clone(this.state.runtimeObservations || []),
+      runtimeInteractions: clone(this.state.runtimeInteractions || []),
       archives: clone(this.state.archives || []),
       cleanRuns: clone(this.state.cleanRuns || []),
       exampleZone: listExampleExperiments(),
@@ -681,6 +720,8 @@ export class PixieLab {
         visualVerifications: (this.state.visualVerifications || []).length,
         imageActions: (this.state.imageActions || []).length,
         imageReceipts: (this.state.imageReceipts || []).length,
+        runtimeObservations: (this.state.runtimeObservations || []).length,
+        runtimeInteractions: (this.state.runtimeInteractions || []).length,
         archives: (this.state.archives || []).length,
         cleanRuns: (this.state.cleanRuns || []).length,
         examples: listExampleExperiments().length,
