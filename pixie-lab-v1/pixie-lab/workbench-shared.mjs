@@ -36,6 +36,7 @@ function collectWorkCarriers(state = {}) {
     ...list(state.ideas).map((item) => ({ kind: 'IDEA', ref: item.ideaId, item })),
     ...list(state.experiments).map((item) => ({ kind: 'EXPERIMENT', ref: item.experimentId, item })),
     ...list(state.productionHandoffs).map((item) => ({ kind: 'PRODUCTION_HANDOFF', ref: item.handoffId, item })),
+    ...list(state.runtimeObservations).map((item) => ({ kind: 'RUNTIME_OBSERVATION', ref: item.observationId, item })),
   ].filter((entry) => entry.item?.workId || entry.item?.checkpointId);
 }
 
@@ -62,6 +63,8 @@ function collectUnknowns(state = {}) {
     ...list(state.visualDrafts).flatMap((item) => list(item?.scans).flatMap((scan) => list(scan?.unknowns))),
     ...list(state.visualRenderPackets).flatMap((item) => list(item?.unknowns)),
     ...list(state.productionHandoffs).flatMap((item) => list(item?.unknowns)),
+    ...list(state.runtimeObservations).flatMap((item) => list(item?.unknowns)),
+    ...list(state.runtimeInteractions).flatMap((item) => list(item?.unknowns)),
   ]);
 }
 
@@ -79,6 +82,8 @@ function actionCandidates(state = {}) {
     ['TEST_RUN', state.testRuns, 'runId'],
     ['DEBUG_SESSION', state.debugSessions, 'debugId'],
     ['PRODUCTION_HANDOFF', state.productionHandoffs, 'handoffId'],
+    ['RUNTIME_OBSERVATION', state.runtimeObservations, 'observationId'],
+    ['RUNTIME_INTERACTION', state.runtimeInteractions, 'interactionId'],
     ['ARTIFACT', state.artifacts, 'artifactId'],
     ['EVIDENCE', state.evidence, 'evidenceId'],
   ];
@@ -155,6 +160,8 @@ export function projectRealityScreen({
   const latestVisual = latest(state.visualDrafts);
   const latestRun = latest(state.testRuns);
   const preview = latestPreview(state);
+  const runtimeObservation = latest(state.runtimeObservations);
+  const runtimeInteraction = latest(state.runtimeInteractions);
   const evidence = latest(state.evidence);
   const artifact = latest(state.artifacts);
   const golden = latestGoldenPass(state);
@@ -180,6 +187,8 @@ export function projectRealityScreen({
     observed: Object.freeze({
       latestTest: clone(latestRun),
       latestPreview: clone(preview),
+      latestRuntimeObservation: clone(runtimeObservation),
+      latestRuntimeInteraction: clone(runtimeInteraction),
       latestEvidence: clone(evidence),
       latestArtifact: clone(artifact),
       lastKnownGood: clone(golden),
@@ -196,6 +205,8 @@ export function projectRealityScreen({
       current: 'ERGASTERION_STATE_V2',
       tests: 'state.testRuns',
       previews: 'state.appPrototypes[].previews',
+      runtimeObservations: 'state.runtimeObservations',
+      runtimeInteractions: 'state.runtimeInteractions',
       evidence: 'state.evidence',
       artifacts: 'state.artifacts',
       unknowns: 'state projections',

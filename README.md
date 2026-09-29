@@ -33,8 +33,8 @@ Current Workbench floor:
 - **Build / Test Workbench**
 - **Debug / Inspection Workbench**
 - **Production / Evidence Workbench**
-- **Coding Workbench** — `GAP`
-- **Runtime Workbench** — `PARTIAL`
+- **Coding Workbench** — `HOST_DEPENDENT`; local/Actions hosts can provide real repository hands
+- **Runtime Workbench** — `HOST_DEPENDENT`; evidence bridge is active and direct interaction requires a host executor
 
 **ROOM-A / ROOM-B / ROOM-C** remain Experimental Labs for isolated experiments.  
 **ROOM-D** remains only as a compatibility source while Debug capability migrates to the Debug / Inspection Workbench.
@@ -152,6 +152,12 @@ Important current commands include:
 - `reality_screen` — read-only Current/Test/Preview/Evidence/Artifact projection with provenance
 - `big_view` — read-only owner Before/After + proof projection
 - `intent_review` — read-only Requested Result coverage + known gap projection; excess stays `UNKNOWN` when scope diff is unavailable
+- `coding_status` — inspect host executor availability and write/push capability
+- `coding_list` / `coding_read` / `coding_search` / `coding_diff` — bounded repository inspection
+- `coding_apply` — structured write → verification run → commit → optional branch push; no merge/deploy authority
+- `runtime_record` / `runtime_interaction_record` — persist observed runtime evidence and interaction receipts from Browser Observer/Lighthouse-style hosts
+- `runtime_view` — read current prototype + runtime observation/evidence
+- `runtime_status` / `runtime_action` — inspect/use direct interaction executor when a host provides one
 
 The command surface does not expose merge, deploy, release, system-CURRENT acceptance, direct image generation, or the legacy `factory_handoff` route.
 
@@ -176,6 +182,10 @@ Phase 2 begins the canonical naming move without breaking callers: Logic now liv
 
 `big_view` and `intent_review` give BIG an owner-readable inspection surface. They can report known missing evidence/unknowns, but they do not invent scope-overrun conclusions when the required diff is not present in ERGASTERION state.
 
+Phase 3 adds a host-backed Coding Workbench. The core Workbench contract remains runtime-neutral; the Node CLI injects a bounded local Git/filesystem executor. Read/search/diff are available whenever the host is a Git workspace. Write/commit/push require explicit host opt-in. Execution commands use structured argv rather than shell strings. Direct `main`/`master` writes are rejected, verification failure prevents commit/push, and the Workbench has no merge or deploy authority.
+
+Phase 4 turns Runtime from preview-only into an evidence-backed Workbench. External runtime hosts can record observations, screenshots, console/network/log references, and interaction receipts against the same Work/Checkpoint. PASS/FAIL observations without evidence are downgraded to `UNKNOWN`. Reality Screen, BIG View, and Intent Review consume runtime observations rather than treating prototype previews as physical runtime proof. Direct interaction stays `HOST_DEPENDENT` until an executor is injected.
+
 ## Verification status
 
 On the current ERGASTERION migration:
@@ -198,6 +208,9 @@ Do not interpret a skipped workflow-dispatch command job on push/PR as failure; 
 - `pixie-lab-v1/pixie-lab/workbench-view.mjs`
 - `pixie-lab-v1/pixie-lab/workbench-shared.mjs`
 - `pixie-lab-v1/pixie-lab/owner-view.mjs`
+- `pixie-lab-v1/pixie-lab/coding-workbench.mjs`
+- `pixie-lab-v1/pixie-lab/coding-local-adapter.mjs`
+- `pixie-lab-v1/pixie-lab/runtime-workbench.mjs`
 - `pixie-lab-v1/pixie-lab/image-tool-adapter.mjs`
 - `pixie-lab-v1/pixie-lab/production-lane.mjs`
 - `pixie-lab-v1/pixie-lab/capabilities.mjs`

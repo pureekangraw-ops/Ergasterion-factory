@@ -1,6 +1,8 @@
 #!/usr/bin/env node
-import { resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { createJsonFilePersistence } from './pixie-lab/adapters.mjs';
+import { createLocalCodingExecutor } from './pixie-lab/coding-local-adapter.mjs';
 import { createPixieCommander, PIXIE_COMMANDS } from './pixie-lab/command.mjs';
 
 function usage() {
@@ -36,7 +38,17 @@ try {
 
   const stateFile = resolve(process.cwd(), process.env.PIXIE_STATE_FILE || '.pixie/state.json');
   const persistence = createJsonFilePersistence({ filePath: stateFile });
-  const commander = createPixieCommander({ persistence });
+  const codingRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+  const codingExecutor = createLocalCodingExecutor({
+    root: codingRoot,
+    allowWrite: process.env.ERGASTERION_CODING_WRITE === '1',
+    allowGitPush: process.env.ERGASTERION_CODING_GIT_PUSH === '1',
+    allowedExecutables: (process.env.ERGASTERION_CODING_EXECUTABLES || 'npm,node')
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean),
+  });
+  const commander = createPixieCommander({ persistence, codingExecutor });
   const output = await commander.execute(input);
   console.log(JSON.stringify(output, null, 2));
   if (!output.ok) process.exitCode = 2;

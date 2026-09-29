@@ -225,12 +225,11 @@ function productionEvidenceView({ state, capabilities, selector, now }) {
 
 function codingView({ capabilities, selector, now }) {
   return {
-    ...baseView({ id: 'CODING_WORKBENCH', capabilities, source: null, status: 'GAP', selector, now }),
-    reality: 'NOT_IMPLEMENTED',
-    missing: [
-      'REPO_WORKTREE', 'FILE_TREE', 'CODE_SEARCH', 'MULTI_FILE_EDIT',
-      'SHELL', 'DEV_COMMAND_LOOP', 'GIT_DIFF_STATUS', 'PR_PREPARATION',
-    ],
+    ...baseView({ id: 'CODING_WORKBENCH', capabilities, source: 'coding-workbench.mjs', status: 'HOST_DEPENDENT', selector, now }),
+    reality: 'CHECK_CODING_STATUS',
+    runtimeCheck: 'coding_status',
+    mergeAuthority: false,
+    deployAuthority: false,
   };
 }
 
@@ -238,12 +237,22 @@ function runtimeView({ state, capabilities, selector, now }) {
   const prototype = selector.prototypeId
     ? list(state.appPrototypes).find((item) => item.prototypeId === selector.prototypeId)
     : latest(state.appPrototypes);
+  const observations = list(state.runtimeObservations).filter((item) => {
+    if (selector.workId && item.workId !== selector.workId) return false;
+    if (selector.checkpointId && item.checkpointId !== selector.checkpointId) return false;
+    if (selector.prototypeId && item.prototypeId !== selector.prototypeId) return false;
+    return true;
+  });
+  const observation = latest(observations);
   return {
-    ...baseView({ id: 'RUNTIME_WORKBENCH', capabilities, source: 'idea-workspace.mjs', status: 'PARTIAL', selector, now }),
+    ...baseView({ id: 'RUNTIME_WORKBENCH', capabilities, source: 'runtime-workbench.mjs', status: 'HOST_DEPENDENT', selector, now }),
     prototype: clone(prototype),
     latestPreview: clone(latest(prototype?.previews || [])),
-    executionReality: 'UNKNOWN',
-    missing: ['OPEN_RUNTIME', 'INTERACT_RUNTIME', 'CONSOLE', 'NETWORK', 'RUNTIME_LOGS', 'DEVICE_INTERACTION_PROOF'],
+    latestObservation: clone(observation),
+    interactionCount: list(state.runtimeInteractions).filter((item) => !observation || item.observationId === observation.observationId).length,
+    evidenceBridge: 'ACTIVE',
+    directInteraction: 'CHECK_RUNTIME_STATUS',
+    runtimeCheck: 'runtime_status',
   };
 }
 
