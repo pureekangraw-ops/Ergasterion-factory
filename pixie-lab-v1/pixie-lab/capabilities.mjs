@@ -67,8 +67,17 @@ export const ERGASTERION_CAPABILITIES = Object.freeze({
       },
     },
     RUNTIME_WORKBENCH: {
-      status: 'PARTIAL',
-      commands: ['app_prototype_create', 'app_preview_record', 'app_compare'],
+      status: 'HOST_DEPENDENT',
+      commands: [
+        'runtime_status', 'runtime_view', 'runtime_record', 'runtime_interaction_record', 'runtime_action',
+        'app_prototype_create', 'app_preview_record', 'app_compare',
+      ],
+      effects: {
+        evidenceBridge: 'ACTIVE',
+        directInteraction: 'AVAILABLE_WITH_EXECUTOR',
+        merge: false,
+        deploy: false,
+      },
     },
   },
   lanes: {
