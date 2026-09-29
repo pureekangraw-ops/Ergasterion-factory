@@ -9,6 +9,7 @@ const requireObject = (value, label = 'args') => {
 
 export const PIXIE_COMMANDS = Object.freeze([
   'status', 'ask', 'capabilities', 'workbench_floor', 'workbench_open', 'checkpoint_dock', 'reality_screen', 'big_view', 'intent_review',
+  'coding_status', 'coding_list', 'coding_read', 'coding_search', 'coding_diff', 'coding_apply',
   'idea_create', 'experiment_create', 'variant_create', 'variant_evaluate', 'experiment_select',
   'app_prototype_create', 'app_preview_record', 'app_compare',
   'start_session', 'archive_session', 'close_session', 'clean_room',
@@ -47,11 +48,13 @@ const MUTATING = new Set([
   'persist',
 ]);
 
-export function createPixieCommander({ persistence, evidenceVerifier = null, now } = {}) {
+const EXTERNAL_EFFECT = new Set(['coding_apply']);
+
+export function createPixieCommander({ persistence, evidenceVerifier = null, codingExecutor = null, now } = {}) {
   if (!persistence?.load || !persistence?.save) throw new Error('PIXIE_PERSISTENCE_REQUIRED');
 
   async function loadLab() {
-    const lab = new PixieLab({ persistence, evidenceVerifier, now });
+    const lab = new PixieLab({ persistence, evidenceVerifier, codingExecutor, now });
     await lab.rebuildBoard();
     return lab;
   }
@@ -98,6 +101,24 @@ export function createPixieCommander({ persistence, evidenceVerifier = null, now
         break;
       case 'intent_review':
         result = lab.intentReview(requireObject(args.selector, 'args.selector'));
+        break;
+      case 'coding_status':
+        result = await lab.codingStatus();
+        break;
+      case 'coding_list':
+        result = await lab.codingList(args);
+        break;
+      case 'coding_read':
+        result = await lab.codingRead(args);
+        break;
+      case 'coding_search':
+        result = await lab.codingSearch(args);
+        break;
+      case 'coding_diff':
+        result = await lab.codingDiff(args);
+        break;
+      case 'coding_apply':
+        result = await lab.codingApply(args);
         break;
       case 'idea_create':
         result = lab.createIdea(args);
@@ -251,7 +272,8 @@ export function createPixieCommander({ persistence, evidenceVerifier = null, now
       pixieId: lab.state.pixieId,
       labId: lab.labId,
       command,
-      mutated: MUTATING.has(command),
+      mutated: MUTATING.has(command) || EXTERNAL_EFFECT.has(command),
+      externalEffect: EXTERNAL_EFFECT.has(command),
       result,
     };
   }
