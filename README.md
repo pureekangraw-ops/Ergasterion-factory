@@ -134,6 +134,8 @@ Important current commands include:
 - `production_handoff_prepare`
 - `workbench_floor` — read-only Workbench/Lab/Reality projection from current state
 - `workbench_open` — read-only detailed view of one Workbench using current state and existing capability inventory
+- `checkpoint_dock` — read-only Work/Checkpoint resume projection; unknown next action stays `UNKNOWN`
+- `reality_screen` — read-only Current/Test/Preview/Evidence/Artifact projection with provenance
 
 The command surface does not expose merge, deploy, release, system-CURRENT acceptance, direct image generation, or the legacy `factory_handoff` route.
 
@@ -151,6 +153,8 @@ Phase 1 begins by surfacing existing state without changing core behavior. The r
 The projection creates no authority, transfers no authority, and does not persist or mutate state.
 
 `workbench_open` turns that floor into an inspectable table: General/Idea, Logic, Visual, Build/Test, Debug/Inspection, Production/Evidence, Coding gap, and Runtime partial state can be opened without creating a second state owner. Tool Rails are projections from the existing command/capability surface, not a new authority layer.
+
+`checkpoint_dock` and `reality_screen` are also projections over the same state. They do not create Work, infer a next action, create truth, or grant authority; missing information remains `UNKNOWN`.
 
 ## Verification status
 
