@@ -40,6 +40,41 @@ jobs:
           node-version: 20
       - run: npm test
 
+      - name: Smoke ERGASTERION command persistence
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PIXIE_STATE_FILE="$RUNNER_TEMP/ergasterion-smoke-state.json"
+
+          node cli.mjs capabilities > "$RUNNER_TEMP/capabilities.json"
+          node cli.mjs '{"command":"idea_create","args":{"ideaId":"IDEA-SMOKE","title":"Smoke","intent":"verify persisted command surface","requestedResult":"state survives across commands","workId":"WORK-SMOKE","checkpointId":"CP-SMOKE"}}' > "$RUNNER_TEMP/idea.json"
+          node cli.mjs '{"command":"experiment_create","args":{"experimentId":"EXP-SMOKE","ideaId":"IDEA-SMOKE","kind":"APP","goal":"exercise app experiment"}}' > "$RUNNER_TEMP/experiment.json"
+          node cli.mjs '{"command":"variant_create","args":{"variantId":"VAR-SMOKE","experimentId":"EXP-SMOKE","spec":{"screen":"home"}}}' > "$RUNNER_TEMP/variant.json"
+          node cli.mjs '{"command":"app_prototype_create","args":{"prototypeId":"APP-SMOKE","experimentId":"EXP-SMOKE","variantId":"VAR-SMOKE","spec":{"kind":"web"}}}' > "$RUNNER_TEMP/app.json"
+
+          node cli.mjs '{"command":"visual_create","args":{"visualDraftId":"VIS-SMOKE","sourceRef":"image://smoke","spec":{"subject":"smoke"}}}' > "$RUNNER_TEMP/visual.json"
+          node cli.mjs '{"command":"visual_render_packet","args":{"visualDraftId":"VIS-SMOKE","packet":{"packetId":"PACK-SMOKE","intent":"smoke render bridge","requestedResult":"one test artifact"}}}' > "$RUNNER_TEMP/packet.json"
+          node cli.mjs '{"command":"image_request","args":{"packetId":"PACK-SMOKE","request":{"actionId":"IMG-SMOKE","workId":"WORK-SMOKE","checkpointId":"CP-SMOKE"}}}' > "$RUNNER_TEMP/request.json"
+          node cli.mjs '{"command":"image_result","args":{"actionId":"IMG-SMOKE","result":{"status":"ARTIFACT_RETURNED","artifactRef":"image://smoke-result","receiptRef":"receipt://smoke","evidenceRefs":["evidence://smoke"]}}}' > "$RUNNER_TEMP/result.json"
+
+          node cli.mjs status > "$RUNNER_TEMP/status.json"
+
+          STATUS_FILE="$RUNNER_TEMP/status.json" CAP_FILE="$RUNNER_TEMP/capabilities.json" node --input-type=module <<'NODE'
+          import { readFile } from 'node:fs/promises';
+
+          const status = JSON.parse(await readFile(process.env.STATUS_FILE, 'utf8'));
+          const capabilities = JSON.parse(await readFile(process.env.CAP_FILE, 'utf8'));
+
+          if (!status.ok) throw new Error('STATUS_NOT_OK');
+          if (status.result?.counts?.ideas !== 1) throw new Error('IDEA_PERSISTENCE_FAILED');
+          if (status.result?.counts?.experiments !== 1) throw new Error('EXPERIMENT_PERSISTENCE_FAILED');
+          if (status.result?.counts?.variants !== 1) throw new Error('VARIANT_PERSISTENCE_FAILED');
+          if (status.result?.counts?.appPrototypes !== 1) throw new Error('APP_PERSISTENCE_FAILED');
+          if (status.result?.counts?.imageActions !== 1) throw new Error('IMAGE_ACTION_PERSISTENCE_FAILED');
+          if (status.result?.counts?.imageReceipts !== 1) throw new Error('IMAGE_RECEIPT_PERSISTENCE_FAILED');
+          if (capabilities.result?.app?.id !== 'ERGASTERION') throw new Error('CAPABILITY_MANIFEST_FAILED');
+          NODE
+
   command:
     if: github.event_name == 'workflow_dispatch'
     needs: test
