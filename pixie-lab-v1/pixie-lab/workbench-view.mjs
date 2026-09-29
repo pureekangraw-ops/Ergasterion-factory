@@ -115,7 +115,7 @@ function logicView({ state, capabilities, selector, now }) {
   const draft = pickByIdOrLatest(state.logicDrafts, [['draftId', selector.draftId]], selector);
   return {
     ...baseView({ id: 'LOGIC_WORKBENCH', capabilities, source: 'logic-workbench.mjs', selector, now }),
-    migration: 'REFRAME_SURFACE_ONLY',
+    migration: 'CANONICAL_WORKBENCH_LEGACY_ALIAS',
     draft: clone(draft),
     compare: draft ? {
       draftId: draft.draftId,
@@ -188,7 +188,7 @@ function debugInspectionView({ state, capabilities, selector, now }) {
     : latest(state.debugSessions);
   const roomD = list(state.rooms).find((item) => item.roomId === 'ROOM-D') || null;
   return {
-    ...baseView({ id: 'DEBUG_INSPECTION_WORKBENCH', capabilities, source: 'debug-inspection-workbench.mjs', status: 'MIGRATION_TARGET', selector, now }),
+    ...baseView({ id: 'DEBUG_INSPECTION_WORKBENCH', capabilities, source: 'debug-inspection-workbench.mjs', status: 'ACTIVE', selector, now }),
     legacyRoom: roomD ? { ...clone(roomD), compatibilityOnly: true } : null,
     debugSession: clone(debug),
     bugs: clone(state.bugs || []),
