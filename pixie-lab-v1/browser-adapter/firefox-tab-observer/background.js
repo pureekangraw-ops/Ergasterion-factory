@@ -2,7 +2,7 @@ const HUB_ORIGIN = 'https://go-hub.pureekangraw.workers.dev';
 const API_ROOT = '/hub/api/factory-eye';
 const PROTOCOL_VERSION = '2';
 const HOST = 'firefox-addon';
-const VERSION = '0.2.1';
+const VERSION = '0.2.2';
 const HEARTBEAT_MS = 5000;
 const COMMAND_POLL_MS = 2500;
 
@@ -273,10 +273,72 @@ async function captureScreenshot(tab) {
   try {
     return await browser.tabs.captureVisibleTab(tab.windowId, {
       format: 'jpeg',
-      quality: 45,
+      quality: 35,
     });
   } catch {
     return null;
+  }
+}
+
+async function observeFromContentPulse(message, sender) {
+  if (!(await ensureRegistered())) return { ok: false, error: 'FACTORY_EYE_PAIRING_REQUIRED' };
+
+  const senderTab = sender?.tab;
+  if (!senderTab || !Number.isInteger(senderTab.id)) {
+    return { ok: false, error: 'CONTENT_PULSE_TAB_UNAVAILABLE' };
+  }
+
+  const page = message?.page;
+  if (!page || page.capturesInputValues !== false || page.createsAuthority !== false) {
+    return { ok: false, error: 'CONTENT_PULSE_PAGE_INVALID' };
+  }
+
+  const senderUrl = String(senderTab.url || sender?.url || '');
+  const pageUrl = String(page.url || '');
+  if (!isWebUrl(senderUrl) || !isWebUrl(pageUrl)) {
+    return { ok: false, error: 'CONTENT_PULSE_URL_UNSUPPORTED' };
+  }
+
+  let sameOrigin = false;
+  try {
+    sameOrigin = new URL(senderUrl).origin === new URL(pageUrl).origin;
+  } catch {}
+  if (!sameOrigin) {
+    return { ok: false, error: 'CONTENT_PULSE_URL_MISMATCH' };
+  }
+
+  const tab = {
+    ...senderTab,
+    active: message?.visible === true ? true : senderTab.active === true,
+  };
+
+  const screenshotDataUrl = await captureScreenshot(tab);
+  const observationId = `OBS-${Date.now()}-${tab.id}-${idPart().slice(0, 8)}`;
+
+  try {
+    const result = await fetchHub('/observe', {
+      method: 'POST',
+      body: JSON.stringify({
+        adapterId: await loadAdapterId(),
+        observationId,
+        observedAt: new Date().toISOString(),
+        tab: tabShape(tab),
+        page,
+        screenshotDataUrl,
+        status: 'OBSERVED',
+        unknowns: [],
+      }),
+    });
+    return {
+      ok: true,
+      observationId: result?.observation?.observationId || observationId,
+    };
+  } catch (error) {
+    registered = false;
+    return {
+      ok: false,
+      error: error?.message || 'CONTENT_PULSE_OBSERVATION_FAILED',
+    };
   }
 }
 
@@ -365,7 +427,10 @@ async function boot() {
   return true;
 }
 
-browser.runtime.onMessage.addListener((message) => {
+browser.runtime.onMessage.addListener((message, sender) => {
+  if (message?.type === 'ERGASTERION_FACTORY_EYE_CONTENT_PULSE') {
+    return observeFromContentPulse(message, sender);
+  }
   if (message?.type === 'ERGASTERION_FACTORY_EYE_STATUS') {
     return status();
   }
