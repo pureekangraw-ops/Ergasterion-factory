@@ -76,6 +76,9 @@ function evidenceRefsFor({ state, variant, experiment }) {
       list(item.checks).flatMap((check) => list(check.evidenceRefs))
     ),
     ...list(state.testRuns).flatMap((item) => list(item.evidenceRefs)),
+    ...list(state.runtimeObservations)
+      .filter((item) => (!experiment || item.experimentId === experiment.experimentId) && (!variant || item.variantId === variant.variantId))
+      .flatMap((item) => list(item.evidenceRefs)),
   ]);
 }
 
@@ -90,18 +93,21 @@ function unknownsFor({ state, variant, experiment }) {
     ...list(state.roomReports).flatMap((item) => list(item.unknowns)),
     ...list(state.appPrototypes).flatMap((item) => list(item.previews).flatMap((preview) => list(preview.unknowns))),
     ...list(state.visualDrafts).flatMap((item) => list(item.scans).flatMap((scan) => list(scan.unknowns))),
+    ...list(state.runtimeObservations)
+      .filter((item) => (!experiment || item.experimentId === experiment.experimentId) && (!variant || item.variantId === variant.variantId))
+      .flatMap((item) => list(item.unknowns)),
   ]);
 }
 
 function runtimeEvidenceStatus(state = {}, experiment = null) {
   const prototypes = list(state.appPrototypes).filter((item) => !experiment || item.experimentId === experiment.experimentId);
   if (!prototypes.length) return { required: false, status: 'NOT_APPLICABLE' };
-  const previews = prototypes.flatMap((item) => list(item.previews));
-  if (!previews.length) return { required: true, status: 'MISSING' };
-  const statuses = previews.map((item) => text(item.status).toUpperCase());
+  const observations = list(state.runtimeObservations).filter((item) => !experiment || item.experimentId === experiment.experimentId);
+  if (!observations.length) return { required: true, status: 'MISSING' };
+  const statuses = observations.map((item) => text(item.status).toUpperCase());
   if (statuses.includes('FAIL')) return { required: true, status: 'FAILED' };
   if (statuses.includes('UNKNOWN')) return { required: true, status: 'UNKNOWN' };
-  return { required: true, status: 'RECORDED' };
+  return { required: true, status: 'OBSERVED' };
 }
 
 export function projectIntentReview({
@@ -165,6 +171,8 @@ export function projectBigView({
   const deltas = [logicDelta(state, selector), visualDelta(state, selector)].filter(Boolean);
   const latestRun = latest(state.testRuns);
   const latestPreview = latest(list(state.appPrototypes).flatMap((item) => list(item.previews)));
+  const latestRuntimeObservation = latest(state.runtimeObservations);
+  const latestRuntimeInteraction = latest(state.runtimeInteractions);
   const latestEvidence = latest(state.evidence);
   const latestArtifact = latest(state.artifacts);
 
@@ -187,6 +195,8 @@ export function projectBigView({
     proof: Object.freeze({
       latestTest: clone(latestRun),
       latestPreview: clone(latestPreview),
+      latestRuntimeObservation: clone(latestRuntimeObservation),
+      latestRuntimeInteraction: clone(latestRuntimeInteraction),
       latestEvidence: clone(latestEvidence),
       latestArtifact: clone(latestArtifact),
       evidenceRefs: intentReview.coverage.evidenceRefs,
