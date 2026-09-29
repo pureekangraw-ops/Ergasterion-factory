@@ -22,6 +22,7 @@ import {
 import { createImageActionRequest, acceptImageActionResult } from './image-tool-adapter.mjs';
 import { prepareProductionHandoff, prepareFactoryHandoff } from './production-lane.mjs';
 import { getErgasterionCapabilities } from './capabilities.mjs';
+import { projectWorkbenchFloor } from './workbench-floor.mjs';
 import {
   createVisualDraft, scanVisualDraft, editVisualDraft, compareVisualDraft,
   createVisualRenderPacket, verifyVisualRender,
@@ -296,6 +297,7 @@ export class PixieLab {
   }
 
   capabilities() { return getErgasterionCapabilities(); }
+  workbenchFloor() { return projectWorkbenchFloor({ state: this.state, capabilities: getErgasterionCapabilities(), now: this.now }); }
 
   createIdea(input = {}) {
     if (this.state.ideas.some((item) => item.ideaId === input.ideaId)) throw new Error('DUPLICATE_IDEA_ID');
