@@ -350,37 +350,62 @@ async function renderCoding(view) {
 }
 
 async function renderRuntime(view) {
-  const [status, runtimeView] = await Promise.all([
+  const [status, runtimeView, browserStatus, browserTabs, browserLatest] = await Promise.all([
     command('runtime_status').catch((error) => ({ result: { status:'UNAVAILABLE', reason:error.message } })),
     command('runtime_view', { selector: contextSelector() }).catch((error) => ({ result: { status:'UNAVAILABLE', reason:error.message } })),
+    api('/api/browser/status').catch((error) => ({ result: { status:'UNAVAILABLE', reason:error.message } })),
+    api('/api/browser/tabs').catch(() => ({ tabs: [] })),
+    api('/api/browser/latest').catch(() => ({ observation: null })),
   ]);
-  $('#workspace').innerHTML = `<div class="generic-grid">
-    <section class="data-card"><h3>RUNTIME HOST</h3><pre>${esc(pretty(status.result))}</pre></section>
-    <section class="data-card"><h3>LATEST OBSERVATION</h3><pre>${esc(pretty(runtimeView.result))}</pre></section>
-    <section class="data-card"><h3>RECORD OBSERVATION</h3>
-      <input id="runtime-target" style="width:100%;margin-bottom:8px" placeholder="targetRef e.g. app://candidate">
-      <input id="runtime-observed" style="width:100%;margin-bottom:8px" placeholder="observedRef e.g. observer://snapshot">
-      <input id="runtime-evidence" style="width:100%;margin-bottom:8px" placeholder="evidence ref (optional)">
-      <button id="runtime-record">Record observed reality</button>
+
+  const tabs = browserTabs.tabs || [];
+  const latest = browserLatest.observation || null;
+  const screenshot = latest?.screenshotRef
+    ? `<img class="runtime-screenshot" src="/api/browser/screenshot?ref=${encodeURIComponent(latest.screenshotRef)}" alt="Latest observed browser tab">`
+    : '<div class="runtime-shot-empty">No screenshot captured yet.</div>';
+
+  const tabCards = tabs.length
+    ? tabs.map((tab) => `<button class="runtime-tab-card ${tab.active ? 'active' : ''}" data-runtime-tab="${tab.tabId}">
+        <strong>${esc(tab.title || 'Untitled tab')}</strong>
+        <span>${esc(tab.url || 'URL unavailable')}</span>
+        <small>tab ${tab.tabId} · window ${tab.windowId ?? '?'}${tab.pinned ? ' · pinned' : ''}${tab.active ? ' · ACTIVE' : ''}</small>
+      </button>`).join('')
+    : '<div class="muted">No Firefox adapter connected yet.</div>';
+
+  $('#workspace').innerHTML = `<div class="runtime-layout">
+    <section class="data-card runtime-tabs-card">
+      <h3>FIREFOX TABS</h3>
+      <div class="runtime-tabs">${tabCards}</div>
     </section>
+    <section class="data-card runtime-live-card">
+      <h3>LIVE OBSERVATION</h3>
+      ${screenshot}
+      <pre>${esc(pretty(latest?.page || latest || { status: 'NO_OBSERVATION' }))}</pre>
+    </section>
+    <section class="data-card"><h3>RUNTIME HOST</h3><pre>${esc(pretty(status.result))}</pre></section>
+    <section class="data-card"><h3>BROWSER ADAPTER</h3><pre>${esc(pretty(browserStatus.result))}</pre></section>
+    <section class="data-card"><h3>RUNTIME WORKBENCH READBACK</h3><pre>${esc(pretty(runtimeView.result))}</pre></section>
     <section class="data-card"><h3>WORKBENCH CONTRACT</h3><pre>${esc(pretty(view))}</pre></section>
   </div>`;
-  $('#runtime-record').addEventListener('click', async () => {
-    const targetRef = $('#runtime-target').value.trim();
-    const observedRef = $('#runtime-observed').value.trim();
-    if (!targetRef || !observedRef) return;
-    const evidenceRef = $('#runtime-evidence').value.trim();
-    await command('runtime_record', {
-      observationId: `OBS-${Date.now()}`,
-      targetRef,
-      observedRef,
-      status: evidenceRef ? 'PASS' : 'UNKNOWN',
-      evidenceRefs: evidenceRef ? [evidenceRef] : [],
-      source: 'FACTORY_SHELL',
-      ...contextSelector(),
+
+  $$('.runtime-tab-card').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const tabId = Number(button.dataset.runtimeTab);
+      if (!Number.isInteger(tabId)) return;
+      button.disabled = true;
+      try {
+        await command('runtime_action', {
+          action: {
+            type: 'activate_tab',
+            tabId,
+            ...contextSelector(),
+          },
+        });
+        setTimeout(() => { void openWorkbench('RUNTIME_WORKBENCH'); }, 700);
+      } finally {
+        button.disabled = false;
+      }
     });
-    await refreshBootstrap();
-    await openWorkbench('RUNTIME_WORKBENCH');
   });
 }
 
