@@ -1,9 +1,16 @@
-const FACTORY_ORIGIN = 'http://127.0.0.1:4317';
-const PROTOCOL_VERSION = '1';
+const HUB_ORIGIN = 'https://go-hub.pureekangraw.workers.dev';
+const API_ROOT = '/hub/api/factory-eye';
+const PROTOCOL_VERSION = '2';
 const HOST = 'firefox-addon';
-const VERSION = '0.2.0';
+const VERSION = '0.2.1';
 const HEARTBEAT_MS = 5000;
-const COMMAND_POLL_MS = 1200;
+const COMMAND_POLL_MS = 2500;
+
+const SESSION_KEYS = Object.freeze({
+  id: 'ergasterionFactoryEyeSessionId',
+  token: 'ergasterionFactoryEyeSessionToken',
+  expiresAt: 'ergasterionFactoryEyeSessionExpiresAt',
+});
 
 let adapterId = null;
 let registered = false;
@@ -34,17 +41,105 @@ async function loadAdapterId() {
   return adapterId;
 }
 
-async function fetchJson(path, options = {}) {
-  const response = await fetch(`${FACTORY_ORIGIN}${path}`, {
-    headers: {
-      'content-type': 'application/json',
-      ...(options.headers || {}),
-    },
+async function clearSession() {
+  registered = false;
+  await browser.storage.local.remove([
+    SESSION_KEYS.id,
+    SESSION_KEYS.token,
+    SESSION_KEYS.expiresAt,
+  ]);
+}
+
+async function loadSession() {
+  const stored = await browser.storage.local.get([
+    SESSION_KEYS.id,
+    SESSION_KEYS.token,
+    SESSION_KEYS.expiresAt,
+  ]);
+  const sessionId = stored[SESSION_KEYS.id];
+  const sessionToken = stored[SESSION_KEYS.token];
+  const expiresAt = Number(stored[SESSION_KEYS.expiresAt] || 0);
+  if (!sessionId || !sessionToken || !Number.isFinite(expiresAt) || Date.now() >= expiresAt) {
+    if (sessionId || sessionToken || expiresAt) await clearSession();
+    return null;
+  }
+  return { sessionId, sessionToken, expiresAt };
+}
+
+async function sessionHeaders() {
+  const session = await loadSession();
+  if (!session) throw new Error('FACTORY_EYE_PAIRING_REQUIRED');
+  return {
+    'x-factory-eye-session-id': session.sessionId,
+    'x-factory-eye-session-token': session.sessionToken,
+  };
+}
+
+async function fetchHub(path, options = {}, { requiresSession = true } = {}) {
+  const headers = {
+    'content-type': 'application/json',
+    ...(requiresSession ? await sessionHeaders() : {}),
+    ...(options.headers || {}),
+  };
+  const response = await fetch(`${HUB_ORIGIN}${API_ROOT}${path}`, {
     ...options,
+    headers,
   });
   const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(body.error || `FACTORY_HTTP_${response.status}`);
+  if (!response.ok) {
+    const code = body.code || body.error || `FACTORY_EYE_HTTP_${response.status}`;
+    if (response.status === 403 || response.status === 410) {
+      if (code === 'FACTORY_EYE_SESSION_INACTIVE' || code === 'FACTORY_EYE_SESSION_EXPIRED') {
+        await clearSession();
+      }
+    }
+    throw new Error(code);
+  }
   return body;
+}
+
+async function pair(passcode) {
+  const secret = String(passcode || '');
+  if (!secret) throw new Error('OWNER_PASSCODE_REQUIRED');
+  const id = await loadAdapterId();
+  const result = await fetchHub('/session/start', {
+    method: 'POST',
+    headers: {
+      'x-go-owner-passcode': secret,
+    },
+    body: JSON.stringify({ adapterId: id }),
+  }, { requiresSession: false });
+
+  if (!result.session_id || !result.session_token || !result.expires_at) {
+    throw new Error('FACTORY_EYE_PAIRING_INVALID_RESPONSE');
+  }
+
+  await browser.storage.local.set({
+    [SESSION_KEYS.id]: result.session_id,
+    [SESSION_KEYS.token]: result.session_token,
+    [SESSION_KEYS.expiresAt]: Number(result.expires_at),
+  });
+  registered = false;
+  return {
+    ok: true,
+    adapterId: id,
+    hubOrigin: result.hub_origin || HUB_ORIGIN,
+    expiresAt: Number(result.expires_at),
+  };
+}
+
+async function disconnect() {
+  const session = await loadSession();
+  if (session) {
+    try {
+      await fetchHub('/session/stop', {
+        method: 'POST',
+        body: JSON.stringify({ adapterId: await loadAdapterId() }),
+      });
+    } catch {}
+  }
+  await clearSession();
+  return { ok: true };
 }
 
 function tabShape(tab) {
@@ -69,7 +164,7 @@ async function currentTabs() {
 
 async function register() {
   const id = await loadAdapterId();
-  const response = await fetchJson('/api/browser/register', {
+  const response = await fetchHub('/register', {
     method: 'POST',
     body: JSON.stringify({
       adapterId: id,
@@ -84,8 +179,8 @@ async function register() {
         title: true,
         domSummary: true,
         screenshot: true,
-        navigate: true,
-        activateTab: true,
+        navigate: false,
+        activateTab: false,
         click: false,
         type: false,
         scroll: false,
@@ -96,6 +191,7 @@ async function register() {
         'HTTP_HTTPS_CONTENT_ONLY',
         'NO_INPUT_VALUES_CAPTURED',
         'PRIVILEGED_FIREFOX_PAGES_UNSUPPORTED',
+        'REMOTE_BRIDGE_EYES_ONLY',
       ],
     }),
   });
@@ -104,6 +200,7 @@ async function register() {
 }
 
 async function ensureRegistered() {
+  if (!(await loadSession())) return false;
   if (registered) return true;
   try {
     await register();
@@ -121,7 +218,7 @@ async function heartbeat() {
     if (!(await ensureRegistered())) return;
     const tabs = await currentTabs();
     const active = tabs.find((tab) => tab.active) || null;
-    await fetchJson('/api/browser/heartbeat', {
+    await fetchHub('/heartbeat', {
       method: 'POST',
       body: JSON.stringify({
         adapterId: await loadAdapterId(),
@@ -176,7 +273,7 @@ async function captureScreenshot(tab) {
   try {
     return await browser.tabs.captureVisibleTab(tab.windowId, {
       format: 'jpeg',
-      quality: 55,
+      quality: 45,
     });
   } catch {
     return null;
@@ -198,7 +295,7 @@ async function observeTab(tabId) {
   const observationId = `OBS-${Date.now()}-${tab.id}-${idPart().slice(0, 8)}`;
 
   try {
-    const result = await fetchJson('/api/browser/observe', {
+    const result = await fetchHub('/observe', {
       method: 'POST',
       body: JSON.stringify({
         adapterId: await loadAdapterId(),
@@ -225,99 +322,13 @@ async function observeActiveTabs() {
   }
 }
 
-function waitForTabComplete(tabId, timeoutMs = 12000) {
-  return new Promise((resolve) => {
-    let settled = false;
-    const finish = () => {
-      if (settled) return;
-      settled = true;
-      browser.tabs.onUpdated.removeListener(listener);
-      resolve();
-    };
-    const listener = (updatedTabId, changeInfo) => {
-      if (updatedTabId === tabId && changeInfo.status === 'complete') finish();
-    };
-    browser.tabs.onUpdated.addListener(listener);
-    setTimeout(finish, timeoutMs);
-  });
-}
-
-async function executeCommand(command) {
-  const action = command?.action || {};
-  const type = String(action.type || '').toLowerCase();
-  const tabId = Number(action.tabId);
-
-  if (type === 'activate_tab') {
-    if (!Number.isInteger(tabId)) throw new Error('TAB_ID_REQUIRED');
-    await browser.tabs.update(tabId, { active: true });
-    return { tabId };
-  }
-
-  if (type === 'navigate') {
-    if (!Number.isInteger(tabId)) throw new Error('TAB_ID_REQUIRED');
-    if (!isWebUrl(action.url)) throw new Error('NAVIGATION_URL_UNSUPPORTED');
-    await browser.tabs.update(tabId, { url: action.url });
-    await waitForTabComplete(tabId);
-    return { tabId, url: action.url };
-  }
-
-  if (type === 'observe_tab') {
-    if (!Number.isInteger(tabId)) throw new Error('TAB_ID_REQUIRED');
-    return { tabId };
-  }
-
-  throw new Error('BROWSER_ACTION_UNSUPPORTED');
-}
-
-async function sendReceipt(command, status, details = {}) {
-  const action = command?.action || {};
-  let followUpObservationId = null;
-  const tabId = Number(action.tabId);
-  if (status === 'EXECUTED' && Number.isInteger(tabId)) {
-    followUpObservationId = await observeTab(tabId);
-  }
-
-  try {
-    await fetchJson('/api/browser/receipt', {
-      method: 'POST',
-      body: JSON.stringify({
-        adapterId: await loadAdapterId(),
-        commandId: command.commandId,
-        status,
-        completedAt: new Date().toISOString(),
-        followUpObservationId,
-        targetRef: Number.isInteger(tabId)
-          ? `browser-tab://${await loadAdapterId()}/unknown/${tabId}`
-          : `browser-adapter://${await loadAdapterId()}`,
-        action,
-        errorCode: details.errorCode || null,
-        unknowns: details.unknowns || [],
-        workId: action.workId || null,
-        checkpointId: action.checkpointId || null,
-      }),
-    });
-  } catch {
-    registered = false;
-  }
-}
-
 async function pollCommands() {
   if (commandPollBusy) return;
   commandPollBusy = true;
   try {
     if (!(await ensureRegistered())) return;
     const id = await loadAdapterId();
-    const result = await fetchJson(`/api/browser/commands?adapterId=${encodeURIComponent(id)}`);
-    for (const command of result.commands || []) {
-      try {
-        await executeCommand(command);
-        await sendReceipt(command, 'EXECUTED');
-      } catch (error) {
-        await sendReceipt(command, 'REJECTED', {
-          errorCode: error?.message || 'BROWSER_COMMAND_FAILED',
-        });
-      }
-    }
+    await fetchHub(`/commands?adapterId=${encodeURIComponent(id)}`, { method: 'GET' });
   } catch {
     registered = false;
   } finally {
@@ -325,24 +336,79 @@ async function pollCommands() {
   }
 }
 
+async function openPairingPage() {
+  try {
+    await browser.runtime.openOptionsPage();
+  } catch {
+    await browser.tabs.create({ url: browser.runtime.getURL('options.html') });
+  }
+}
+
+async function status() {
+  const session = await loadSession();
+  return {
+    ok: true,
+    paired: Boolean(session),
+    adapterId: await loadAdapterId(),
+    hubOrigin: HUB_ORIGIN,
+    version: VERSION,
+    expiresAt: session?.expiresAt || null,
+    registered,
+  };
+}
+
 async function boot() {
+  if (!(await loadSession())) return false;
   await ensureRegistered();
   await heartbeat();
   await observeActiveTabs();
+  return true;
 }
 
-browser.runtime.onInstalled.addListener(() => { void boot(); });
+browser.runtime.onMessage.addListener((message) => {
+  if (message?.type === 'ERGASTERION_FACTORY_EYE_STATUS') {
+    return status();
+  }
+  if (message?.type === 'ERGASTERION_FACTORY_EYE_PAIR') {
+    return (async () => {
+      try {
+        const paired = await pair(message.passcode);
+        await boot();
+        return { ...paired, status: await status() };
+      } catch (error) {
+        return { ok: false, error: error?.message || 'FACTORY_EYE_PAIR_FAILED' };
+      }
+    })();
+  }
+  if (message?.type === 'ERGASTERION_FACTORY_EYE_DISCONNECT') {
+    return disconnect();
+  }
+  if (message?.type === 'ERGASTERION_FACTORY_EYE_REFRESH') {
+    return (async () => {
+      const started = await boot();
+      return { ok: started, status: await status() };
+    })();
+  }
+  return undefined;
+});
+
+browser.runtime.onInstalled.addListener(() => {
+  void (async () => {
+    if (!(await boot())) await openPairingPage();
+  })();
+});
+
 browser.runtime.onStartup.addListener(() => { void boot(); });
 
 browser.tabs.onActivated.addListener(({ tabId }) => {
   void heartbeat();
-  setTimeout(() => { void observeTab(tabId); }, 120);
+  setTimeout(() => { void observeTab(tabId); }, 150);
 });
 
 browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab?.active) {
     void heartbeat();
-    setTimeout(() => { void observeTab(tabId); }, 120);
+    setTimeout(() => { void observeTab(tabId); }, 150);
   }
 });
 
@@ -353,6 +419,10 @@ browser.tabs.onAttached.addListener(() => { void heartbeat(); });
 browser.tabs.onDetached.addListener(() => { void heartbeat(); });
 
 browser.action.onClicked.addListener(async (tab) => {
+  if (!(await loadSession())) {
+    await openPairingPage();
+    return;
+  }
   await heartbeat();
   if (Number.isInteger(tab?.id)) await observeTab(tab.id);
 });
