@@ -125,7 +125,10 @@ export function createLocalCodingExecutor({
       const needle = text(query);
       if (!needle) throw new Error('CODING_SEARCH_QUERY_REQUIRED');
       const start = resolveInside(workspaceRoot, path);
-      const files = await walk(workspaceRoot, start, 5000);
+      const startInfo = await stat(start);
+      const files = startInfo.isFile()
+        ? [relative(workspaceRoot, start)]
+        : await walk(workspaceRoot, start, 5000);
       const matches = [];
       for (const rel of files) {
         if (matches.length >= limit) break;
