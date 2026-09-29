@@ -17,7 +17,7 @@ test('workbench floor projects A/B/C as labs and keeps ROOM-D compatibility-only
   assert.deepEqual(floor.labs.experimental.map((room) => room.roomId), ['ROOM-A', 'ROOM-B', 'ROOM-C']);
   assert.equal(floor.labs.legacyDebugRoom.roomId, 'ROOM-D');
   assert.equal(floor.labs.legacyDebugRoom.compatibilityOnly, true);
-  assert.equal(floor.workbenches.debugInspection.status, 'MIGRATION_TARGET');
+  assert.equal(floor.workbenches.debugInspection.status, 'ACTIVE');
   assert.equal(floor.legacy.roomDRouteCurrent, false);
   assert.equal(floor.legacy.factoryHandoffCurrent, false);
 });
