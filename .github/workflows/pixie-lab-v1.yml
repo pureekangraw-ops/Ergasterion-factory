@@ -59,12 +59,24 @@ jobs:
           node cli.mjs '{"command":"image_result","args":{"actionId":"IMG-SMOKE","result":{"status":"ARTIFACT_RETURNED","artifactRef":"image://smoke-result","receiptRef":"receipt://smoke","evidenceRefs":["evidence://smoke"]}}}' > "$RUNNER_TEMP/result.json"
 
           node cli.mjs status > "$RUNNER_TEMP/status.json"
+          node cli.mjs workbench_floor > "$RUNNER_TEMP/workbench-floor.json"
+          node cli.mjs '{"command":"workbench_open","args":{"workbenchId":"VISUAL_WORKBENCH"}}' > "$RUNNER_TEMP/workbench-open.json"
+          node cli.mjs checkpoint_dock > "$RUNNER_TEMP/checkpoint-dock.json"
+          node cli.mjs reality_screen > "$RUNNER_TEMP/reality-screen.json"
+          node cli.mjs big_view > "$RUNNER_TEMP/big-view.json"
+          node cli.mjs intent_review > "$RUNNER_TEMP/intent-review.json"
 
-          STATUS_FILE="$RUNNER_TEMP/status.json" CAP_FILE="$RUNNER_TEMP/capabilities.json" node --input-type=module <<'NODE'
+          STATUS_FILE="$RUNNER_TEMP/status.json" CAP_FILE="$RUNNER_TEMP/capabilities.json" FLOOR_FILE="$RUNNER_TEMP/workbench-floor.json" OPEN_FILE="$RUNNER_TEMP/workbench-open.json" DOCK_FILE="$RUNNER_TEMP/checkpoint-dock.json" REALITY_FILE="$RUNNER_TEMP/reality-screen.json" BIG_FILE="$RUNNER_TEMP/big-view.json" INTENT_FILE="$RUNNER_TEMP/intent-review.json" node --input-type=module <<'NODE'
           import { readFile } from 'node:fs/promises';
 
           const status = JSON.parse(await readFile(process.env.STATUS_FILE, 'utf8'));
           const capabilities = JSON.parse(await readFile(process.env.CAP_FILE, 'utf8'));
+          const floor = JSON.parse(await readFile(process.env.FLOOR_FILE, 'utf8'));
+          const open = JSON.parse(await readFile(process.env.OPEN_FILE, 'utf8'));
+          const dock = JSON.parse(await readFile(process.env.DOCK_FILE, 'utf8'));
+          const reality = JSON.parse(await readFile(process.env.REALITY_FILE, 'utf8'));
+          const big = JSON.parse(await readFile(process.env.BIG_FILE, 'utf8'));
+          const intent = JSON.parse(await readFile(process.env.INTENT_FILE, 'utf8'));
 
           if (!status.ok) throw new Error('STATUS_NOT_OK');
           if (status.result?.counts?.ideas !== 1) throw new Error('IDEA_PERSISTENCE_FAILED');
@@ -76,6 +88,24 @@ jobs:
           if (status.result?.counts?.imageActions !== 1) throw new Error('IMAGE_ACTION_PERSISTENCE_FAILED');
           if (status.result?.counts?.imageReceipts !== 1) throw new Error('IMAGE_RECEIPT_PERSISTENCE_FAILED');
           if (capabilities.result?.app?.id !== 'ERGASTERION') throw new Error('CAPABILITY_MANIFEST_FAILED');
+          if (!floor.ok || floor.mutated !== false) throw new Error('WORKBENCH_FLOOR_COMMAND_FAILED');
+          if (floor.result?.schema !== 'ERGASTERION_WORKBENCH_FLOOR_V1') throw new Error('WORKBENCH_FLOOR_SCHEMA_FAILED');
+          if (floor.result?.labs?.experimental?.map((room) => room.roomId).join(',') !== 'ROOM-A,ROOM-B,ROOM-C') throw new Error('EXPERIMENTAL_LAB_BOUNDARY_FAILED');
+          if (floor.result?.workbenches?.coding?.status !== 'GAP') throw new Error('CODING_GAP_TRUTH_FAILED');
+          if (floor.result?.authority?.createsAuthority !== false) throw new Error('WORKBENCH_FLOOR_AUTHORITY_EXPANSION');
+          if (!open.ok || open.mutated !== false) throw new Error('WORKBENCH_OPEN_COMMAND_FAILED');
+          if (open.result?.workbenchId !== 'VISUAL_WORKBENCH') throw new Error('WORKBENCH_OPEN_VISUAL_FAILED');
+          if (open.result?.authority?.createsAuthority !== false) throw new Error('WORKBENCH_OPEN_AUTHORITY_EXPANSION');
+          if (!dock.ok || dock.mutated !== false || dock.result?.readOnly !== true) throw new Error('CHECKPOINT_DOCK_FAILED');
+          if (dock.result?.createsWork !== false || dock.result?.createsAuthority !== false) throw new Error('CHECKPOINT_DOCK_SCOPE_EXPANSION');
+          if (!reality.ok || reality.mutated !== false || reality.result?.readOnly !== true) throw new Error('REALITY_SCREEN_FAILED');
+          if (reality.result?.createsTruth !== false || reality.result?.createsAuthority !== false) throw new Error('REALITY_SCREEN_SCOPE_EXPANSION');
+          if (!big.ok || big.mutated !== false || big.result?.readOnly !== true) throw new Error('BIG_VIEW_FAILED');
+          if (big.result?.createsTruth !== false || big.result?.createsAuthority !== false) throw new Error('BIG_VIEW_SCOPE_EXPANSION');
+          if (!intent.ok || intent.mutated !== false || intent.result?.blocking !== false) throw new Error('INTENT_REVIEW_FAILED');
+          if (intent.result?.excess?.status !== 'UNKNOWN') throw new Error('INTENT_REVIEW_EXCESS_INVENTED');
+          if (capabilities.result?.layout?.canonicalUnit !== 'WORKBENCH') throw new Error('WORKBENCH_LAYOUT_MANIFEST_FAILED');
+          if (capabilities.result?.layout?.experimentalLabs?.join(',') !== 'ROOM-A,ROOM-B,ROOM-C') throw new Error('EXPERIMENTAL_LAB_MANIFEST_FAILED');
           NODE
 
   command:

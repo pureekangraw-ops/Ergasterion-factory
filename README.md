@@ -23,11 +23,25 @@ The GO Hub connection remains an upstream PRYTANEION capability. ERGASTERION con
 
 ## Internal shape
 
-- **PIXIE LAB** — ratified idea/experiment department. PIXIE is its assistant.
-- **Visual capability lane** — reference, composition, edit, render preparation, compare, verify.
-- **Production/evidence capability lane** — build, test, debug, QA, evidence, artifact, regression, handoff preparation.
+The canonical working unit is **WORKBENCH**.
 
-The capability lanes are internal to ERGASTERION; they are not separate top-level apps.
+Current Workbench floor:
+
+- **General / Idea Workbench**
+- **Logic Workbench**
+- **Visual Workbench**
+- **Build / Test Workbench**
+- **Debug / Inspection Workbench**
+- **Production / Evidence Workbench**
+- **Coding Workbench** — `GAP`
+- **Runtime Workbench** — `PARTIAL`
+
+**ROOM-A / ROOM-B / ROOM-C** remain Experimental Labs for isolated experiments.  
+**ROOM-D** remains only as a compatibility source while Debug capability migrates to the Debug / Inspection Workbench.
+
+PIXIE is the Workshop Assistant across Workbenches. It does not own Work identity, Current acceptance, merge/deploy authority, or BIG final authority.
+
+Older `lane`, `zone`, and ROOM-D surfaces remain only where compatibility requires them; they are not the target architecture.
 
 ## Current implementation
 
@@ -132,8 +146,35 @@ Important current commands include:
 - `visual_render_packet` / `visual_verify`
 - `image_request` / `image_result`
 - `production_handoff_prepare`
+- `workbench_floor` — read-only Workbench/Lab/Reality projection from current state
+- `workbench_open` — read-only detailed view of one Workbench using current state and existing capability inventory
+- `checkpoint_dock` — read-only Work/Checkpoint resume projection; unknown next action stays `UNKNOWN`
+- `reality_screen` — read-only Current/Test/Preview/Evidence/Artifact projection with provenance
+- `big_view` — read-only owner Before/After + proof projection
+- `intent_review` — read-only Requested Result coverage + known gap projection; excess stays `UNKNOWN` when scope diff is unavailable
 
 The command surface does not expose merge, deploy, release, system-CURRENT acceptance, direct image generation, or the legacy `factory_handoff` route.
+
+## Dream Factory migration surface
+
+Phase 1 begins by surfacing existing state without changing core behavior. The read-only `workbench_floor` command projects:
+
+- A/B/C as Experimental Labs
+- ROOM-D as compatibility-only debug room pending migration
+- existing Idea / Logic / Visual / Build-Test / Production-Evidence capability surfaces
+- Coding as `GAP`
+- Runtime as `PARTIAL`
+- shared PIXIE / Evidence / Checkpoint / Reality summaries
+
+The projection creates no authority, transfers no authority, and does not persist or mutate state.
+
+`workbench_open` turns that floor into an inspectable table: General/Idea, Logic, Visual, Build/Test, Debug/Inspection, Production/Evidence, Coding gap, and Runtime partial state can be opened without creating a second state owner. Tool Rails are projections from the existing command/capability surface, not a new authority layer.
+
+`checkpoint_dock` and `reality_screen` are also projections over the same state. They do not create Work, infer a next action, create truth, or grant authority; missing information remains `UNKNOWN`.
+
+Phase 2 begins the canonical naming move without breaking callers: Logic now lives in `logic-workbench.mjs`, current Production/Evidence behavior lives in `production-evidence-workbench.mjs`, and Debug lifecycle behavior lives in `debug-inspection-workbench.mjs`. `lab-zones.mjs` and `production-lane.mjs` retain compatibility exports for older callers.
+
+`big_view` and `intent_review` give BIG an owner-readable inspection surface. They can report known missing evidence/unknowns, but they do not invent scope-overrun conclusions when the required diff is not present in ERGASTERION state.
 
 ## Verification status
 
@@ -150,6 +191,13 @@ Do not interpret a skipped workflow-dispatch command job on push/PR as failure; 
 
 - `pixie-lab-v1/pixie-lab/idea-workspace.mjs`
 - `pixie-lab-v1/pixie-lab/visual-workbench.mjs`
+- `pixie-lab-v1/pixie-lab/logic-workbench.mjs`
+- `pixie-lab-v1/pixie-lab/debug-inspection-workbench.mjs`
+- `pixie-lab-v1/pixie-lab/production-evidence-workbench.mjs`
+- `pixie-lab-v1/pixie-lab/workbench-floor.mjs`
+- `pixie-lab-v1/pixie-lab/workbench-view.mjs`
+- `pixie-lab-v1/pixie-lab/workbench-shared.mjs`
+- `pixie-lab-v1/pixie-lab/owner-view.mjs`
 - `pixie-lab-v1/pixie-lab/image-tool-adapter.mjs`
 - `pixie-lab-v1/pixie-lab/production-lane.mjs`
 - `pixie-lab-v1/pixie-lab/capabilities.mjs`

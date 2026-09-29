@@ -41,11 +41,12 @@ test('commands persist state across calls', async () => {
   assert.equal(status.result.activeSessions.some((item) => item.sessionId === 'S-CMD-1'), true);
 });
 
-test('ask routes through Pixie guide', async () => {
+test('ask routes through Pixie guide using current Lab/Workbench architecture', async () => {
   const pixie = await commander();
   const out = await pixie.execute({ command: 'ask', args: { question: 'มีกี่ห้อง' } });
   assert.equal(out.ok, true);
-  assert.match(out.result.answer, /4 room/);
+  assert.match(out.result.answer, /ROOM-A \/ ROOM-B \/ ROOM-C/);
+  assert.match(out.result.answer, /ROOM-D is compatibility-only/);
 });
 
 test('external authority commands are not exposed', async () => {

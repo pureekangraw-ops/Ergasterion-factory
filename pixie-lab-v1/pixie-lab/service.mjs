@@ -13,15 +13,27 @@ import {
 } from './core.mjs';
 import {
   DEBUG_ROOM_ID, listExampleExperiments, getExampleExperiment,
-  createLogicDraft, editLogicDraft, compareLogicDraft,
 } from './lab-zones.mjs';
+import {
+  createLogicDraft, editLogicDraft, compareLogicDraft,
+} from './logic-workbench.mjs';
 import {
   createIdea, createExperiment, createVariant, evaluateVariant,
   selectExperimentCandidate, createAppPrototype, recordAppPreview, compareAppPrototypes,
 } from './idea-workspace.mjs';
 import { createImageActionRequest, acceptImageActionResult } from './image-tool-adapter.mjs';
-import { prepareProductionHandoff, prepareFactoryHandoff } from './production-lane.mjs';
+import { prepareProductionHandoff } from './production-evidence-workbench.mjs';
+import { prepareFactoryHandoff } from './production-lane.mjs';
 import { getErgasterionCapabilities } from './capabilities.mjs';
+import { projectWorkbenchFloor } from './workbench-floor.mjs';
+import { openWorkbench } from './workbench-view.mjs';
+import { projectCheckpointDock, projectRealityScreen } from './workbench-shared.mjs';
+import { projectBigView, projectIntentReview } from './owner-view.mjs';
+import {
+  createDebugInspectionSession,
+  appendDebugInspectionStep,
+  completeDebugInspectionSession,
+} from './debug-inspection-workbench.mjs';
 import {
   createVisualDraft, scanVisualDraft, editVisualDraft, compareVisualDraft,
   createVisualRenderPacket, verifyVisualRender,
@@ -259,10 +271,27 @@ export class PixieLab {
   addGoldenCase(input) { const golden = createGoldenCase({ ...input, now: this.now }); this.state.goldenCases.push(golden); return clone(golden); }
   replayGolden(goldenCaseId, input) { const index = this.state.goldenCases.findIndex((golden) => golden.goldenCaseId === goldenCaseId); if (index < 0) throw new Error('GOLDEN_NOT_FOUND'); const next = replayGoldenCase(this.state.goldenCases[index], { ...input, now: this.now }); this.state.goldenCases[index] = next; if (next.status === 'REGRESSION_CASE') this.state.regressionAlerts.push(createRegressionAlert({ alertId: `ALERT-${input.runId}`, goldenCaseId, ...input, expected: next.expected, observed: input.observed, now: this.now })); return clone(next); }
   addRegressionAlert(input) { const alert = createRegressionAlert({ ...input, now: this.now }); this.state.regressionAlerts.push(alert); return clone(alert); }
-  debug(input = {}) { const debug = { debugId: required(input.debugId, 'debugId'), bugId: required(input.bugId, 'bugId'), status: 'OPEN', confidence: 'SUSPECTED', steps: [], regressionRunRefs: [], goldenCaseRefs: [], createdAt: this.now() }; this.state.debugSessions.push(debug); return clone(debug); }
-  debugStep(debugId, step = {}) { const debug = this.state.debugSessions.find((item) => item.debugId === debugId); if (!debug) throw new Error('DEBUG_NOT_FOUND'); debug.steps.push({ stepId: required(step.stepId, 'stepId'), action: required(step.action, 'action'), evidenceRefs: step.evidenceRefs || [], observed: clone(step.observed ?? null), at: this.now() });
-  if (step.confidence) { const confidence = text(step.confidence).toUpperCase(); if (!['SUSPECTED', 'SUPPORTED', 'CONFIRMED'].includes(confidence)) throw new Error('DEBUG_CONFIDENCE_INVALID'); debug.confidence = confidence; } if (step.regressionRunId) debug.regressionRunRefs.push(step.regressionRunId); if (step.goldenCaseId) debug.goldenCaseRefs.push(step.goldenCaseId); debug.status = 'IN_PROGRESS'; return clone(debug); }
-  completeDebug(debugId, { result = 'DEBUG_COMPLETE', regressionRunRefs = [], goldenCaseRefs = [] } = {}) { const debug = this.state.debugSessions.find((item) => item.debugId === debugId); if (!debug) throw new Error('DEBUG_NOT_FOUND'); if (result !== 'DEBUG_COMPLETE') throw new Error('DEBUG_REQUIRES_COMPLETE_RESULT'); debug.status = 'COMPLETE'; debug.confidence = 'CONFIRMED'; debug.result = result; debug.regressionRunRefs = [...new Set([...debug.regressionRunRefs, ...regressionRunRefs])]; debug.goldenCaseRefs = [...new Set([...debug.goldenCaseRefs, ...goldenCaseRefs])]; debug.completedAt = this.now(); return clone(debug); }
+  debug(input = {}) {
+    const debug = createDebugInspectionSession({ ...input, now: this.now });
+    this.state.debugSessions.push(debug);
+    return clone(debug);
+  }
+  debugStep(debugId, step = {}) {
+    const index = this.state.debugSessions.findIndex((item) => item.debugId === debugId);
+    if (index < 0) throw new Error('DEBUG_NOT_FOUND');
+    this.state.debugSessions[index] = appendDebugInspectionStep(this.state.debugSessions[index], step, { now: this.now });
+    return clone(this.state.debugSessions[index]);
+  }
+  completeDebug(debugId, { result = 'DEBUG_COMPLETE', regressionRunRefs = [], goldenCaseRefs = [] } = {}) {
+    const index = this.state.debugSessions.findIndex((item) => item.debugId === debugId);
+    if (index < 0) throw new Error('DEBUG_NOT_FOUND');
+    this.state.debugSessions[index] = completeDebugInspectionSession(
+      this.state.debugSessions[index],
+      { result, regressionRunRefs, goldenCaseRefs },
+      { now: this.now },
+    );
+    return clone(this.state.debugSessions[index]);
+  }
 
   proposeLearning(input) { const proposal = createLearningProposal({ ...input, now: this.now }); this.state.memory.push(proposal); return clone(proposal); }
   promoteLearning(proposalId) { const index = this.state.memory.findIndex((asset) => asset.proposalId === proposalId || asset.memoryId === proposalId); if (index < 0) throw new Error('LEARNING_PROPOSAL_NOT_FOUND'); this.state.memory[index] = promoteLearningProposal(this.state.memory[index], { promotedBy: PIXIE_ID, now: this.now }); return clone(this.state.memory[index]); }
@@ -296,6 +325,12 @@ export class PixieLab {
   }
 
   capabilities() { return getErgasterionCapabilities(); }
+  workbenchFloor() { return projectWorkbenchFloor({ state: this.state, capabilities: getErgasterionCapabilities(), now: this.now }); }
+  openWorkbench(workbenchId, selector = {}) { return openWorkbench({ workbenchId, state: this.state, capabilities: getErgasterionCapabilities(), selector, now: this.now }); }
+  checkpointDock(selector = {}) { return projectCheckpointDock({ state: this.state, selector, now: this.now }); }
+  realityScreen(selector = {}) { return projectRealityScreen({ state: this.state, selector, now: this.now }); }
+  bigView(selector = {}) { return projectBigView({ state: this.state, selector, now: this.now }); }
+  intentReview(selector = {}) { return projectIntentReview({ state: this.state, selector, now: this.now }); }
 
   createIdea(input = {}) {
     if (this.state.ideas.some((item) => item.ideaId === input.ideaId)) throw new Error('DUPLICATE_IDEA_ID');
@@ -579,6 +614,7 @@ export class PixieLab {
     return {
       ...base,
       zones: {
+        compatibilityOnly: true,
         experimentRooms: this.state.rooms.filter((room) => room.roomId !== DEBUG_ROOM_ID).map((room) => room.roomId),
         debugRoom: DEBUG_ROOM_ID,
         ideaWorkspace: 'ACTIVE',
@@ -590,6 +626,7 @@ export class PixieLab {
         archiveZone: 'ACTIVE',
         roomCleaner: 'ACTIVE',
       },
+      workbenchLayout: clone(getErgasterionCapabilities().layout),
       capabilities: getErgasterionCapabilities(),
       runtime: {
         schemaVersion: this.state.schemaVersion || ERGASTERION_STATE_SCHEMA,
@@ -638,12 +675,12 @@ export class PixieLab {
     if (q.includes('unknown')) return createGuideAnswer({ question, answer: `${board.unknowns.length} unknown item(s)`, traceRefs: board.roomReports.map((report) => `report://${report.roomId}`), unknowns: board.unknowns });
     if (q.includes('archive') || q.includes('เก็บ')) return createGuideAnswer({ question, answer: `${board.archives.length} archive snapshot(s); Archive never cleans or closes a room.`, traceRefs: board.archives.map((item) => `archive://${item.archiveId}`) });
     if (q.includes('clean') || q.includes('ล้าง')) return createGuideAnswer({ question, answer: `${board.cleanRuns.length} clean run(s); Clean resets room transient state and never creates an archive.`, traceRefs: board.cleanRuns.map((item) => `clean://${item.cleanId}`) });
-    if (q.includes('debug') || q.includes('ดีบั๊ก') || q.includes('ตรวจสอบ')) return createGuideAnswer({ question, answer: `ROOM-D is the dedicated inspection/debug room; ${board.factoryHandoffs.length} Lab handoff record(s)`, traceRefs: ['room://ROOM-D'] });
+    if (q.includes('debug') || q.includes('ดีบั๊ก') || q.includes('ตรวจสอบ')) return createGuideAnswer({ question, answer: `Debug / Inspection Workbench is the current debug surface; ROOM-D remains compatibility-only. ${board.factoryHandoffs.length} legacy Factory handoff record(s)`, traceRefs: ['workbench://DEBUG_INSPECTION_WORKBENCH', 'room://ROOM-D'] });
     if (q.includes('example') || q.includes('ตัวอย่าง')) return createGuideAnswer({ question, answer: `${board.exampleZone.length} reusable example experiment(s)`, traceRefs: board.exampleZone.map((item) => `example://${item.exampleId}`) });
     if (q.includes('ภาพ') || q.includes('visual') || q.includes('วาด') || q.includes('render')) return createGuideAnswer({ question, answer: `${board.visualWorkbench.length} Visual Workbench draft(s), ${board.visualRenderPackets.length} render packet(s), ${board.visualVerifications.length} verification(s)`, traceRefs: board.visualWorkbench.map((item) => `visual-draft://${item.visualDraftId}`) });
     if (q.includes('logic') || q.includes('ลอจิค') || q.includes('โต๊ะ')) return createGuideAnswer({ question, answer: `${board.logicWorkbench.length} Logic Workbench draft(s)`, traceRefs: board.logicWorkbench.map((item) => `logic-draft://${item.draftId}`) });
     if (q.includes('factory') || q.includes('โรงงาน') || q.includes('production')) return createGuideAnswer({ question, answer: `${board.productionHandoffs.length} current production/evidence handoff(s). Handoff carries candidate context and does not create authority. Legacy Debug-to-Factory PASS routing remains compatibility-only.`, traceRefs: board.productionHandoffs.map((item) => `production-handoff://${item.handoffId}`) });
-    if (q.includes('room') || q.includes('ห้อง')) return createGuideAnswer({ question, answer: `${board.rooms.length} room(s), ${board.activeSessions.length} active session(s)`, traceRefs: board.rooms.map((room) => `room://${room.roomId}`) });
+    if (q.includes('room') || q.includes('ห้อง')) return createGuideAnswer({ question, answer: `Experimental Labs are ROOM-A / ROOM-B / ROOM-C. ROOM-D is compatibility-only; ${board.activeSessions.length} active Lab session(s)`, traceRefs: board.rooms.map((room) => `room://${room.roomId}`) });
     if (q.includes('ready')) return createGuideAnswer({ question, answer: `${board.artifacts.filter((artifact) => artifact.status === 'READY_CANDIDATE').length} READY_CANDIDATE artifact(s)`, traceRefs: board.artifacts.map((artifact) => `artifact://${artifact.artifactId}`) });
     if (q.includes('bug') || q.includes('บั๊ก')) return createGuideAnswer({ question, answer: `${board.bugs.length} bug capsule(s)`, traceRefs: board.bugs.map((bug) => `bug://${bug.bugId}`) });
     return createGuideAnswer({ question, answer: 'UNKNOWN', traceRefs: ['pixie-board://PIXIE-BOARD'], unknowns: ['QUERY_NOT_IMPLEMENTED_IN_V1'] });
