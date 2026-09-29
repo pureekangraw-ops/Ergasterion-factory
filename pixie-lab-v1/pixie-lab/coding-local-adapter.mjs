@@ -143,7 +143,7 @@ export function createLocalCodingExecutor({
     },
 
     async diff({ baseRef = null } = {}) {
-      const args = baseRef ? ['diff', '--no-ext-diff', '--', baseRef] : ['diff', '--no-ext-diff'];
+      const args = baseRef ? ['diff', '--no-ext-diff', baseRef, '--'] : ['diff', '--no-ext-diff'];
       const result = await git(args);
       const status = await git(['status', '--short']);
       return {
@@ -211,6 +211,8 @@ export function createLocalCodingExecutor({
         return { ok: false, status: 'FAIL', reason: 'CODING_NO_CHANGES', branch: targetBranch, baseRef, changedFiles: [], diff: '', runs: runResults, pushed: false };
       }
 
+      await git(['config', 'user.name', 'ERGASTERION Coding Workbench']);
+      await git(['config', 'user.email', 'ergasterion-coding@users.noreply.github.com']);
       const commit = await git(['commit', '-m', commitMessage]);
       if (!commit.ok) return { ok: false, status: 'FAIL', reason: 'CODING_COMMIT_FAILED', branch: targetBranch, baseRef, changedFiles, diff: staged.stdout, runs: [...runResults, commit], pushed: false };
 
