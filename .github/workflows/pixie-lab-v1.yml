@@ -59,12 +59,14 @@ jobs:
           node cli.mjs '{"command":"image_result","args":{"actionId":"IMG-SMOKE","result":{"status":"ARTIFACT_RETURNED","artifactRef":"image://smoke-result","receiptRef":"receipt://smoke","evidenceRefs":["evidence://smoke"]}}}' > "$RUNNER_TEMP/result.json"
 
           node cli.mjs status > "$RUNNER_TEMP/status.json"
+          node cli.mjs workbench_floor > "$RUNNER_TEMP/workbench-floor.json"
 
-          STATUS_FILE="$RUNNER_TEMP/status.json" CAP_FILE="$RUNNER_TEMP/capabilities.json" node --input-type=module <<'NODE'
+          STATUS_FILE="$RUNNER_TEMP/status.json" CAP_FILE="$RUNNER_TEMP/capabilities.json" FLOOR_FILE="$RUNNER_TEMP/workbench-floor.json" node --input-type=module <<'NODE'
           import { readFile } from 'node:fs/promises';
 
           const status = JSON.parse(await readFile(process.env.STATUS_FILE, 'utf8'));
           const capabilities = JSON.parse(await readFile(process.env.CAP_FILE, 'utf8'));
+          const floor = JSON.parse(await readFile(process.env.FLOOR_FILE, 'utf8'));
 
           if (!status.ok) throw new Error('STATUS_NOT_OK');
           if (status.result?.counts?.ideas !== 1) throw new Error('IDEA_PERSISTENCE_FAILED');
@@ -76,6 +78,11 @@ jobs:
           if (status.result?.counts?.imageActions !== 1) throw new Error('IMAGE_ACTION_PERSISTENCE_FAILED');
           if (status.result?.counts?.imageReceipts !== 1) throw new Error('IMAGE_RECEIPT_PERSISTENCE_FAILED');
           if (capabilities.result?.app?.id !== 'ERGASTERION') throw new Error('CAPABILITY_MANIFEST_FAILED');
+          if (!floor.ok || floor.mutated !== false) throw new Error('WORKBENCH_FLOOR_COMMAND_FAILED');
+          if (floor.result?.schema !== 'ERGASTERION_WORKBENCH_FLOOR_V1') throw new Error('WORKBENCH_FLOOR_SCHEMA_FAILED');
+          if (floor.result?.labs?.experimental?.map((room) => room.roomId).join(',') !== 'ROOM-A,ROOM-B,ROOM-C') throw new Error('EXPERIMENTAL_LAB_BOUNDARY_FAILED');
+          if (floor.result?.workbenches?.coding?.status !== 'GAP') throw new Error('CODING_GAP_TRUTH_FAILED');
+          if (floor.result?.authority?.createsAuthority !== false) throw new Error('WORKBENCH_FLOOR_AUTHORITY_EXPANSION');
           NODE
 
   command:
