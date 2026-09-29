@@ -26,7 +26,6 @@ export const PIXIE_COMMANDS = Object.freeze([
   'visual_create', 'visual_scan', 'visual_edit', 'visual_compare', 'visual_render_packet', 'visual_verify',
   'image_request', 'image_result',
   'production_handoff_prepare',
-  'runtime_record', 'runtime_interaction_record',
   'candidate_passport', 'door_guard',
   'persist',
 ]);
@@ -46,6 +45,7 @@ const MUTATING = new Set([
   'visual_create', 'visual_scan', 'visual_edit', 'visual_render_packet', 'visual_verify',
   'image_request', 'image_result',
   'production_handoff_prepare',
+  'runtime_record', 'runtime_interaction_record',
   'candidate_passport',
   'persist',
 ]);
