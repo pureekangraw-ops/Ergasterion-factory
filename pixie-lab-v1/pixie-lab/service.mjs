@@ -13,18 +13,26 @@ import {
 } from './core.mjs';
 import {
   DEBUG_ROOM_ID, listExampleExperiments, getExampleExperiment,
-  createLogicDraft, editLogicDraft, compareLogicDraft,
 } from './lab-zones.mjs';
+import {
+  createLogicDraft, editLogicDraft, compareLogicDraft,
+} from './logic-workbench.mjs';
 import {
   createIdea, createExperiment, createVariant, evaluateVariant,
   selectExperimentCandidate, createAppPrototype, recordAppPreview, compareAppPrototypes,
 } from './idea-workspace.mjs';
 import { createImageActionRequest, acceptImageActionResult } from './image-tool-adapter.mjs';
-import { prepareProductionHandoff, prepareFactoryHandoff } from './production-lane.mjs';
+import { prepareProductionHandoff } from './production-evidence-workbench.mjs';
+import { prepareFactoryHandoff } from './production-lane.mjs';
 import { getErgasterionCapabilities } from './capabilities.mjs';
 import { projectWorkbenchFloor } from './workbench-floor.mjs';
 import { openWorkbench } from './workbench-view.mjs';
 import { projectCheckpointDock, projectRealityScreen } from './workbench-shared.mjs';
+import {
+  createDebugInspectionSession,
+  appendDebugInspectionStep,
+  completeDebugInspectionSession,
+} from './debug-inspection-workbench.mjs';
 import {
   createVisualDraft, scanVisualDraft, editVisualDraft, compareVisualDraft,
   createVisualRenderPacket, verifyVisualRender,
@@ -262,10 +270,27 @@ export class PixieLab {
   addGoldenCase(input) { const golden = createGoldenCase({ ...input, now: this.now }); this.state.goldenCases.push(golden); return clone(golden); }
   replayGolden(goldenCaseId, input) { const index = this.state.goldenCases.findIndex((golden) => golden.goldenCaseId === goldenCaseId); if (index < 0) throw new Error('GOLDEN_NOT_FOUND'); const next = replayGoldenCase(this.state.goldenCases[index], { ...input, now: this.now }); this.state.goldenCases[index] = next; if (next.status === 'REGRESSION_CASE') this.state.regressionAlerts.push(createRegressionAlert({ alertId: `ALERT-${input.runId}`, goldenCaseId, ...input, expected: next.expected, observed: input.observed, now: this.now })); return clone(next); }
   addRegressionAlert(input) { const alert = createRegressionAlert({ ...input, now: this.now }); this.state.regressionAlerts.push(alert); return clone(alert); }
-  debug(input = {}) { const debug = { debugId: required(input.debugId, 'debugId'), bugId: required(input.bugId, 'bugId'), status: 'OPEN', confidence: 'SUSPECTED', steps: [], regressionRunRefs: [], goldenCaseRefs: [], createdAt: this.now() }; this.state.debugSessions.push(debug); return clone(debug); }
-  debugStep(debugId, step = {}) { const debug = this.state.debugSessions.find((item) => item.debugId === debugId); if (!debug) throw new Error('DEBUG_NOT_FOUND'); debug.steps.push({ stepId: required(step.stepId, 'stepId'), action: required(step.action, 'action'), evidenceRefs: step.evidenceRefs || [], observed: clone(step.observed ?? null), at: this.now() });
-  if (step.confidence) { const confidence = text(step.confidence).toUpperCase(); if (!['SUSPECTED', 'SUPPORTED', 'CONFIRMED'].includes(confidence)) throw new Error('DEBUG_CONFIDENCE_INVALID'); debug.confidence = confidence; } if (step.regressionRunId) debug.regressionRunRefs.push(step.regressionRunId); if (step.goldenCaseId) debug.goldenCaseRefs.push(step.goldenCaseId); debug.status = 'IN_PROGRESS'; return clone(debug); }
-  completeDebug(debugId, { result = 'DEBUG_COMPLETE', regressionRunRefs = [], goldenCaseRefs = [] } = {}) { const debug = this.state.debugSessions.find((item) => item.debugId === debugId); if (!debug) throw new Error('DEBUG_NOT_FOUND'); if (result !== 'DEBUG_COMPLETE') throw new Error('DEBUG_REQUIRES_COMPLETE_RESULT'); debug.status = 'COMPLETE'; debug.confidence = 'CONFIRMED'; debug.result = result; debug.regressionRunRefs = [...new Set([...debug.regressionRunRefs, ...regressionRunRefs])]; debug.goldenCaseRefs = [...new Set([...debug.goldenCaseRefs, ...goldenCaseRefs])]; debug.completedAt = this.now(); return clone(debug); }
+  debug(input = {}) {
+    const debug = createDebugInspectionSession({ ...input, now: this.now });
+    this.state.debugSessions.push(debug);
+    return clone(debug);
+  }
+  debugStep(debugId, step = {}) {
+    const index = this.state.debugSessions.findIndex((item) => item.debugId === debugId);
+    if (index < 0) throw new Error('DEBUG_NOT_FOUND');
+    this.state.debugSessions[index] = appendDebugInspectionStep(this.state.debugSessions[index], step, { now: this.now });
+    return clone(this.state.debugSessions[index]);
+  }
+  completeDebug(debugId, { result = 'DEBUG_COMPLETE', regressionRunRefs = [], goldenCaseRefs = [] } = {}) {
+    const index = this.state.debugSessions.findIndex((item) => item.debugId === debugId);
+    if (index < 0) throw new Error('DEBUG_NOT_FOUND');
+    this.state.debugSessions[index] = completeDebugInspectionSession(
+      this.state.debugSessions[index],
+      { result, regressionRunRefs, goldenCaseRefs },
+      { now: this.now },
+    );
+    return clone(this.state.debugSessions[index]);
+  }
 
   proposeLearning(input) { const proposal = createLearningProposal({ ...input, now: this.now }); this.state.memory.push(proposal); return clone(proposal); }
   promoteLearning(proposalId) { const index = this.state.memory.findIndex((asset) => asset.proposalId === proposalId || asset.memoryId === proposalId); if (index < 0) throw new Error('LEARNING_PROPOSAL_NOT_FOUND'); this.state.memory[index] = promoteLearningProposal(this.state.memory[index], { promotedBy: PIXIE_ID, now: this.now }); return clone(this.state.memory[index]); }
