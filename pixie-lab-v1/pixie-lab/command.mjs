@@ -8,7 +8,7 @@ const requireObject = (value, label = 'args') => {
 };
 
 export const PIXIE_COMMANDS = Object.freeze([
-  'status', 'ask', 'capabilities', 'workbench_floor', 'workbench_open',
+  'status', 'ask', 'capabilities', 'workbench_floor', 'workbench_open', 'checkpoint_dock', 'reality_screen',
   'idea_create', 'experiment_create', 'variant_create', 'variant_evaluate', 'experiment_select',
   'app_prototype_create', 'app_preview_record', 'app_compare',
   'start_session', 'archive_session', 'close_session', 'clean_room',
@@ -86,6 +86,12 @@ export function createPixieCommander({ persistence, evidenceVerifier = null, now
         break;
       case 'workbench_open':
         result = lab.openWorkbench(args.workbenchId, requireObject(args.selector, 'args.selector'));
+        break;
+      case 'checkpoint_dock':
+        result = lab.checkpointDock(requireObject(args.selector, 'args.selector'));
+        break;
+      case 'reality_screen':
+        result = lab.realityScreen(requireObject(args.selector, 'args.selector'));
         break;
       case 'idea_create':
         result = lab.createIdea(args);
