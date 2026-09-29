@@ -57,8 +57,14 @@ export const ERGASTERION_CAPABILITIES = Object.freeze({
       commands: ['production_handoff_prepare'],
     },
     CODING_WORKBENCH: {
-      status: 'GAP',
-      commands: [],
+      status: 'HOST_DEPENDENT',
+      commands: ['coding_status', 'coding_list', 'coding_read', 'coding_search', 'coding_diff', 'coding_apply'],
+      effects: {
+        read: 'AVAILABLE_WITH_EXECUTOR',
+        writeCommitPush: 'HOST_OPT_IN',
+        merge: false,
+        deploy: false,
+      },
     },
     RUNTIME_WORKBENCH: {
       status: 'PARTIAL',
