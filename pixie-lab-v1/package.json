@@ -3,8 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test test/*.test.mjs",
-    "pixie": "node cli.mjs"
+    "test": "node --check ui/app.js && node --check factory-server.mjs && node --test test/*.test.mjs",
+    "pixie": "node cli.mjs",
+    "factory": "node factory-server.mjs"
   },
   "engines": {
     "node": ">=20"

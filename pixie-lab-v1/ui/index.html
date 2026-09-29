@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ERGASTERION — Dream Factory</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="factory-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">E</div>
+        <div>
+          <strong>ERGASTERION</strong>
+          <span>Dream Factory</span>
+        </div>
+      </div>
+      <div class="work-context">
+        <label>Work ID<input id="work-id" placeholder="WORK-…"></label>
+        <label>Checkpoint<input id="checkpoint-id" placeholder="CP-…"></label>
+        <button id="refresh" class="primary">Refresh reality</button>
+      </div>
+      <div id="health" class="health">connecting…</div>
+    </header>
+
+    <aside class="sidebar">
+      <div class="sidebar-title">WORKBENCH FLOOR</div>
+      <nav id="workbench-nav"></nav>
+      <div class="sidebar-title labs-title">EXPERIMENTAL LABS</div>
+      <div id="labs" class="labs"></div>
+      <div class="sidebar-footer">
+        <button id="open-big">BIG View</button>
+        <button id="open-reality">Reality</button>
+        <button id="open-checkpoint">Checkpoint</button>
+      </div>
+    </aside>
+
+    <main class="stage">
+      <section class="stage-head">
+        <div>
+          <div id="stage-kicker" class="kicker">FACTORY FLOOR</div>
+          <h1 id="stage-title">Dream Factory</h1>
+          <p id="stage-subtitle">Pick a Workbench. The screen reads current ERGASTERION state; it does not create a second truth.</p>
+        </div>
+        <div id="stage-badges" class="badges"></div>
+      </section>
+      <section id="workspace" class="workspace">
+        <div class="empty-state">
+          <div class="empty-icon">🏗️</div>
+          <h2>Loading the factory floor…</h2>
+        </div>
+      </section>
+    </main>
+
+    <aside class="right-rail">
+      <section class="rail-card">
+        <div class="rail-head"><span>REALITY</span><span id="reality-state" class="truth unknown">UNKNOWN</span></div>
+        <div id="reality-mini" class="mini-stack"></div>
+      </section>
+      <section class="rail-card">
+        <div class="rail-head"><span>PIXIE</span><span class="truth known">ASSIST</span></div>
+        <div id="pixie-note" class="pixie-note">PIXIE prepares, compares, checks drift and evidence. It does not approve or change Current.</div>
+      </section>
+      <section class="rail-card">
+        <div class="rail-head"><span>COMMAND</span><span class="truth known">DIRECT</span></div>
+        <select id="command-name"></select>
+        <textarea id="command-args" spellcheck="false">{}</textarea>
+        <button id="run-command">Run command</button>
+        <pre id="command-result" class="command-result"></pre>
+      </section>
+    </aside>
+  </div>
+
+  <template id="visual-template">
+    <div class="visual-grid">
+      <section class="panel reference-panel">
+        <div class="panel-head"><span>REFERENCE TRAY</span><span class="muted">source / keep</span></div>
+        <div class="reference-drop">
+          <div class="reference-thumb" id="visual-source-thumb">REF</div>
+          <div>
+            <strong id="visual-source">No source yet</strong>
+            <small>Current source stays locked. Roles such as STYLE / COMPOSITION / MUST KEEP can be added as metadata without creating a new image engine.</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel canvas-panel">
+        <div class="panel-head"><span>MAIN CANVAS</span><span id="visual-status" class="truth unknown">UNKNOWN</span></div>
+        <div id="visual-canvas" class="visual-canvas">
+          <div class="canvas-placeholder">
+            <div class="canvas-mark">✦</div>
+            <strong>No visual artifact selected</strong>
+            <span>Create/open a Visual Draft, prepare a render packet, then receive an image artifact through GO_IMAGE_TOOL.</span>
+          </div>
+        </div>
+        <div class="generate-bar">
+          <input id="visual-prompt" placeholder="Brief / what should change?">
+          <button id="visual-prepare" class="primary">Prepare render</button>
+        </div>
+      </section>
+
+      <section class="panel brief-panel">
+        <div class="panel-head"><span>BRIEF + PIXIE</span><span class="muted">intent guard</span></div>
+        <label>Requested Result<textarea id="visual-requested" placeholder="What should be true after this image?"></textarea></label>
+        <label>Must Keep<textarea id="visual-keep" placeholder="one item per line"></textarea></label>
+        <label>Must Remove<textarea id="visual-remove" placeholder="one item per line"></textarea></label>
+        <div id="visual-pixie" class="pixie-box"></div>
+      </section>
+
+      <section class="panel history-panel">
+        <div class="panel-head"><span>HISTORY</span><span class="muted">Original → V1 → V2 → V3+</span></div>
+        <div id="visual-history" class="history-strip"></div>
+      </section>
+    </div>
+  </template>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
