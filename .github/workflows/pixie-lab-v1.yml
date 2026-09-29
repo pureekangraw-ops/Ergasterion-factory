@@ -15,6 +15,7 @@ on:
     paths:
       - 'pixie-lab-v1/**'
       - '.github/workflows/pixie-lab-v1.yml'
+      - '.github/workflows/factory-eye-sign.yml'
   push:
     branches:
       - main
@@ -23,6 +24,7 @@ on:
     paths:
       - 'pixie-lab-v1/**'
       - '.github/workflows/pixie-lab-v1.yml'
+      - '.github/workflows/factory-eye-sign.yml'
 
 permissions:
   contents: read
@@ -151,6 +153,23 @@ jobs:
           path: ${{ runner.temp }}/ergasterion-factory-eye-v0.2.0.xpi
           if-no-files-found: error
           retention-days: 14
+
+
+  factory_eye_lint:
+    name: Firefox Factory Eye lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Mozilla web-ext lint
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes web-ext@10.7.0 lint \
+            --source-dir pixie-lab-v1/browser-adapter/firefox-tab-observer \
+            --no-config-discovery
 
   command:
     if: github.event_name == 'workflow_dispatch'
