@@ -611,6 +611,7 @@ export class PixieLab {
     return {
       ...base,
       zones: {
+        compatibilityOnly: true,
         experimentRooms: this.state.rooms.filter((room) => room.roomId !== DEBUG_ROOM_ID).map((room) => room.roomId),
         debugRoom: DEBUG_ROOM_ID,
         ideaWorkspace: 'ACTIVE',
@@ -622,6 +623,7 @@ export class PixieLab {
         archiveZone: 'ACTIVE',
         roomCleaner: 'ACTIVE',
       },
+      workbenchLayout: clone(getErgasterionCapabilities().layout),
       capabilities: getErgasterionCapabilities(),
       runtime: {
         schemaVersion: this.state.schemaVersion || ERGASTERION_STATE_SCHEMA,
@@ -670,12 +672,12 @@ export class PixieLab {
     if (q.includes('unknown')) return createGuideAnswer({ question, answer: `${board.unknowns.length} unknown item(s)`, traceRefs: board.roomReports.map((report) => `report://${report.roomId}`), unknowns: board.unknowns });
     if (q.includes('archive') || q.includes('เก็บ')) return createGuideAnswer({ question, answer: `${board.archives.length} archive snapshot(s); Archive never cleans or closes a room.`, traceRefs: board.archives.map((item) => `archive://${item.archiveId}`) });
     if (q.includes('clean') || q.includes('ล้าง')) return createGuideAnswer({ question, answer: `${board.cleanRuns.length} clean run(s); Clean resets room transient state and never creates an archive.`, traceRefs: board.cleanRuns.map((item) => `clean://${item.cleanId}`) });
-    if (q.includes('debug') || q.includes('ดีบั๊ก') || q.includes('ตรวจสอบ')) return createGuideAnswer({ question, answer: `ROOM-D is the dedicated inspection/debug room; ${board.factoryHandoffs.length} Lab handoff record(s)`, traceRefs: ['room://ROOM-D'] });
+    if (q.includes('debug') || q.includes('ดีบั๊ก') || q.includes('ตรวจสอบ')) return createGuideAnswer({ question, answer: `Debug / Inspection Workbench is the current debug surface; ROOM-D remains compatibility-only. ${board.factoryHandoffs.length} legacy Factory handoff record(s)`, traceRefs: ['workbench://DEBUG_INSPECTION_WORKBENCH', 'room://ROOM-D'] });
     if (q.includes('example') || q.includes('ตัวอย่าง')) return createGuideAnswer({ question, answer: `${board.exampleZone.length} reusable example experiment(s)`, traceRefs: board.exampleZone.map((item) => `example://${item.exampleId}`) });
     if (q.includes('ภาพ') || q.includes('visual') || q.includes('วาด') || q.includes('render')) return createGuideAnswer({ question, answer: `${board.visualWorkbench.length} Visual Workbench draft(s), ${board.visualRenderPackets.length} render packet(s), ${board.visualVerifications.length} verification(s)`, traceRefs: board.visualWorkbench.map((item) => `visual-draft://${item.visualDraftId}`) });
     if (q.includes('logic') || q.includes('ลอจิค') || q.includes('โต๊ะ')) return createGuideAnswer({ question, answer: `${board.logicWorkbench.length} Logic Workbench draft(s)`, traceRefs: board.logicWorkbench.map((item) => `logic-draft://${item.draftId}`) });
     if (q.includes('factory') || q.includes('โรงงาน') || q.includes('production')) return createGuideAnswer({ question, answer: `${board.productionHandoffs.length} current production/evidence handoff(s). Handoff carries candidate context and does not create authority. Legacy Debug-to-Factory PASS routing remains compatibility-only.`, traceRefs: board.productionHandoffs.map((item) => `production-handoff://${item.handoffId}`) });
-    if (q.includes('room') || q.includes('ห้อง')) return createGuideAnswer({ question, answer: `${board.rooms.length} room(s), ${board.activeSessions.length} active session(s)`, traceRefs: board.rooms.map((room) => `room://${room.roomId}`) });
+    if (q.includes('room') || q.includes('ห้อง')) return createGuideAnswer({ question, answer: `Experimental Labs are ROOM-A / ROOM-B / ROOM-C. ROOM-D is compatibility-only; ${board.activeSessions.length} active Lab session(s)`, traceRefs: board.rooms.map((room) => `room://${room.roomId}`) });
     if (q.includes('ready')) return createGuideAnswer({ question, answer: `${board.artifacts.filter((artifact) => artifact.status === 'READY_CANDIDATE').length} READY_CANDIDATE artifact(s)`, traceRefs: board.artifacts.map((artifact) => `artifact://${artifact.artifactId}`) });
     if (q.includes('bug') || q.includes('บั๊ก')) return createGuideAnswer({ question, answer: `${board.bugs.length} bug capsule(s)`, traceRefs: board.bugs.map((bug) => `bug://${bug.bugId}`) });
     return createGuideAnswer({ question, answer: 'UNKNOWN', traceRefs: ['pixie-board://PIXIE-BOARD'], unknowns: ['QUERY_NOT_IMPLEMENTED_IN_V1'] });
