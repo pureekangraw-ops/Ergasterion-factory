@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --check ui/app.js && node --check factory-server.mjs && node --test test/*.test.mjs",
+    "test": "node --check ui/app.js && node --check factory-server.mjs && node --check browser-adapter/firefox-tab-observer/background.js && node --check browser-adapter/firefox-tab-observer/content-observer.js && node --test test/*.test.mjs",
     "pixie": "node cli.mjs",
     "factory": "node factory-server.mjs"
   },

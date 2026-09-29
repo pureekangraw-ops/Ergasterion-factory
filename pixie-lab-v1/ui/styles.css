@@ -123,3 +123,16 @@ h1{margin:5px 0 6px;font-size:28px}
 .check-row{display:flex!important;align-items:center;gap:8px}
 .check-row input{width:auto}
 button:disabled{opacity:.45;cursor:not-allowed}
+
+.runtime-layout{display:grid;grid-template-columns:minmax(280px,34%) minmax(0,1fr);gap:12px}
+.runtime-tabs-card{grid-row:span 2}
+.runtime-live-card{grid-row:span 2}
+.runtime-tabs{display:grid;gap:7px;max-height:620px;overflow:auto}
+.runtime-tab-card{display:grid;gap:4px;text-align:left;background:#0f1317;border:1px solid #252d35;padding:10px;border-radius:9px}
+.runtime-tab-card:hover,.runtime-tab-card.active{border-color:#5d6875;background:#171d23}
+.runtime-tab-card strong{font-size:11px;color:#e4e8ed;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.runtime-tab-card span{font-size:10px;color:#92a0ad;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.runtime-tab-card small{font-size:9px;color:#65717d}
+.runtime-screenshot{width:100%;max-height:420px;object-fit:contain;border-radius:9px;border:1px solid #262e36;background:#0a0d10;margin-bottom:10px}
+.runtime-shot-empty{min-height:180px;display:grid;place-items:center;border:1px dashed #3b444e;border-radius:9px;color:#73808d;margin-bottom:10px}
+@media(max-width:900px){.runtime-layout{display:block}.runtime-layout>.data-card{margin-bottom:10px}}
