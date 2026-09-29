@@ -74,54 +74,31 @@ A website-specific helper may be added later as an optional profile layer, but i
 
 Firefox Stable requires Mozilla-signed extensions for normal installation.
 
-ERGASTERION uses a manual GitHub Actions workflow:
+**Signing ownership lives in GO Hub**, because the existing AMO credentials are already held there. ERGASTERION owns the Factory Eye source and package; Hub only signs that verified source.
+
+Canonical signer workflow:
 
 ```text
-.github/workflows/factory-eye-sign.yml
+pureekangraw-ops/prytaneion-workspace
+.github/workflows/ergasterion-factory-eye-sign.yml
 ```
 
-The workflow signs **only from `main`** and always uses the AMO **unlisted** channel. It does not publish Factory Eye as a public AMO listing.
+The Hub workflow:
+1. runs manually with `workflow_dispatch`
+2. uses the Hub's existing `AMO_SIGN_KEY` / `AMO_SIGN_SECRET`
+3. checks out `pureekangraw-ops/Ergasterion-factory@main`
+4. reads this manifest's extension ID + version
+5. runs Mozilla `web-ext@10.7.0 lint`
+6. builds the unsigned Factory Eye package
+7. requests Mozilla AMO **unlisted** signing
+8. writes signed provenance with Factory source SHA + signed XPI SHA-256
+9. uploads the signed XPI + provenance as a GitHub Actions artifact
 
-### One-time repository setup
-
-Create Mozilla Add-ons API credentials for the account that owns this extension ID, then add these GitHub Actions repository secrets:
-
-```text
-FIREFOX_JWT_ISSUER
-FIREFOX_JWT_SECRET
-```
-
-Never commit either value to the repository.
-
-### Sign
-
-Run the GitHub Actions workflow:
-
-```text
-Firefox Factory Eye — AMO Sign
-```
-
-Select `main` and run it manually.
-
-The workflow:
-1. refuses non-main refs
-2. reads the extension ID + version from `manifest.json`
-3. checks the AMO secrets exist
-4. runs Mozilla `web-ext@10.7.0 lint`
-5. requests AMO v5 **unlisted** signing
-6. downloads the Mozilla-signed XPI
-7. writes `factory-eye-signed-provenance.json`
-8. uploads both files as a GitHub Actions artifact
-
-Expected artifact name:
-
-```text
-ergasterion-factory-eye-v<version>-signed
-```
+The signer does **not** use GO Hub Browser Policy, Gumroad allowlists, legacy browser routes, or Observer session policy.
 
 ### Version rule
 
-AMO will not accept the same extension version twice. After a successful signing of `0.2.0`, any changed source that needs another signing must first bump the manifest version.
+AMO will not accept the same extension version twice. After a successful signing of `0.2.0`, changed source that needs another signing must first bump the manifest version.
 
 ### Acceptance boundary
 
