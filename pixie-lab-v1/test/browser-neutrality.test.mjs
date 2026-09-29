@@ -14,7 +14,9 @@ test('Factory Eye manifest observes generic HTTP and HTTPS tabs', async () => {
   assert.deepEqual(matches, ['http://*/*', 'https://*/*']);
   assert.ok(manifest.permissions.includes('tabs'));
   assert.ok(manifest.host_permissions.includes('<all_urls>'));
-  assert.equal(manifest.version, '0.2.0');
+  assert.equal(manifest.options_ui?.page, 'options.html');
+  assert.deepEqual(manifest.browser_specific_settings?.gecko?.data_collection_permissions?.required, ['websiteActivity', 'websiteContent']);
+  assert.equal(manifest.version, '0.2.1');
   assert.equal(
     manifest.browser_specific_settings?.gecko?.id,
     'ergasterion-factory-eye@pureekangraw.local',
@@ -36,5 +38,5 @@ test('Factory Eye source contains no site-specific profile or domain binding', a
 test('Factory Eye page observer never captures input values', async () => {
   const source = await read('content-observer.js');
   assert.match(source, /capturesInputValues:\s*false/);
-  assert.doesNotMatch(source, /\.value\s*[,}]/);
+  assert.doesNotMatch(source, /\.value\b/);
 });

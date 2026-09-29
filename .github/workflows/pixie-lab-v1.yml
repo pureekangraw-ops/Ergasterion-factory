@@ -15,7 +15,6 @@ on:
     paths:
       - 'pixie-lab-v1/**'
       - '.github/workflows/pixie-lab-v1.yml'
-      - '.github/workflows/factory-eye-sign.yml'
   push:
     branches:
       - main
@@ -24,7 +23,6 @@ on:
     paths:
       - 'pixie-lab-v1/**'
       - '.github/workflows/pixie-lab-v1.yml'
-      - '.github/workflows/factory-eye-sign.yml'
 
 permissions:
   contents: read
@@ -134,23 +132,35 @@ jobs:
           if (big.result?.proof?.latestRuntimeObservation?.observationId !== 'OBS-SMOKE') throw new Error('BIG_RUNTIME_PROJECTION_FAILED');
           NODE
 
-      - name: Package Firefox Factory Eye XPI
+      - name: Read Factory Eye version
+        id: factory_eye_meta
         shell: bash
         run: |
           set -euo pipefail
+          version="$(node -p "require('./browser-adapter/firefox-tab-observer/manifest.json').version")"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Package Firefox Factory Eye XPI
+        shell: bash
+        env:
+          FACTORY_EYE_VERSION: ${{ steps.factory_eye_meta.outputs.version }}
+        run: |
+          set -euo pipefail
           cd browser-adapter/firefox-tab-observer
-          zip -q -X -r "$RUNNER_TEMP/ergasterion-factory-eye-v0.2.0.xpi" \
+          zip -q -X -r "$RUNNER_TEMP/ergasterion-factory-eye-v${FACTORY_EYE_VERSION}.xpi" \
             manifest.json \
             background.js \
             content-observer.js \
+            options.html \
+            options.js \
             README.md
-          unzip -l "$RUNNER_TEMP/ergasterion-factory-eye-v0.2.0.xpi"
+          unzip -l "$RUNNER_TEMP/ergasterion-factory-eye-v${FACTORY_EYE_VERSION}.xpi"
 
       - name: Upload Firefox Factory Eye XPI
         uses: actions/upload-artifact@v4
         with:
-          name: ergasterion-factory-eye-v0.2.0
-          path: ${{ runner.temp }}/ergasterion-factory-eye-v0.2.0.xpi
+          name: ergasterion-factory-eye-v${{ steps.factory_eye_meta.outputs.version }}
+          path: ${{ runner.temp }}/ergasterion-factory-eye-v${{ steps.factory_eye_meta.outputs.version }}.xpi
           if-no-files-found: error
           retention-days: 14
 

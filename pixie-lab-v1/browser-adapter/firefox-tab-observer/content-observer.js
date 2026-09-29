@@ -58,7 +58,7 @@
     return [...document.querySelectorAll('button,[role="button"],input[type="button"],input[type="submit"]')]
       .filter(visible)
       .map((element) => ({
-        label: clean(element.innerText || element.value || labelFor(element), 220),
+        label: clean(element.innerText || element.textContent || labelFor(element), 220),
         disabled: Boolean(element.disabled || element.getAttribute('aria-disabled') === 'true'),
       }))
       .filter((item) => item.label)
