@@ -17,10 +17,10 @@ import {
 } from './lab-zones.mjs';
 import {
   createIdea, createExperiment, createVariant, evaluateVariant,
-  selectExperimentCandidate, createAppPrototype, recordAppPreview,
+  selectExperimentCandidate, createAppPrototype, recordAppPreview, compareAppPrototypes,
 } from './idea-workspace.mjs';
 import { createImageActionRequest, acceptImageActionResult } from './image-tool-adapter.mjs';
-import { prepareFactoryHandoff } from './production-lane.mjs';
+import { prepareProductionHandoff, prepareFactoryHandoff } from './production-lane.mjs';
 import { getErgasterionCapabilities } from './capabilities.mjs';
 import {
   createVisualDraft, scanVisualDraft, editVisualDraft, compareVisualDraft,
@@ -31,6 +31,7 @@ const clone = (value) => value == null ? value : structuredClone(value);
 const text = (value) => String(value ?? '').trim();
 const required = (value, label) => { const result = text(value); if (!result) throw new Error(`${label} is required`); return result; };
 const nowIso = () => new Date().toISOString();
+export const ERGASTERION_STATE_SCHEMA = 'ERGASTERION_STATE_V2';
 
 function seedRegistry() {
   const registry = createTestTypeRegistry();
@@ -53,12 +54,13 @@ export class PixieLab {
     this.evidenceVerifier = evidenceVerifier;
     this.testTypes = seedRegistry();
     this.state = {
+      schemaVersion: ERGASTERION_STATE_SCHEMA,
       labId, pixieId: PIXIE_ID, rooms: createDefaultRooms({ now }).map(clone), roomReports: [], sessions: [], cycles: [],
       matrices: [], testRuns: [], proposals: [], bugs: [], attentions: [], goldenCases: [], regressionAlerts: [],
       memory: [], grants: [], snapshots: [], artifacts: [], passports: [], factorySimulations: [], evidence: [],
       debugSessions: [], selfTests: [], crossRoomChecks: [], contradictions: [],
       ideas: [], experiments: [], variants: [], appPrototypes: [],
-      logicDrafts: [], factoryHandoffs: [],
+      logicDrafts: [], productionHandoffs: [], factoryHandoffs: [],
       visualDrafts: [], visualRenderPackets: [], visualVerifications: [],
       imageActions: [], imageReceipts: [],
       archives: [], cleanRuns: [],
@@ -359,6 +361,13 @@ export class PixieLab {
     return clone(this.state.appPrototypes[index]);
   }
 
+  compareAppPrototypes(leftPrototypeId, rightPrototypeId, input = {}) {
+    const left = this.state.appPrototypes.find((item) => item.prototypeId === leftPrototypeId);
+    const right = this.state.appPrototypes.find((item) => item.prototypeId === rightPrototypeId);
+    if (!left || !right) throw new Error('APP_PROTOTYPE_NOT_FOUND');
+    return compareAppPrototypes(left, right, { ...input, now: this.now });
+  }
+
   createLogicDraft(input = {}) {
     if (this.state.logicDrafts.some((item) => item.draftId === input.draftId)) throw new Error('DUPLICATE_LOGIC_DRAFT_ID');
     if (input.variantId && !input.experimentId) throw new Error('EXPERIMENT_ID_REQUIRED_FOR_VARIANT');
@@ -458,6 +467,17 @@ export class PixieLab {
     return clone(receipt);
   }
 
+  prepareProductionHandoff(input = {}) {
+    const experiment = this.state.experiments.find((item) => item.experimentId === input.experimentId);
+    if (!experiment) throw new Error('EXPERIMENT_NOT_FOUND');
+    const variant = this.state.variants.find((item) => item.variantId === input.variantId && item.experimentId === experiment.experimentId);
+    if (!variant) throw new Error('VARIANT_EXPERIMENT_MISMATCH');
+    if (this.state.productionHandoffs.some((item) => item.handoffId === input.handoffId)) throw new Error('DUPLICATE_PRODUCTION_HANDOFF_ID');
+    const result = prepareProductionHandoff({ ...input, now: this.now });
+    this.state.productionHandoffs.push(result);
+    return clone(result);
+  }
+
   factoryHandoff(input = {}) {
     const result = prepareFactoryHandoff({ ...input, now: this.now });
     if (result.status === 'READY_FOR_FACTORY') this.state.factoryHandoffs.push(result);
@@ -526,6 +546,7 @@ export class PixieLab {
     const canonical = await this.persistence.load();
     if (canonical) {
       this.state = clone(canonical);
+      this.state.schemaVersion = ERGASTERION_STATE_SCHEMA;
       const defaultRooms = createDefaultRooms({ now: this.now }).map(clone);
       this.state.rooms = Array.isArray(this.state.rooms) ? this.state.rooms : [];
       for (const room of defaultRooms) if (!this.state.rooms.some((item) => item.roomId === room.roomId)) this.state.rooms.push(room);
@@ -537,6 +558,7 @@ export class PixieLab {
       this.state.variants = Array.isArray(this.state.variants) ? this.state.variants : [];
       this.state.appPrototypes = Array.isArray(this.state.appPrototypes) ? this.state.appPrototypes : [];
       this.state.logicDrafts = Array.isArray(this.state.logicDrafts) ? this.state.logicDrafts : [];
+      this.state.productionHandoffs = Array.isArray(this.state.productionHandoffs) ? this.state.productionHandoffs : [];
       this.state.factoryHandoffs = Array.isArray(this.state.factoryHandoffs) ? this.state.factoryHandoffs : [];
       this.state.visualDrafts = Array.isArray(this.state.visualDrafts) ? this.state.visualDrafts : [];
       this.state.visualRenderPackets = Array.isArray(this.state.visualRenderPackets) ? this.state.visualRenderPackets : [];
@@ -569,6 +591,10 @@ export class PixieLab {
         roomCleaner: 'ACTIVE',
       },
       capabilities: getErgasterionCapabilities(),
+      runtime: {
+        schemaVersion: this.state.schemaVersion || ERGASTERION_STATE_SCHEMA,
+        legacyCompatibilityPath: 'pixie-lab-v1',
+      },
       crossRoomChecks: clone(this.state.crossRoomChecks || []),
       ideas: clone(this.state.ideas || []),
       experiments: clone(this.state.experiments || []),
@@ -583,6 +609,7 @@ export class PixieLab {
       archives: clone(this.state.archives || []),
       cleanRuns: clone(this.state.cleanRuns || []),
       exampleZone: listExampleExperiments(),
+      productionHandoffs: clone(this.state.productionHandoffs || []),
       factoryHandoffs: clone(this.state.factoryHandoffs || []),
       counts: {
         ...base.counts,
@@ -600,6 +627,7 @@ export class PixieLab {
         archives: (this.state.archives || []).length,
         cleanRuns: (this.state.cleanRuns || []).length,
         examples: listExampleExperiments().length,
+        productionHandoffs: (this.state.productionHandoffs || []).length,
         factoryHandoffs: (this.state.factoryHandoffs || []).length,
       },
     };
@@ -614,7 +642,7 @@ export class PixieLab {
     if (q.includes('example') || q.includes('ตัวอย่าง')) return createGuideAnswer({ question, answer: `${board.exampleZone.length} reusable example experiment(s)`, traceRefs: board.exampleZone.map((item) => `example://${item.exampleId}`) });
     if (q.includes('ภาพ') || q.includes('visual') || q.includes('วาด') || q.includes('render')) return createGuideAnswer({ question, answer: `${board.visualWorkbench.length} Visual Workbench draft(s), ${board.visualRenderPackets.length} render packet(s), ${board.visualVerifications.length} verification(s)`, traceRefs: board.visualWorkbench.map((item) => `visual-draft://${item.visualDraftId}`) });
     if (q.includes('logic') || q.includes('ลอจิค') || q.includes('โต๊ะ')) return createGuideAnswer({ question, answer: `${board.logicWorkbench.length} Logic Workbench draft(s)`, traceRefs: board.logicWorkbench.map((item) => `logic-draft://${item.draftId}`) });
-    if (q.includes('factory') || q.includes('โรงงาน')) return createGuideAnswer({ question, answer: 'ROOM-D can reach Factory only through GO Hub with a live ACTIVE MAINTENANCE or EMERGENCY Factory-scoped Pass; normal WORK/READ passes are blocked.', traceRefs: ['room://ROOM-D', 'destination://factory'] });
+    if (q.includes('factory') || q.includes('โรงงาน') || q.includes('production')) return createGuideAnswer({ question, answer: `${board.productionHandoffs.length} current production/evidence handoff(s). Handoff carries candidate context and does not create authority. Legacy Debug-to-Factory PASS routing remains compatibility-only.`, traceRefs: board.productionHandoffs.map((item) => `production-handoff://${item.handoffId}`) });
     if (q.includes('room') || q.includes('ห้อง')) return createGuideAnswer({ question, answer: `${board.rooms.length} room(s), ${board.activeSessions.length} active session(s)`, traceRefs: board.rooms.map((room) => `room://${room.roomId}`) });
     if (q.includes('ready')) return createGuideAnswer({ question, answer: `${board.artifacts.filter((artifact) => artifact.status === 'READY_CANDIDATE').length} READY_CANDIDATE artifact(s)`, traceRefs: board.artifacts.map((artifact) => `artifact://${artifact.artifactId}`) });
     if (q.includes('bug') || q.includes('บั๊ก')) return createGuideAnswer({ question, answer: `${board.bugs.length} bug capsule(s)`, traceRefs: board.bugs.map((bug) => `bug://${bug.bugId}`) });
