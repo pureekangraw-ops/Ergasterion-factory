@@ -361,6 +361,16 @@ export class PixieLab {
 
   createLogicDraft(input = {}) {
     if (this.state.logicDrafts.some((item) => item.draftId === input.draftId)) throw new Error('DUPLICATE_LOGIC_DRAFT_ID');
+    if (input.variantId && !input.experimentId) throw new Error('EXPERIMENT_ID_REQUIRED_FOR_VARIANT');
+    if (input.experimentId) {
+      const experiment = this.state.experiments.find((item) => item.experimentId === input.experimentId);
+      if (!experiment) throw new Error('EXPERIMENT_NOT_FOUND');
+      if (input.variantId) {
+        const variant = this.state.variants.find((item) => item.variantId === input.variantId && item.experimentId === experiment.experimentId);
+        if (!variant) throw new Error('VARIANT_EXPERIMENT_MISMATCH');
+        if (!['LOGIC', 'GENERAL'].includes(variant.kind)) throw new Error('LOGIC_VARIANT_REQUIRED');
+      }
+    }
     const draft = createLogicDraft({ ...input, now: this.now });
     this.state.logicDrafts.push(draft);
     return clone(draft);
@@ -379,6 +389,16 @@ export class PixieLab {
 
   createVisualDraft(input = {}) {
     if (this.state.visualDrafts.some((item) => item.visualDraftId === input.visualDraftId)) throw new Error('DUPLICATE_VISUAL_DRAFT_ID');
+    if (input.variantId && !input.experimentId) throw new Error('EXPERIMENT_ID_REQUIRED_FOR_VARIANT');
+    if (input.experimentId) {
+      const experiment = this.state.experiments.find((item) => item.experimentId === input.experimentId);
+      if (!experiment) throw new Error('EXPERIMENT_NOT_FOUND');
+      if (input.variantId) {
+        const variant = this.state.variants.find((item) => item.variantId === input.variantId && item.experimentId === experiment.experimentId);
+        if (!variant) throw new Error('VARIANT_EXPERIMENT_MISMATCH');
+        if (!['VISUAL', 'GENERAL'].includes(variant.kind)) throw new Error('VISUAL_VARIANT_REQUIRED');
+      }
+    }
     const draft = createVisualDraft({ ...input, now: this.now });
     this.state.visualDrafts.push(draft);
     return clone(draft);
