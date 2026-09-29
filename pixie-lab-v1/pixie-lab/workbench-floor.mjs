@@ -153,17 +153,11 @@ export function projectWorkbenchFloor({
       }),
       coding: Object.freeze({
         id: 'CODING_WORKBENCH',
-        status: 'GAP',
-        missing: Object.freeze([
-          'REPO_WORKTREE',
-          'FILE_TREE',
-          'CODE_SEARCH',
-          'MULTI_FILE_EDIT',
-          'SHELL',
-          'DEV_COMMAND_LOOP',
-          'GIT_DIFF_STATUS',
-          'PR_PREPARATION',
-        ]),
+        status: 'HOST_DEPENDENT',
+        runtimeCheck: 'coding_status',
+        commands: Object.freeze([...(capabilities.workbenches?.CODING_WORKBENCH?.commands || [])]),
+        mergeAuthority: false,
+        deployAuthority: false,
       }),
       runtime: Object.freeze({
         id: 'RUNTIME_WORKBENCH',
