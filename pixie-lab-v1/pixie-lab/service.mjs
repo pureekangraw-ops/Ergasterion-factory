@@ -30,6 +30,14 @@ import { openWorkbench } from './workbench-view.mjs';
 import { projectCheckpointDock, projectRealityScreen } from './workbench-shared.mjs';
 import { projectBigView, projectIntentReview } from './owner-view.mjs';
 import {
+  inspectCodingWorkbench,
+  listCodingFiles,
+  readCodingFile,
+  searchCodingWorkspace,
+  inspectCodingDiff,
+  applyCodingChange,
+} from './coding-workbench.mjs';
+import {
   createDebugInspectionSession,
   appendDebugInspectionStep,
   completeDebugInspectionSession,
@@ -59,11 +67,12 @@ function seedRegistry() {
 }
 
 export class PixieLab {
-  constructor({ labId = 'PIXIE-LAB', now = nowIso, persistence = null, evidenceVerifier = null } = {}) {
+  constructor({ labId = 'PIXIE-LAB', now = nowIso, persistence = null, evidenceVerifier = null, codingExecutor = null } = {}) {
     this.labId = labId;
     this.now = now;
     this.persistence = persistence || createMemoryPersistence();
     this.evidenceVerifier = evidenceVerifier;
+    this.codingExecutor = codingExecutor;
     this.testTypes = seedRegistry();
     this.state = {
       schemaVersion: ERGASTERION_STATE_SCHEMA,
@@ -331,6 +340,17 @@ export class PixieLab {
   realityScreen(selector = {}) { return projectRealityScreen({ state: this.state, selector, now: this.now }); }
   bigView(selector = {}) { return projectBigView({ state: this.state, selector, now: this.now }); }
   intentReview(selector = {}) { return projectIntentReview({ state: this.state, selector, now: this.now }); }
+  async codingStatus() { return inspectCodingWorkbench({ executor: this.codingExecutor }); }
+  async codingList(input = {}) { return listCodingFiles({ executor: this.codingExecutor, ...input }); }
+  async codingRead(input = {}) { return readCodingFile({ executor: this.codingExecutor, ...input }); }
+  async codingSearch(input = {}) { return searchCodingWorkspace({ executor: this.codingExecutor, ...input }); }
+  async codingDiff(input = {}) { return inspectCodingDiff({ executor: this.codingExecutor, ...input }); }
+  async codingApply(input = {}) {
+    return applyCodingChange({
+      executor: this.codingExecutor,
+      ...input,
+    });
+  }
 
   createIdea(input = {}) {
     if (this.state.ideas.some((item) => item.ideaId === input.ideaId)) throw new Error('DUPLICATE_IDEA_ID');
