@@ -60,13 +60,15 @@ jobs:
 
           node cli.mjs status > "$RUNNER_TEMP/status.json"
           node cli.mjs workbench_floor > "$RUNNER_TEMP/workbench-floor.json"
+          node cli.mjs '{"command":"workbench_open","args":{"workbenchId":"VISUAL_WORKBENCH"}}' > "$RUNNER_TEMP/workbench-open.json"
 
-          STATUS_FILE="$RUNNER_TEMP/status.json" CAP_FILE="$RUNNER_TEMP/capabilities.json" FLOOR_FILE="$RUNNER_TEMP/workbench-floor.json" node --input-type=module <<'NODE'
+          STATUS_FILE="$RUNNER_TEMP/status.json" CAP_FILE="$RUNNER_TEMP/capabilities.json" FLOOR_FILE="$RUNNER_TEMP/workbench-floor.json" OPEN_FILE="$RUNNER_TEMP/workbench-open.json" node --input-type=module <<'NODE'
           import { readFile } from 'node:fs/promises';
 
           const status = JSON.parse(await readFile(process.env.STATUS_FILE, 'utf8'));
           const capabilities = JSON.parse(await readFile(process.env.CAP_FILE, 'utf8'));
           const floor = JSON.parse(await readFile(process.env.FLOOR_FILE, 'utf8'));
+          const open = JSON.parse(await readFile(process.env.OPEN_FILE, 'utf8'));
 
           if (!status.ok) throw new Error('STATUS_NOT_OK');
           if (status.result?.counts?.ideas !== 1) throw new Error('IDEA_PERSISTENCE_FAILED');
@@ -83,6 +85,9 @@ jobs:
           if (floor.result?.labs?.experimental?.map((room) => room.roomId).join(',') !== 'ROOM-A,ROOM-B,ROOM-C') throw new Error('EXPERIMENTAL_LAB_BOUNDARY_FAILED');
           if (floor.result?.workbenches?.coding?.status !== 'GAP') throw new Error('CODING_GAP_TRUTH_FAILED');
           if (floor.result?.authority?.createsAuthority !== false) throw new Error('WORKBENCH_FLOOR_AUTHORITY_EXPANSION');
+          if (!open.ok || open.mutated !== false) throw new Error('WORKBENCH_OPEN_COMMAND_FAILED');
+          if (open.result?.workbenchId !== 'VISUAL_WORKBENCH') throw new Error('WORKBENCH_OPEN_VISUAL_FAILED');
+          if (open.result?.authority?.createsAuthority !== false) throw new Error('WORKBENCH_OPEN_AUTHORITY_EXPANSION');
           NODE
 
   command:
