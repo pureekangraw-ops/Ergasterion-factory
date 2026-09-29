@@ -44,7 +44,7 @@ export function projectWorkbenchFloor({
   now = () => new Date().toISOString(),
 } = {}) {
   const rooms = list(state.rooms);
-  const labIds = ['ROOM-A', 'ROOM-B', 'ROOM-C'];
+  const labIds = list(capabilities.layout?.experimentalLabs).length ? list(capabilities.layout.experimentalLabs) : ['ROOM-A', 'ROOM-B', 'ROOM-C'];
   const experimentalLabs = labIds.map((roomId) => {
     const room = rooms.find((item) => item?.roomId === roomId);
     return {
@@ -103,7 +103,7 @@ export function projectWorkbenchFloor({
       logic: Object.freeze({
         id: 'LOGIC_WORKBENCH',
         status: 'ACTIVE',
-        source: 'lab-zones.mjs',
+        source: 'logic-workbench.mjs',
         migration: 'REFRAME_SURFACE_ONLY',
         count: count(state, 'logicDrafts'),
         currentDraftId: latestLogic?.draftId || null,
@@ -136,7 +136,7 @@ export function projectWorkbenchFloor({
       debugInspection: Object.freeze({
         id: 'DEBUG_INSPECTION_WORKBENCH',
         status: 'MIGRATION_TARGET',
-        source: 'ROOM-D_COMPATIBILITY',
+        source: 'debug-inspection-workbench.mjs',
         debugSessionCount: count(state, 'debugSessions'),
         bugCount: count(state, 'bugs'),
         attentionCount: count(state, 'attentions'),
@@ -145,7 +145,7 @@ export function projectWorkbenchFloor({
       productionEvidence: Object.freeze({
         id: 'PRODUCTION_EVIDENCE_WORKBENCH',
         status: 'ACTIVE',
-        source: 'production-lane.mjs',
+        source: 'production-evidence-workbench.mjs',
         handoffCount: count(state, 'productionHandoffs'),
         currentHandoffId: latestProductionHandoff?.handoffId || null,
         authorityTransferred: false,
