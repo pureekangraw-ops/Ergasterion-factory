@@ -133,6 +133,7 @@ Important current commands include:
 - `image_request` / `image_result`
 - `production_handoff_prepare`
 - `workbench_floor` — read-only Workbench/Lab/Reality projection from current state
+- `workbench_open` — read-only detailed view of one Workbench using current state and existing capability inventory
 
 The command surface does not expose merge, deploy, release, system-CURRENT acceptance, direct image generation, or the legacy `factory_handoff` route.
 
@@ -148,6 +149,8 @@ Phase 1 begins by surfacing existing state without changing core behavior. The r
 - shared PIXIE / Evidence / Checkpoint / Reality summaries
 
 The projection creates no authority, transfers no authority, and does not persist or mutate state.
+
+`workbench_open` turns that floor into an inspectable table: General/Idea, Logic, Visual, Build/Test, Debug/Inspection, Production/Evidence, Coding gap, and Runtime partial state can be opened without creating a second state owner. Tool Rails are projections from the existing command/capability surface, not a new authority layer.
 
 ## Verification status
 
