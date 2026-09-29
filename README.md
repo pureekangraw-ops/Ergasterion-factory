@@ -1,61 +1,137 @@
-# PIXIE LAB
-
-This repository is now dedicated to **PIXIE LAB**.
-
-Legacy MIMIR / GO Catalog proof files were retired after PIXIE became the active project. PIXIE keeps its original safety boundary: it can inspect, test, debug, learn, project status, and produce candidate evidence, but it does **not** gain external write/delete/share/merge/deploy or production-control authority.
-
-## Command PIXIE
-
-From the repository root:
-
-```bash
-npm test
-npm run pixie -- status
-npm run pixie -- ask "มี unknown ไหม"
-npm run pixie -- start_session '{"roomId":"ROOM-A","sessionId":"S-1","purpose":"check","activityType":"CHECK"}'
+ERGASTERION is the artifact production factory in YGGDRASIL.
+It receives an authorized production request, turns an approved design or specification into a real artifact, tests and inspects the result, and returns the artifact with technical evidence.
+## Role
+**Artifact Production Factory**
+## Core Question
+> What did we actually build?
+## Owns
+- production planning
+- artifact generation
+- code production
+- image / visual production
+- UI implementation
+- build
+- transform / render
+- technical inspection
+- piece QC
+- assembly
+- assembly QC
+- automated tests
+- packaging
+- release preparation
+- technical repair
+- rollback capability
+- production evidence
+PIXIE may operate as a specialized artifact-production capability inside this production boundary.
+## Does Not Own
+ERGASTERION must not become the owner of:
+- the user mission
+- Current Work identity
+- Work ID / Checkpoint ownership
+- business or product meaning
+- final user decision
+- update acceptance policy
+- the target project’s Current truth
+- authority that was not included in the production request
+## Input Contract
+ERGASTERION accepts an authorized production request containing:
+- Work ID
+- Checkpoint
+- Requested Result
+- approved brief / design / specification
+- selected context
+- production scope
+- required authority
+- target output
+- return condition
+- verification requirements
+If the request is missing scope, authority, or a usable specification, return `UNKNOWN`, `BLOCKED`, or `WAITING_INPUT`. Do not invent the missing contract.
+## Production Flow
+```text
+Authorized Build Request
+→ Inspect
+→ Plan
+→ Produce
+→ Test
+→ Piece QC
+→ Assembly
+→ Assembly QC
+→ Build
+→ Package
+→ Observe
+→ Return Artifact + Evidence
 ```
-
-You can also send one JSON command:
-
-```bash
-npm run pixie -- '{"command":"status"}'
+## Output Contract
+Return to PRYTANEION:
+- artifact
+- version / revision
+- production result
+- test result
+- QC result
+- evidence
+- technical risks
+- rollback state
+- remaining UNKNOWN
+- recommended next action
+- return condition status
+An artifact without evidence is incomplete production output.
+## Truth and Verification
+```text
+ARTIFACT ≠ VERIFIED
+BUILDABLE ≠ SHOULD BE BUILT
+TOOL SUCCESS ≠ REALITY SUCCESS
+DO ≠ DONE
 ```
-
-State is persisted locally at `.pixie/state.json` by default. Set `PIXIE_STATE_FILE` to use another host-managed path.
-
-The command layer is an explicit allowlist over the existing `PixieLab` service. Unknown or external-authority commands fail closed with `COMMAND_NOT_ALLOWED`.
-
-## Project layout
-
-- `pixie-lab-v1/pixie-lab/core.mjs` — immutable contracts and gates.
-- `pixie-lab-v1/pixie-lab/service.mjs` — PIXIE LAB service.
-- `pixie-lab-v1/pixie-lab/adapters.mjs` — persistence, evidence, runner and replay seams.
-- `pixie-lab-v1/pixie-lab/command.mjs` — owner/host command boundary.
-- `pixie-lab-v1/cli.mjs` — local command entrypoint.
-- `pixie-lab-v1/test/` — core, adapter, failure-path and command tests.
-
-## Reality boundary
-
-The included CLI is a host/local command surface. It does not itself create a remote transport into GO Hub and it does not bypass PIXIE authority boundaries.
-
-
-## Experiment Lab zones
-
-PIXIE LAB now separates experimentation from investigation:
-
-- `ROOM-A`, `ROOM-B`, `ROOM-C` — ordinary isolated experiment rooms.
-- `ROOM-D` — dedicated inspection/debug room.
-- **Logic Workbench** — creates Lab-owned drafts and safely edits the working copy with SET, DELETE, APPEND, TRIM_TEXT, and REPLACE_TEXT while preserving the source snapshot.
-- **Example Zone** — reusable fixtures for healthy public entry, 404, false-green, recovered entry, and critical-unknown behavior.
-- **Experiment-aware Master Gate** — evaluates the latest relevant cross-room result for the requested experiment/subject. Historical FAIL evidence is retained for learning but does not permanently poison a recovered experiment.
-- **Debug → Factory handoff** — the Lab can simulate/prepare a handoff from ROOM-D, but the command is intentionally not exposed on PIXIE's owner/CLI allowlist. The real Factory path lives in GO Hub, which re-reads the live Centre Pass and accepts only ACTIVE `MAINTENANCE` or `EMERGENCY` Factory-scoped authority. A normal WORK/READ Pass is not sufficient.
-
-PIXIE still has no direct merge, deploy, delete, share, or production-control authority. A debug handoff is `NOT_AN_APPROVAL` and host execution remains governed.
-
-
-### Room controls: Archive and Clean are intentionally separate
-
-- `archive_session` creates an Archive Zone snapshot of the session, room, and related cycles. It does **not** close the session and does **not** clean the room.
-- `close_session` closes the session only and leaves the room `DIRTY` until an explicit clean.
-- `clean_room` discards the room's active transient session/cycles and room report, runs the Lab-owned cleanup lifecycle `ZERO → STERILIZE → VERIFY_CLEAN → LOAD_CLEAN_SEED → READY`, and does **not** create an archive.
-- Archive records survive later room cleaning. Clean runs keep only cleanup audit metadata; they are not hidden archives.
+ERGASTERION must distinguish:
+- generated artifact
+- action receipt
+- test result
+- technical evidence
+- verified production result
+- user-facing Requested Result
+Production completion does not prove that the user’s Requested Result has been achieved. PRYTANEION or the responsible product owner must review the meaning and real-world result.
+## Route and Authority
+ERGASTERION may act only within the authorized production scope.
+- Access does not equal ownership.
+- A tool does not grant authority.
+- Build permission does not grant product decision authority.
+- Technical success does not authorize release by itself.
+- Backend access does not authorize bypassing the governed route.
+If a production change affects product meaning, Current selection, update policy, or ownership, return the issue to PRYTANEION / OLYMPUS / the target owner instead of deciding silently.
+## Failure States
+Use explicit states:
+- `BLOCKED` — required input, permission, or capability is unavailable
+- `UNKNOWN` — evidence is insufficient
+- `TEST_FAILED` — a test or QC gate failed
+- `CONFLICT` — request, specification, or source conflicts
+- `ROLLBACK_READY` — output can be reverted safely
+- `WAITING_REVIEW` — technical output exists but owner review is required
+- `PRODUCTION_VERIFIED` — production evidence is complete; this does not automatically mean product success
+## Continuity
+Keep the same Work ID and Checkpoint while producing a continuation of the same authorized request.
+Do not create a new Work merely because:
+- the artifact version changes
+- the build target changes within authorized scope
+- a tool changes
+- a production attempt is retried
+- a technical repair is required
+Use the existing Work / Checkpoint and create a new technical receipt or revision record when appropriate.
+## Handoff Back
+Return the minimum usable production context:
+- what was produced
+- which version was produced
+- which tests passed or failed
+- what evidence exists
+- what remains UNKNOWN
+- what PRYTANEION must review
+- whether rollback is available
+## Non-Goals
+ERGASTERION is not:
+- a chat-based product manager
+- the owner of user intent
+- a replacement for PRYTANEION
+- a blind merge or update system
+- a source of business truth
+- a final approval authority
+## Success Criteria
+ERGASTERION succeeds when it returns a real, inspectable, testable artifact with enough evidence for the responsible owner to decide what happens next.
