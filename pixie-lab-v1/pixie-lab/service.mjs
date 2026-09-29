@@ -13,8 +13,15 @@ import {
 } from './core.mjs';
 import {
   DEBUG_ROOM_ID, listExampleExperiments, getExampleExperiment,
-  createLogicDraft, editLogicDraft, compareLogicDraft, prepareFactoryHandoff,
+  createLogicDraft, editLogicDraft, compareLogicDraft,
 } from './lab-zones.mjs';
+import {
+  createIdea, createExperiment, createVariant, evaluateVariant,
+  selectExperimentCandidate, createAppPrototype, recordAppPreview,
+} from './idea-workspace.mjs';
+import { createImageActionRequest, acceptImageActionResult } from './image-tool-adapter.mjs';
+import { prepareFactoryHandoff } from './production-lane.mjs';
+import { getErgasterionCapabilities } from './capabilities.mjs';
 import {
   createVisualDraft, scanVisualDraft, editVisualDraft, compareVisualDraft,
   createVisualRenderPacket, verifyVisualRender,
@@ -50,8 +57,10 @@ export class PixieLab {
       matrices: [], testRuns: [], proposals: [], bugs: [], attentions: [], goldenCases: [], regressionAlerts: [],
       memory: [], grants: [], snapshots: [], artifacts: [], passports: [], factorySimulations: [], evidence: [],
       debugSessions: [], selfTests: [], crossRoomChecks: [], contradictions: [],
+      ideas: [], experiments: [], variants: [], appPrototypes: [],
       logicDrafts: [], factoryHandoffs: [],
       visualDrafts: [], visualRenderPackets: [], visualVerifications: [],
+      imageActions: [], imageReceipts: [],
       archives: [], cleanRuns: [],
     };
     this.assertHealthy();
@@ -284,6 +293,72 @@ export class PixieLab {
     });
   }
 
+  capabilities() { return getErgasterionCapabilities(); }
+
+  createIdea(input = {}) {
+    if (this.state.ideas.some((item) => item.ideaId === input.ideaId)) throw new Error('DUPLICATE_IDEA_ID');
+    const idea = createIdea({ ...input, now: this.now });
+    this.state.ideas.push(idea);
+    return clone(idea);
+  }
+  createExperiment(input = {}) {
+    if (!this.state.ideas.some((item) => item.ideaId === input.ideaId)) throw new Error('IDEA_NOT_FOUND');
+    if (this.state.experiments.some((item) => item.experimentId === input.experimentId)) throw new Error('DUPLICATE_EXPERIMENT_ID');
+    const experiment = createExperiment({ ...input, now: this.now });
+    this.state.experiments.push(experiment);
+    const ideaIndex = this.state.ideas.findIndex((item) => item.ideaId === experiment.ideaId);
+    const idea = this.state.ideas[ideaIndex];
+    this.state.ideas[ideaIndex] = Object.freeze({ ...clone(idea), experimentRefs: [...(idea.experimentRefs || []), experiment.experimentId], updatedAt: this.now() });
+    return clone(experiment);
+  }
+  createVariant(input = {}) {
+    const experimentIndex = this.state.experiments.findIndex((item) => item.experimentId === input.experimentId);
+    if (experimentIndex < 0) throw new Error('EXPERIMENT_NOT_FOUND');
+    if (this.state.variants.some((item) => item.variantId === input.variantId)) throw new Error('DUPLICATE_VARIANT_ID');
+    const experiment = this.state.experiments[experimentIndex];
+    const variant = createVariant({ ...input, kind: input.kind || experiment.kind, now: this.now });
+    this.state.variants.push(variant);
+    this.state.experiments[experimentIndex] = Object.freeze({ ...clone(experiment), variantRefs: [...(experiment.variantRefs || []), variant.variantId], updatedAt: this.now() });
+    return clone(variant);
+  }
+  evaluateVariant(variantId, input = {}) {
+    const index = this.state.variants.findIndex((item) => item.variantId === variantId);
+    if (index < 0) throw new Error('VARIANT_NOT_FOUND');
+    this.state.variants[index] = evaluateVariant(this.state.variants[index], { ...input, now: this.now });
+    return clone(this.state.variants[index]);
+  }
+  selectExperimentCandidate(experimentId, variantId, input = {}) {
+    const experimentIndex = this.state.experiments.findIndex((item) => item.experimentId === experimentId);
+    if (experimentIndex < 0) throw new Error('EXPERIMENT_NOT_FOUND');
+    const variant = this.state.variants.find((item) => item.variantId === variantId);
+    if (!variant) throw new Error('VARIANT_NOT_FOUND');
+    this.state.experiments[experimentIndex] = selectExperimentCandidate(this.state.experiments[experimentIndex], variant, { ...input, now: this.now });
+    const experiment = this.state.experiments[experimentIndex];
+    const ideaIndex = this.state.ideas.findIndex((item) => item.ideaId === experiment.ideaId);
+    if (ideaIndex >= 0) {
+      const idea = this.state.ideas[ideaIndex];
+      this.state.ideas[ideaIndex] = Object.freeze({ ...clone(idea), selectedExperimentId: experiment.experimentId, updatedAt: this.now() });
+    }
+    return clone(experiment);
+  }
+  createAppPrototype(input = {}) {
+    const experiment = this.state.experiments.find((item) => item.experimentId === input.experimentId);
+    if (!experiment) throw new Error('EXPERIMENT_NOT_FOUND');
+    const variant = this.state.variants.find((item) => item.variantId === input.variantId);
+    if (!variant || variant.experimentId !== experiment.experimentId) throw new Error('VARIANT_EXPERIMENT_MISMATCH');
+    if (variant.kind !== 'APP') throw new Error('APP_VARIANT_REQUIRED');
+    if (this.state.appPrototypes.some((item) => item.prototypeId === input.prototypeId)) throw new Error('DUPLICATE_APP_PROTOTYPE_ID');
+    const prototype = createAppPrototype({ ...input, now: this.now });
+    this.state.appPrototypes.push(prototype);
+    return clone(prototype);
+  }
+  recordAppPreview(prototypeId, input = {}) {
+    const index = this.state.appPrototypes.findIndex((item) => item.prototypeId === prototypeId);
+    if (index < 0) throw new Error('APP_PROTOTYPE_NOT_FOUND');
+    this.state.appPrototypes[index] = recordAppPreview(this.state.appPrototypes[index], { ...input, now: this.now });
+    return clone(this.state.appPrototypes[index]);
+  }
+
   createLogicDraft(input = {}) {
     if (this.state.logicDrafts.some((item) => item.draftId === input.draftId)) throw new Error('DUPLICATE_LOGIC_DRAFT_ID');
     const draft = createLogicDraft({ ...input, now: this.now });
@@ -342,6 +417,25 @@ export class PixieLab {
     if (this.state.visualVerifications.some((item) => item.verificationId === result.verificationId)) throw new Error('DUPLICATE_VISUAL_VERIFICATION_ID');
     this.state.visualVerifications.push(result);
     return clone(result);
+  }
+
+  createImageAction(packetId, input = {}) {
+    const packet = this.state.visualRenderPackets.find((item) => item.packetId === packetId);
+    if (!packet) throw new Error('VISUAL_RENDER_PACKET_NOT_FOUND');
+    const existing = this.state.imageActions.find((item) => item.actionId === input.actionId);
+    if (existing) return clone(existing);
+    const request = createImageActionRequest(packet, { ...input, now: this.now });
+    this.state.imageActions.push(request);
+    return clone(request);
+  }
+  acceptImageResult(actionId, input = {}) {
+    const request = this.state.imageActions.find((item) => item.actionId === actionId);
+    if (!request) throw new Error('IMAGE_ACTION_NOT_FOUND');
+    const existing = this.state.imageReceipts.find((item) => item.actionId === actionId);
+    if (existing) return clone(existing);
+    const receipt = acceptImageActionResult(request, { ...input, now: this.now });
+    this.state.imageReceipts.push(receipt);
+    return clone(receipt);
   }
 
   factoryHandoff(input = {}) {
@@ -418,11 +512,17 @@ export class PixieLab {
       this.state.roomReports = Array.isArray(this.state.roomReports) ? this.state.roomReports : [];
       this.state.sessions = Array.isArray(this.state.sessions) ? this.state.sessions : [];
       this.state.crossRoomChecks = Array.isArray(this.state.crossRoomChecks) ? this.state.crossRoomChecks : [];
+      this.state.ideas = Array.isArray(this.state.ideas) ? this.state.ideas : [];
+      this.state.experiments = Array.isArray(this.state.experiments) ? this.state.experiments : [];
+      this.state.variants = Array.isArray(this.state.variants) ? this.state.variants : [];
+      this.state.appPrototypes = Array.isArray(this.state.appPrototypes) ? this.state.appPrototypes : [];
       this.state.logicDrafts = Array.isArray(this.state.logicDrafts) ? this.state.logicDrafts : [];
       this.state.factoryHandoffs = Array.isArray(this.state.factoryHandoffs) ? this.state.factoryHandoffs : [];
       this.state.visualDrafts = Array.isArray(this.state.visualDrafts) ? this.state.visualDrafts : [];
       this.state.visualRenderPackets = Array.isArray(this.state.visualRenderPackets) ? this.state.visualRenderPackets : [];
       this.state.visualVerifications = Array.isArray(this.state.visualVerifications) ? this.state.visualVerifications : [];
+      this.state.imageActions = Array.isArray(this.state.imageActions) ? this.state.imageActions : [];
+      this.state.imageReceipts = Array.isArray(this.state.imageReceipts) ? this.state.imageReceipts : [];
       this.state.archives = Array.isArray(this.state.archives) ? this.state.archives : [];
       this.state.cleanRuns = Array.isArray(this.state.cleanRuns) ? this.state.cleanRuns : [];
       this.state.evidence = (this.state.evidence || []).flatMap((value) => {
@@ -439,17 +539,27 @@ export class PixieLab {
       zones: {
         experimentRooms: this.state.rooms.filter((room) => room.roomId !== DEBUG_ROOM_ID).map((room) => room.roomId),
         debugRoom: DEBUG_ROOM_ID,
+        ideaWorkspace: 'ACTIVE',
+        appPlayground: 'ACTIVE',
         logicWorkbench: 'ACTIVE',
         visualWorkbench: 'ACTIVE',
+        imageBridge: 'ACTIVE',
         exampleZone: 'ACTIVE',
         archiveZone: 'ACTIVE',
         roomCleaner: 'ACTIVE',
       },
+      capabilities: getErgasterionCapabilities(),
       crossRoomChecks: clone(this.state.crossRoomChecks || []),
+      ideas: clone(this.state.ideas || []),
+      experiments: clone(this.state.experiments || []),
+      variants: clone(this.state.variants || []),
+      appPrototypes: clone(this.state.appPrototypes || []),
       logicWorkbench: clone(this.state.logicDrafts || []),
       visualWorkbench: clone(this.state.visualDrafts || []),
       visualRenderPackets: clone(this.state.visualRenderPackets || []),
       visualVerifications: clone(this.state.visualVerifications || []),
+      imageActions: clone(this.state.imageActions || []),
+      imageReceipts: clone(this.state.imageReceipts || []),
       archives: clone(this.state.archives || []),
       cleanRuns: clone(this.state.cleanRuns || []),
       exampleZone: listExampleExperiments(),
@@ -457,10 +567,16 @@ export class PixieLab {
       counts: {
         ...base.counts,
         crossRoomChecks: (this.state.crossRoomChecks || []).length,
+        ideas: (this.state.ideas || []).length,
+        experiments: (this.state.experiments || []).length,
+        variants: (this.state.variants || []).length,
+        appPrototypes: (this.state.appPrototypes || []).length,
         logicDrafts: (this.state.logicDrafts || []).length,
         visualDrafts: (this.state.visualDrafts || []).length,
         visualRenderPackets: (this.state.visualRenderPackets || []).length,
         visualVerifications: (this.state.visualVerifications || []).length,
+        imageActions: (this.state.imageActions || []).length,
+        imageReceipts: (this.state.imageReceipts || []).length,
         archives: (this.state.archives || []).length,
         cleanRuns: (this.state.cleanRuns || []).length,
         examples: listExampleExperiments().length,

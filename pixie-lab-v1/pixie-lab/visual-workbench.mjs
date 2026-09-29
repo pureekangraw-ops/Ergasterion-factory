@@ -62,12 +62,11 @@ export function createVisualDraft({
       history: 'V1_V2_V3_PLUS',
     },
     assistant: {
-      name: 'Gnome',
-      role: 'GO_VISUAL_ASSISTANT',
-      stationedAt: 'VISUAL_WORKBENCH',
+      name: 'PIXIE',
+      role: 'PIXIE_LAB_ASSISTANT',
+      stationedAt: 'PIXIE_LAB',
       independentImageGenerator: false,
       operator: 'GO_IMAGE_TOOL',
-      motto: 'TRY_IT_NOW',
       responsibilities: [
         'KEEP_REFERENCE_SEPARATE_FROM_BRIEF',
         'PRESERVE_INTENT_AND_CONSTRAINTS',
