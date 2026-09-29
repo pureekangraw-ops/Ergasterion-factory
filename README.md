@@ -132,8 +132,22 @@ Important current commands include:
 - `visual_render_packet` / `visual_verify`
 - `image_request` / `image_result`
 - `production_handoff_prepare`
+- `workbench_floor` — read-only Workbench/Lab/Reality projection from current state
 
 The command surface does not expose merge, deploy, release, system-CURRENT acceptance, direct image generation, or the legacy `factory_handoff` route.
+
+## Dream Factory migration surface
+
+Phase 1 begins by surfacing existing state without changing core behavior. The read-only `workbench_floor` command projects:
+
+- A/B/C as Experimental Labs
+- ROOM-D as compatibility-only debug room pending migration
+- existing Idea / Logic / Visual / Build-Test / Production-Evidence capability surfaces
+- Coding as `GAP`
+- Runtime as `PARTIAL`
+- shared PIXIE / Evidence / Checkpoint / Reality summaries
+
+The projection creates no authority, transfers no authority, and does not persist or mutate state.
 
 ## Verification status
 
