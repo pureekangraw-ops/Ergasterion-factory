@@ -225,12 +225,11 @@ function productionEvidenceView({ state, capabilities, selector, now }) {
 
 function codingView({ capabilities, selector, now }) {
   return {
-    ...baseView({ id: 'CODING_WORKBENCH', capabilities, source: null, status: 'GAP', selector, now }),
-    reality: 'NOT_IMPLEMENTED',
-    missing: [
-      'REPO_WORKTREE', 'FILE_TREE', 'CODE_SEARCH', 'MULTI_FILE_EDIT',
-      'SHELL', 'DEV_COMMAND_LOOP', 'GIT_DIFF_STATUS', 'PR_PREPARATION',
-    ],
+    ...baseView({ id: 'CODING_WORKBENCH', capabilities, source: 'coding-workbench.mjs', status: 'HOST_DEPENDENT', selector, now }),
+    reality: 'CHECK_CODING_STATUS',
+    runtimeCheck: 'coding_status',
+    mergeAuthority: false,
+    deployAuthority: false,
   };
 }
 
