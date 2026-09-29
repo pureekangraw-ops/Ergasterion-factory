@@ -103,10 +103,10 @@ test('Visual Workbench is exposed on board and command surface', async () => {
 });
 
 
-test('Gnome is stationed at the Visual Workbench and travels with render packets', () => {
+test('PIXIE identity is used in Lab visual experimentation without inventing a separate assistant', () => {
   const lab = new PixieLab({ now: clock() });
   const draft = lab.createVisualDraft({
-    visualDraftId: 'VIS-GNOME',
+    visualDraftId: 'VIS-PIXIE',
     sourceRef: 'image://prism-crystal',
     sourceVersion: 'selected-v1',
     spec: {
@@ -117,19 +117,18 @@ test('Gnome is stationed at the Visual Workbench and travels with render packets
   assert.equal(draft.table.referencePin, 'IDEA_REFERENCE');
   assert.equal(draft.table.briefPin, 'BRIEF_PROMPT');
   assert.equal(draft.table.main, 'VISUAL_WORKSPACE');
-  assert.equal(draft.assistant.name, 'Gnome');
-  assert.equal(draft.assistant.role, 'GO_VISUAL_ASSISTANT');
+  assert.equal(draft.assistant.name, 'PIXIE');
+  assert.equal(draft.assistant.role, 'PIXIE_LAB_ASSISTANT');
   assert.equal(draft.assistant.independentImageGenerator, false);
   assert.equal(draft.assistant.operator, 'GO_IMAGE_TOOL');
-  assert.equal(draft.assistant.motto, 'TRY_IT_NOW');
-
-  const packet = lab.createVisualRenderPacket('VIS-GNOME', {
-    packetId: 'PACK-GNOME',
+  
+  const packet = lab.createVisualRenderPacket('VIS-PIXIE', {
+    packetId: 'PACK-PIXIE',
     intent: 'Preserve PRISM identity while iterating',
     requestedResult: 'One candidate for GO to render',
     mustKeep: ['crystal identity'],
   });
-  assert.equal(packet.workbenchAssistant.name, 'Gnome');
+  assert.equal(packet.workbenchAssistant.name, 'PIXIE');
   assert.equal(packet.workbenchAssistant.independentImageGenerator, false);
   assert.equal(packet.table.history, 'V1_V2_V3_PLUS');
   assert.equal(packet.targetTool, 'GO_IMAGE_TOOL');
