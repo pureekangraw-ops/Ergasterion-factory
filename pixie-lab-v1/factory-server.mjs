@@ -5,6 +5,7 @@ import { dirname, extname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createJsonFilePersistence } from './pixie-lab/adapters.mjs';
 import { createLocalCodingExecutor } from './pixie-lab/coding-local-adapter.mjs';
+import { createNeutralBrowserRuntimeAdapter } from './pixie-lab/browser-runtime-adapter.mjs';
 import { createPixieCommander } from './pixie-lab/command.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -50,6 +51,7 @@ export function createFactoryCommander({
   codingRoot = resolve(HERE, '..'),
   allowCodingWrite = process.env.ERGASTERION_CODING_WRITE === '1',
   allowGitPush = process.env.ERGASTERION_CODING_GIT_PUSH === '1',
+  runtimeExecutor = null,
 } = {}) {
   const persistence = createJsonFilePersistence({ filePath: stateFile });
   const codingExecutor = createLocalCodingExecutor({
@@ -61,13 +63,17 @@ export function createFactoryCommander({
       .map((value) => value.trim())
       .filter(Boolean),
   });
-  return createPixieCommander({ persistence, codingExecutor });
+  return createPixieCommander({ persistence, codingExecutor, runtimeExecutor });
 }
 
 export function createFactoryServer({
-  commander = createFactoryCommander(),
+  commander = null,
+  browserAdapter = null,
   uiRoot = UI_ROOT,
 } = {}) {
+  const liveBrowserAdapter = browserAdapter || createNeutralBrowserRuntimeAdapter();
+  const liveCommander = commander || createFactoryCommander({ runtimeExecutor: liveBrowserAdapter });
+
   return createServer(async (req, res) => {
     try {
       const url = new URL(req.url || '/', 'http://localhost');
@@ -81,9 +87,88 @@ export function createFactoryServer({
         });
       }
 
+      if (req.method === 'GET' && url.pathname === '/api/browser/status') {
+        return json(res, 200, { ok: true, result: await liveBrowserAdapter.status() });
+      }
+
+      if (req.method === 'GET' && url.pathname === '/api/browser/tabs') {
+        const adapterId = url.searchParams.get('adapterId') || null;
+        return json(res, 200, { ok: true, tabs: liveBrowserAdapter.listTabs({ adapterId }) });
+      }
+
+      if (req.method === 'GET' && url.pathname === '/api/browser/latest') {
+        const adapterId = url.searchParams.get('adapterId') || null;
+        const tabValue = url.searchParams.get('tabId');
+        const tabId = tabValue == null ? null : Number(tabValue);
+        return json(res, 200, {
+          ok: true,
+          observation: liveBrowserAdapter.latest({
+            adapterId,
+            tabId: Number.isInteger(tabId) ? tabId : null,
+          }),
+        });
+      }
+
+      if (req.method === 'GET' && url.pathname === '/api/browser/screenshot') {
+        const ref = url.searchParams.get('ref') || '';
+        const shot = liveBrowserAdapter.getScreenshot(ref);
+        if (!shot) return json(res, 404, { ok: false, error: 'BROWSER_SCREENSHOT_NOT_FOUND' });
+        res.writeHead(200, {
+          'content-type': shot.contentType || 'image/png',
+          'content-length': shot.data.length,
+          'cache-control': 'no-store',
+          'x-content-type-options': 'nosniff',
+        });
+        return res.end(shot.data);
+      }
+
+      if (req.method === 'GET' && url.pathname === '/api/browser/commands') {
+        const adapterId = url.searchParams.get('adapterId') || '';
+        return json(res, 200, { ok: true, commands: liveBrowserAdapter.pullCommands(adapterId) });
+      }
+
+      if (req.method === 'POST' && url.pathname === '/api/browser/register') {
+        const input = await readJson(req);
+        return json(res, 200, { ok: true, adapter: liveBrowserAdapter.register(input) });
+      }
+
+      if (req.method === 'POST' && url.pathname === '/api/browser/heartbeat') {
+        const input = await readJson(req);
+        return json(res, 200, { ok: true, adapter: liveBrowserAdapter.heartbeat(input) });
+      }
+
+      if (req.method === 'POST' && url.pathname === '/api/browser/observe') {
+        const input = await readJson(req, 8 * 1024 * 1024);
+        const observation = liveBrowserAdapter.observe(input);
+        const recorded = await liveCommander.execute({
+          command: 'runtime_record',
+          args: observation.runtimeRecord,
+        });
+        return json(res, recorded.ok === false ? 400 : 200, {
+          ok: recorded.ok !== false,
+          observation,
+          runtimeRecord: recorded,
+        });
+      }
+
+      if (req.method === 'POST' && url.pathname === '/api/browser/receipt') {
+        const input = await readJson(req);
+        const receipt = liveBrowserAdapter.acceptReceipt(input);
+        const recorded = await liveCommander.execute({
+          command: 'runtime_interaction_record',
+          args: receipt.runtimeInteraction,
+        });
+        return json(res, recorded.ok === false ? 400 : 200, {
+          ok: recorded.ok !== false,
+          receipt,
+          runtimeInteraction: recorded,
+        });
+      }
+
+
       if (req.method === 'GET' && url.pathname === '/api/bootstrap') {
         const commands = ['workbench_floor', 'reality_screen', 'checkpoint_dock', 'big_view', 'intent_review'];
-        const entries = await Promise.all(commands.map(async (command) => [command, await commander.execute({ command })]));
+        const entries = await Promise.all(commands.map(async (command) => [command, await liveCommander.execute({ command })]));
         return json(res, 200, {
           ok: true,
           shell: 'DREAM_FACTORY_SHELL_V1',
@@ -93,7 +178,7 @@ export function createFactoryServer({
 
       if (req.method === 'POST' && url.pathname === '/api/command') {
         const input = await readJson(req);
-        const output = await commander.execute(input);
+        const output = await liveCommander.execute(input);
         return json(res, output.ok === false ? 400 : 200, output);
       }
 
