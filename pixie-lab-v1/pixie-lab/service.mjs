@@ -28,6 +28,7 @@ import { getErgasterionCapabilities } from './capabilities.mjs';
 import { projectWorkbenchFloor } from './workbench-floor.mjs';
 import { openWorkbench } from './workbench-view.mjs';
 import { projectCheckpointDock, projectRealityScreen } from './workbench-shared.mjs';
+import { projectBigView, projectIntentReview } from './owner-view.mjs';
 import {
   createDebugInspectionSession,
   appendDebugInspectionStep,
@@ -328,6 +329,8 @@ export class PixieLab {
   openWorkbench(workbenchId, selector = {}) { return openWorkbench({ workbenchId, state: this.state, capabilities: getErgasterionCapabilities(), selector, now: this.now }); }
   checkpointDock(selector = {}) { return projectCheckpointDock({ state: this.state, selector, now: this.now }); }
   realityScreen(selector = {}) { return projectRealityScreen({ state: this.state, selector, now: this.now }); }
+  bigView(selector = {}) { return projectBigView({ state: this.state, selector, now: this.now }); }
+  intentReview(selector = {}) { return projectIntentReview({ state: this.state, selector, now: this.now }); }
 
   createIdea(input = {}) {
     if (this.state.ideas.some((item) => item.ideaId === input.ideaId)) throw new Error('DUPLICATE_IDEA_ID');
