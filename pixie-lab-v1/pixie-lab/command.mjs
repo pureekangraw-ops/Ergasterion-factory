@@ -8,7 +8,9 @@ const requireObject = (value, label = 'args') => {
 };
 
 export const PIXIE_COMMANDS = Object.freeze([
-  'status', 'ask',
+  'status', 'ask', 'capabilities',
+  'idea_create', 'experiment_create', 'variant_create', 'variant_evaluate', 'experiment_select',
+  'app_prototype_create', 'app_preview_record',
   'start_session', 'archive_session', 'close_session', 'clean_room',
   'start_cycle', 'cycle_action',
   'add_matrix', 'start_matrix', 'update_matrix',
@@ -20,11 +22,14 @@ export const PIXIE_COMMANDS = Object.freeze([
   'examples', 'run_example',
   'logic_create', 'logic_edit', 'logic_compare',
   'visual_create', 'visual_scan', 'visual_edit', 'visual_compare', 'visual_render_packet', 'visual_verify',
+  'image_request', 'image_result',
   'candidate_passport', 'door_guard',
   'persist',
 ]);
 
 const MUTATING = new Set([
+  'idea_create', 'experiment_create', 'variant_create', 'variant_evaluate', 'experiment_select',
+  'app_prototype_create', 'app_preview_record',
   'start_session', 'archive_session', 'close_session', 'clean_room',
   'start_cycle', 'cycle_action',
   'add_matrix', 'start_matrix', 'update_matrix',
@@ -35,6 +40,7 @@ const MUTATING = new Set([
   'self_test', 'cross_room', 'run_example',
   'logic_create', 'logic_edit',
   'visual_create', 'visual_scan', 'visual_edit', 'visual_render_packet', 'visual_verify',
+  'image_request', 'image_result',
   'candidate_passport',
   'persist',
 ]);
@@ -69,6 +75,30 @@ export function createPixieCommander({ persistence, evidenceVerifier = null, now
         break;
       case 'ask':
         result = lab.guide(String(args.question ?? ''));
+        break;
+      case 'capabilities':
+        result = lab.capabilities();
+        break;
+      case 'idea_create':
+        result = lab.createIdea(args);
+        break;
+      case 'experiment_create':
+        result = lab.createExperiment(args);
+        break;
+      case 'variant_create':
+        result = lab.createVariant(args);
+        break;
+      case 'variant_evaluate':
+        result = lab.evaluateVariant(args.variantId, requireObject(args.evaluation, 'args.evaluation'));
+        break;
+      case 'experiment_select':
+        result = lab.selectExperimentCandidate(args.experimentId, args.variantId, requireObject(args.selection, 'args.selection'));
+        break;
+      case 'app_prototype_create':
+        result = lab.createAppPrototype(args);
+        break;
+      case 'app_preview_record':
+        result = lab.recordAppPreview(args.prototypeId, requireObject(args.preview, 'args.preview'));
         break;
       case 'start_session':
         result = lab.startSession(args);
@@ -168,6 +198,12 @@ export function createPixieCommander({ persistence, evidenceVerifier = null, now
         break;
       case 'visual_verify':
         result = lab.verifyVisualRender(args.packetId, requireObject(args.verification, 'args.verification'));
+        break;
+      case 'image_request':
+        result = lab.createImageAction(args.packetId, requireObject(args.request, 'args.request'));
+        break;
+      case 'image_result':
+        result = lab.acceptImageResult(args.actionId, requireObject(args.result, 'args.result'));
         break;
       case 'candidate_passport':
         result = lab.candidatePassport(args.artifactId);
