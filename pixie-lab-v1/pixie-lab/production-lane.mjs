@@ -14,6 +14,38 @@ function freeze(value) {
 
 export const DEBUG_ROOM_ID = 'ROOM-D';
 
+export function prepareProductionHandoff({
+  handoffId,
+  experimentId,
+  variantId,
+  workId,
+  checkpointId,
+  requestedResult,
+  artifactRefs = [],
+  evidenceRefs = [],
+  unknowns = [],
+  now = nowIso,
+} = {}) {
+  return freeze({
+    handoffId: required(handoffId, 'handoffId'),
+    experimentId: required(experimentId, 'experimentId'),
+    variantId: required(variantId, 'variantId'),
+    workId: required(workId, 'workId'),
+    checkpointId: required(checkpointId, 'checkpointId'),
+    requestedResult: required(requestedResult, 'requestedResult'),
+    artifactRefs: [...new Set((artifactRefs || []).map(text).filter(Boolean))],
+    evidenceRefs: [...new Set((evidenceRefs || []).map(text).filter(Boolean))],
+    unknowns: [...new Set((unknowns || []).map(text).filter(Boolean))],
+    status: 'READY_FOR_PRODUCTION_EVIDENCE',
+    authorityTransferred: false,
+    routeAuthorityCreated: false,
+    approval: 'NOT_AN_APPROVAL',
+    preparedAt: now(),
+  });
+}
+
+
+/** Legacy PASS/Gate compatibility only. Not part of the CURRENT ERGASTERION flow. */
 export function validateFactoryHandoffAuthority(pass = {}, { now = nowIso } = {}) {
   const kind = upper(pass.kind);
   if (upper(pass.state) !== 'ACTIVE') return { allowed: false, reason: 'FACTORY_HANDOFF_ACTIVE_PASS_REQUIRED' };
@@ -30,6 +62,7 @@ export function validateFactoryHandoffAuthority(pass = {}, { now = nowIso } = {}
   return { allowed: true, reason: null, kind };
 }
 
+/** Legacy Debug -> Factory route compatibility only. Prefer prepareProductionHandoff. */
 export function prepareFactoryHandoff({
   roomId,
   pass,
