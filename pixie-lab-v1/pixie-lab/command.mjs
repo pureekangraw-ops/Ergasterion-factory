@@ -10,6 +10,7 @@ const requireObject = (value, label = 'args') => {
 export const PIXIE_COMMANDS = Object.freeze([
   'status', 'ask', 'capabilities', 'workbench_floor', 'workbench_open', 'checkpoint_dock', 'reality_screen', 'big_view', 'intent_review',
   'coding_status', 'coding_list', 'coding_read', 'coding_search', 'coding_diff', 'coding_apply',
+  'runtime_status', 'runtime_view', 'runtime_record', 'runtime_interaction_record', 'runtime_action',
   'idea_create', 'experiment_create', 'variant_create', 'variant_evaluate', 'experiment_select',
   'app_prototype_create', 'app_preview_record', 'app_compare',
   'start_session', 'archive_session', 'close_session', 'clean_room',
@@ -25,6 +26,7 @@ export const PIXIE_COMMANDS = Object.freeze([
   'visual_create', 'visual_scan', 'visual_edit', 'visual_compare', 'visual_render_packet', 'visual_verify',
   'image_request', 'image_result',
   'production_handoff_prepare',
+  'runtime_record', 'runtime_interaction_record',
   'candidate_passport', 'door_guard',
   'persist',
 ]);
@@ -48,13 +50,13 @@ const MUTATING = new Set([
   'persist',
 ]);
 
-const EXTERNAL_EFFECT = new Set(['coding_apply']);
+const EXTERNAL_EFFECT = new Set(['coding_apply', 'runtime_action']);
 
-export function createPixieCommander({ persistence, evidenceVerifier = null, codingExecutor = null, now } = {}) {
+export function createPixieCommander({ persistence, evidenceVerifier = null, codingExecutor = null, runtimeExecutor = null, now } = {}) {
   if (!persistence?.load || !persistence?.save) throw new Error('PIXIE_PERSISTENCE_REQUIRED');
 
   async function loadLab() {
-    const lab = new PixieLab({ persistence, evidenceVerifier, codingExecutor, now });
+    const lab = new PixieLab({ persistence, evidenceVerifier, codingExecutor, runtimeExecutor, now });
     await lab.rebuildBoard();
     return lab;
   }
@@ -119,6 +121,21 @@ export function createPixieCommander({ persistence, evidenceVerifier = null, cod
         break;
       case 'coding_apply':
         result = await lab.codingApply(args);
+        break;
+      case 'runtime_status':
+        result = await lab.runtimeStatus();
+        break;
+      case 'runtime_view':
+        result = await lab.runtimeView(requireObject(args.selector, 'args.selector'));
+        break;
+      case 'runtime_record':
+        result = lab.recordRuntimeObservation(args);
+        break;
+      case 'runtime_interaction_record':
+        result = lab.recordRuntimeInteraction(args);
+        break;
+      case 'runtime_action':
+        result = await lab.runtimeAction(requireObject(args.action, 'args.action'));
         break;
       case 'idea_create':
         result = lab.createIdea(args);
