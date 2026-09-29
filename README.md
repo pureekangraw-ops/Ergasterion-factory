@@ -123,6 +123,52 @@ Visual draft
 
 PIXIE prepares, compares, and verifies visual work; GO Image Generation remains the executor.
 
+## Dream Factory Shell
+
+ERGASTERION now has a local-first visual shell over the existing command/state machinery.
+
+Run read-only:
+
+```bash
+cd pixie-lab-v1
+npm run factory
+```
+
+Open:
+
+```text
+http://127.0.0.1:4317
+```
+
+The server binds to localhost by default and exposes only the fixed UI assets plus `/api/health`, `/api/bootstrap`, and the existing allowlisted PIXIE command surface through `/api/command`.
+
+Enable Coding Workbench branch writes explicitly:
+
+```bash
+ERGASTERION_CODING_WRITE=1 npm run factory
+```
+
+Enable branch push as well:
+
+```bash
+ERGASTERION_CODING_WRITE=1 ERGASTERION_CODING_GIT_PUSH=1 npm run factory
+```
+
+The UI does **not** grant merge/deploy authority. Coding still rejects direct `main` / `master` targets and verification failure prevents commit/push.
+
+Current shell surfaces:
+- Workbench Floor navigation
+- A/B/C Experimental Lab status
+- Visual Workbench: Reference Tray / Main Canvas / Brief + PIXIE / History / render preparation
+- Coding Workbench: repository search/read/diff + edit → verify → commit → optional branch push
+- Runtime Workbench: host status + observed evidence readback/recording
+- Reality Screen
+- Checkpoint Dock
+- BIG View
+- direct command console for the same allowlisted command inventory
+
+The shell is a projection/operator surface over the existing ERGASTERION state. It does not create a second state owner or a second Visual/Coding engine.
+
 ## Commands
 
 ```bash
@@ -211,6 +257,10 @@ Do not interpret a skipped workflow-dispatch command job on push/PR as failure; 
 - `pixie-lab-v1/pixie-lab/coding-workbench.mjs`
 - `pixie-lab-v1/pixie-lab/coding-local-adapter.mjs`
 - `pixie-lab-v1/pixie-lab/runtime-workbench.mjs`
+- `pixie-lab-v1/factory-server.mjs`
+- `pixie-lab-v1/ui/index.html`
+- `pixie-lab-v1/ui/app.js`
+- `pixie-lab-v1/ui/styles.css`
 - `pixie-lab-v1/pixie-lab/image-tool-adapter.mjs`
 - `pixie-lab-v1/pixie-lab/production-lane.mjs`
 - `pixie-lab-v1/pixie-lab/capabilities.mjs`
