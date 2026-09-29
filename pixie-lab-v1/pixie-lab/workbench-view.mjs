@@ -237,12 +237,22 @@ function runtimeView({ state, capabilities, selector, now }) {
   const prototype = selector.prototypeId
     ? list(state.appPrototypes).find((item) => item.prototypeId === selector.prototypeId)
     : latest(state.appPrototypes);
+  const observations = list(state.runtimeObservations).filter((item) => {
+    if (selector.workId && item.workId !== selector.workId) return false;
+    if (selector.checkpointId && item.checkpointId !== selector.checkpointId) return false;
+    if (selector.prototypeId && item.prototypeId !== selector.prototypeId) return false;
+    return true;
+  });
+  const observation = latest(observations);
   return {
-    ...baseView({ id: 'RUNTIME_WORKBENCH', capabilities, source: 'idea-workspace.mjs', status: 'PARTIAL', selector, now }),
+    ...baseView({ id: 'RUNTIME_WORKBENCH', capabilities, source: 'runtime-workbench.mjs', status: 'HOST_DEPENDENT', selector, now }),
     prototype: clone(prototype),
     latestPreview: clone(latest(prototype?.previews || [])),
-    executionReality: 'UNKNOWN',
-    missing: ['OPEN_RUNTIME', 'INTERACT_RUNTIME', 'CONSOLE', 'NETWORK', 'RUNTIME_LOGS', 'DEVICE_INTERACTION_PROOF'],
+    latestObservation: clone(observation),
+    interactionCount: list(state.runtimeInteractions).filter((item) => !observation || item.observationId === observation.observationId).length,
+    evidenceBridge: 'ACTIVE',
+    directInteraction: 'CHECK_RUNTIME_STATUS',
+    runtimeCheck: 'runtime_status',
   };
 }
 
