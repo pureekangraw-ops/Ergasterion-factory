@@ -61,14 +61,18 @@ jobs:
           node cli.mjs status > "$RUNNER_TEMP/status.json"
           node cli.mjs workbench_floor > "$RUNNER_TEMP/workbench-floor.json"
           node cli.mjs '{"command":"workbench_open","args":{"workbenchId":"VISUAL_WORKBENCH"}}' > "$RUNNER_TEMP/workbench-open.json"
+          node cli.mjs checkpoint_dock > "$RUNNER_TEMP/checkpoint-dock.json"
+          node cli.mjs reality_screen > "$RUNNER_TEMP/reality-screen.json"
 
-          STATUS_FILE="$RUNNER_TEMP/status.json" CAP_FILE="$RUNNER_TEMP/capabilities.json" FLOOR_FILE="$RUNNER_TEMP/workbench-floor.json" OPEN_FILE="$RUNNER_TEMP/workbench-open.json" node --input-type=module <<'NODE'
+          STATUS_FILE="$RUNNER_TEMP/status.json" CAP_FILE="$RUNNER_TEMP/capabilities.json" FLOOR_FILE="$RUNNER_TEMP/workbench-floor.json" OPEN_FILE="$RUNNER_TEMP/workbench-open.json" DOCK_FILE="$RUNNER_TEMP/checkpoint-dock.json" REALITY_FILE="$RUNNER_TEMP/reality-screen.json" node --input-type=module <<'NODE'
           import { readFile } from 'node:fs/promises';
 
           const status = JSON.parse(await readFile(process.env.STATUS_FILE, 'utf8'));
           const capabilities = JSON.parse(await readFile(process.env.CAP_FILE, 'utf8'));
           const floor = JSON.parse(await readFile(process.env.FLOOR_FILE, 'utf8'));
           const open = JSON.parse(await readFile(process.env.OPEN_FILE, 'utf8'));
+          const dock = JSON.parse(await readFile(process.env.DOCK_FILE, 'utf8'));
+          const reality = JSON.parse(await readFile(process.env.REALITY_FILE, 'utf8'));
 
           if (!status.ok) throw new Error('STATUS_NOT_OK');
           if (status.result?.counts?.ideas !== 1) throw new Error('IDEA_PERSISTENCE_FAILED');
@@ -88,6 +92,10 @@ jobs:
           if (!open.ok || open.mutated !== false) throw new Error('WORKBENCH_OPEN_COMMAND_FAILED');
           if (open.result?.workbenchId !== 'VISUAL_WORKBENCH') throw new Error('WORKBENCH_OPEN_VISUAL_FAILED');
           if (open.result?.authority?.createsAuthority !== false) throw new Error('WORKBENCH_OPEN_AUTHORITY_EXPANSION');
+          if (!dock.ok || dock.mutated !== false || dock.result?.readOnly !== true) throw new Error('CHECKPOINT_DOCK_FAILED');
+          if (dock.result?.createsWork !== false || dock.result?.createsAuthority !== false) throw new Error('CHECKPOINT_DOCK_SCOPE_EXPANSION');
+          if (!reality.ok || reality.mutated !== false || reality.result?.readOnly !== true) throw new Error('REALITY_SCREEN_FAILED');
+          if (reality.result?.createsTruth !== false || reality.result?.createsAuthority !== false) throw new Error('REALITY_SCREEN_SCOPE_EXPANSION');
           NODE
 
   command:
