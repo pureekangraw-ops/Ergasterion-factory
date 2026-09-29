@@ -8,13 +8,10 @@ Neutral Firefox WebExtension for the Runtime Workbench.
 - reports tab id, window id, URL, title, active/pinned/audible/status
 - observes HTTP/HTTPS page structure through a neutral content observer
 - captures the currently visible active-tab screenshot when Firefox allows it
-- sends observations to the local Factory bridge
-- receives queued Runtime actions from the Factory
-- currently executes only:
-  - `activate_tab`
-  - `navigate`
-  - `observe_tab`
-- records receipts and follows execution with a fresh observation when possible
+- sends observations over HTTPS to the owner-paired GO Hub Factory Eye bridge
+- keeps the remote bridge **eyes-only** in v0.2.1
+- stores only the issued Factory Eye session id/token/expiry; the owner passcode is never stored
+- reports stale/disconnected reality instead of pretending the eye is live
 
 It contains **no site-specific profile**.
 
@@ -30,45 +27,44 @@ It does not capture:
 
 Firefox privileged pages that normal extensions cannot inspect are reported as unsupported/partial rather than faked as observed.
 
-## Local bridge
+## Remote Hub bridge — Firefox Android
 
-Default Factory endpoint:
+v0.2.1 uses the dedicated neutral Factory Eye ingress:
 
 ```text
-http://127.0.0.1:4317
+https://go-hub.pureekangraw.workers.dev/hub/api/factory-eye/*
 ```
 
-Start the Factory first:
+This route is separate from the legacy Browser Observer route. It does **not** use GO Hub `BROWSER_POLICY`, Gumroad host allowlists, or the old Gumroad observer session schema.
 
-```bash
-cd pixie-lab-v1
-npm run factory
+### Pair once
+
+After install or update, Factory Eye opens its options page when no valid session exists.
+
+1. Enter the existing **GO Hub owner passcode**.
+2. Tap **Pair Factory Eye**.
+3. The passcode is sent only to the Hub pairing endpoint.
+4. Hub issues a random Factory Eye session id/token with an expiry.
+5. The add-on stores only that session id/token/expiry and begins heartbeat + observation.
+
+The bridge is currently **eyes-only**:
+- tab inventory
+- active tab URL/title/state
+- neutral page summary
+- active visible-tab screenshot when Firefox allows capture
+
+Remote navigate/click/type/scroll are not declared available in v0.2.1.
+
+### Readback
+
+GO Hub's existing read surface stays canonical:
+
+```text
+go_hub_observer_latest
+go_hub_observer_screenshot
 ```
 
-## Temporary Firefox test
-
-On Firefox desktop:
-
-1. Open `about:debugging`
-2. Choose **This Firefox**
-3. Choose **Load Temporary Add-on**
-4. Select this directory's `manifest.json`
-5. Open any ordinary HTTP/HTTPS website
-6. Open a second website on a different domain
-7. Open the ERGASTERION Runtime Workbench
-
-Acceptance for the first neutral-eye test:
-
-- both tabs appear in **FIREFOX TABS**
-- the active tab is identified correctly
-- its URL/title are current
-- page summary comes from the active tab
-- a screenshot appears when Firefox permits capture
-- switching tabs creates a new observation without changing extension code
-- `runtime_view` reads the observation written by the browser bridge
-
-A website-specific helper may be added later as an optional profile layer, but it must not change this core observer contract.
-
+When Factory Eye exists, readback returns `source=FACTORY_EYE` and `legacyBrowserPolicyUsed=false`. If Factory Eye has never been paired, the read surface may fall back to the legacy observer.
 
 ## Mozilla signing for Firefox Stable / Android
 
@@ -98,7 +94,7 @@ The signer does **not** use GO Hub Browser Policy, Gumroad allowlists, legacy br
 
 ### Version rule
 
-AMO will not accept the same extension version twice. After a successful signing of `0.2.0`, changed source that needs another signing must first bump the manifest version.
+AMO will not accept the same extension version twice. After a successful signing of `0.2.0`, remote-bridge source moved to `0.2.1`; every changed source that needs another AMO signing must continue to bump the manifest version.
 
 ### Acceptance boundary
 
