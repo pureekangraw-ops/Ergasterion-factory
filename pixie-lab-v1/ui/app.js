@@ -270,21 +270,82 @@ async function renderCoding(view) {
     command('coding_status').catch((error) => ({ result: { status:'UNAVAILABLE', reason:error.message } })),
     command('coding_diff').catch((error) => ({ result: { status:'UNAVAILABLE', reason:error.message } })),
   ]);
+  const host = status.result?.executor || {};
+  const writeEnabled = host.writeEnabled === true;
+  const pushEnabled = host.pushEnabled === true;
+
   $('#workspace').innerHTML = `<div class="generic-grid">
     <section class="data-card"><h3>CODING HOST</h3><pre>${esc(pretty(status.result))}</pre></section>
-    <section class="data-card"><h3>GIT DIFF / STATUS</h3><pre>${esc(pretty(diff.result))}</pre></section>
+    <section class="data-card"><h3>GIT DIFF / STATUS</h3><pre id="coding-diff">${esc(pretty(diff.result))}</pre></section>
     <section class="data-card">
-      <h3>SEARCH REPOSITORY</h3>
-      <div style="display:flex;gap:8px"><input id="coding-query" style="flex:1" placeholder="function / error / filename"><button id="coding-search">Search</button></div>
+      <h3>SEARCH / READ</h3>
+      <div style="display:flex;gap:8px;margin-bottom:8px"><input id="coding-query" style="flex:1" placeholder="function / error / filename"><button id="coding-search">Search</button></div>
+      <div style="display:flex;gap:8px"><input id="coding-read-path" style="flex:1" placeholder="path/to/file.mjs"><button id="coding-read">Read</button></div>
       <pre id="coding-search-result"></pre>
     </section>
-    <section class="data-card"><h3>WORKBENCH CONTRACT</h3><pre>${esc(pretty(view))}</pre></section>
+    <section class="data-card">
+      <h3>EDIT → VERIFY → COMMIT → BRANCH PUSH</h3>
+      <div class="code-form">
+        <label>Branch<input id="coding-branch" placeholder="factory/my-change"></label>
+        <label>Base<input id="coding-base" value="main"></label>
+        <label>File path<input id="coding-write-path" placeholder="path/to/file.mjs"></label>
+        <label>File content<textarea id="coding-write-content" spellcheck="false" placeholder="full file content"></textarea></label>
+        <label>Verify argv<input id="coding-run" value="npm test" placeholder="npm test"></label>
+        <label>Commit message<input id="coding-commit" placeholder="feat: change"></label>
+        <label class="check-row"><input id="coding-push" type="checkbox" ${pushEnabled ? '' : 'disabled'}> Push branch</label>
+        <button id="coding-apply" class="primary" ${writeEnabled ? '' : 'disabled'}>Apply on Coding Workbench</button>
+        <small class="muted">${writeEnabled
+          ? `Write enabled · push ${pushEnabled ? 'enabled' : 'disabled'} · main/master protected`
+          : 'Write is disabled on this host. Start Factory Shell with ERGASTERION_CODING_WRITE=1 to enable branch writes.'}</small>
+      </div>
+      <pre id="coding-apply-result"></pre>
+    </section>
   </div>`;
+
   $('#coding-search').addEventListener('click', async () => {
     const query = $('#coding-query').value.trim();
     if (!query) return;
     const result = await command('coding_search', { query, path: '.', limit: 60 });
     $('#coding-search-result').textContent = pretty(result.result);
+  });
+
+  $('#coding-read').addEventListener('click', async () => {
+    const path = $('#coding-read-path').value.trim();
+    if (!path) return;
+    const result = await command('coding_read', { path });
+    $('#coding-search-result').textContent = result.result?.result?.content || pretty(result.result);
+    $('#coding-write-path').value = path;
+    $('#coding-write-content').value = result.result?.result?.content || '';
+  });
+
+  $('#coding-apply').addEventListener('click', async () => {
+    const branch = $('#coding-branch').value.trim();
+    const path = $('#coding-write-path').value.trim();
+    const content = $('#coding-write-content').value;
+    const commitMessage = $('#coding-commit').value.trim();
+    if (!branch || !path || !commitMessage) {
+      window.alert('Branch, file path and commit message are required.');
+      return;
+    }
+    const argv = $('#coding-run').value.trim().split(/\s+/).filter(Boolean);
+    $('#coding-apply-result').textContent = 'running verification…';
+    try {
+      const result = await command('coding_apply', {
+        branch,
+        baseRef: $('#coding-base').value.trim() || 'main',
+        writes: [{ path, content }],
+        runs: argv.length ? [{ argv, cwd: 'pixie-lab-v1' }] : [],
+        commitMessage,
+        push: $('#coding-push').checked,
+        ...contextSelector(),
+      });
+      $('#coding-apply-result').textContent = pretty(result.result);
+      const freshDiff = await command('coding_diff').catch(() => null);
+      if (freshDiff) $('#coding-diff').textContent = pretty(freshDiff.result);
+      await refreshBootstrap();
+    } catch (error) {
+      $('#coding-apply-result').textContent = error.message;
+    }
   });
 }
 
