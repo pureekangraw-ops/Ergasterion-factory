@@ -70,7 +70,8 @@ test('workbench floor surfaces current capability state without inventing missin
   assert.equal(floor.shared.evidence.count, 1);
   assert.equal(floor.workbenches.coding.status, 'HOST_DEPENDENT');
   assert.equal(floor.workbenches.coding.runtimeCheck, 'coding_status');
-  assert.equal(floor.workbenches.runtime.status, 'PARTIAL');
+  assert.equal(floor.workbenches.runtime.status, 'HOST_DEPENDENT');
+  assert.equal(floor.workbenches.runtime.evidenceBridge, 'ACTIVE');
   assert.equal(floor.authority.createsAuthority, false);
   assert.equal(floor.authority.transfersAuthority, false);
   assert.equal(floor.authority.approval, 'NOT_AN_APPROVAL');
