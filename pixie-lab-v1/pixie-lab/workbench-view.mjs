@@ -16,27 +16,10 @@ export const WORKBENCH_IDS = Object.freeze([
   'RUNTIME_WORKBENCH',
 ]);
 
-const TOOL_RAILS = Object.freeze({
-  GENERAL_IDEA_WORKBENCH: Object.freeze([
-    'idea_create', 'experiment_create', 'variant_create', 'variant_evaluate', 'experiment_select',
-    'app_prototype_create', 'app_preview_record', 'app_compare',
-  ]),
-  LOGIC_WORKBENCH: Object.freeze(['logic_create', 'logic_edit', 'logic_compare']),
-  VISUAL_WORKBENCH: Object.freeze([
-    'visual_create', 'visual_scan', 'visual_edit', 'visual_compare',
-    'visual_render_packet', 'visual_verify', 'image_request', 'image_result',
-  ]),
-  BUILD_TEST_WORKBENCH: Object.freeze([
-    'add_matrix', 'start_matrix', 'update_matrix', 'add_test_run', 'rerun_test_run',
-    'add_golden_case', 'replay_golden',
-  ]),
-  DEBUG_INSPECTION_WORKBENCH: Object.freeze([
-    'add_bug', 'add_attention', 'update_attention', 'debug_start', 'debug_step', 'debug_complete',
-  ]),
-  PRODUCTION_EVIDENCE_WORKBENCH: Object.freeze(['production_handoff_prepare']),
-  CODING_WORKBENCH: Object.freeze([]),
-  RUNTIME_WORKBENCH: Object.freeze(['app_prototype_create', 'app_preview_record', 'app_compare']),
-});
+function toolRailFor(capabilities = {}, workbenchId) {
+  return clone(capabilities.workbenches?.[workbenchId]?.commands || []);
+}
+
 
 function latest(values = []) {
   return list(values).length ? list(values).at(-1) : null;
@@ -83,7 +66,7 @@ function baseView({ id, capabilities, source, status = 'ACTIVE', selector = {}, 
     status,
     source,
     selector: clone(selector),
-    toolRail: [...(TOOL_RAILS[id] || [])],
+    toolRail: toolRailFor(capabilities, id),
     capabilityTruth: capabilityTruth(capabilities),
     authority: {
       createsAuthority: false,
@@ -131,7 +114,7 @@ function generalIdeaView({ state, capabilities, selector, now }) {
 function logicView({ state, capabilities, selector, now }) {
   const draft = pickByIdOrLatest(state.logicDrafts, [['draftId', selector.draftId]], selector);
   return {
-    ...baseView({ id: 'LOGIC_WORKBENCH', capabilities, source: 'lab-zones.mjs', selector, now }),
+    ...baseView({ id: 'LOGIC_WORKBENCH', capabilities, source: 'logic-workbench.mjs', selector, now }),
     migration: 'REFRAME_SURFACE_ONLY',
     draft: clone(draft),
     compare: draft ? {
@@ -205,7 +188,7 @@ function debugInspectionView({ state, capabilities, selector, now }) {
     : latest(state.debugSessions);
   const roomD = list(state.rooms).find((item) => item.roomId === 'ROOM-D') || null;
   return {
-    ...baseView({ id: 'DEBUG_INSPECTION_WORKBENCH', capabilities, source: 'ROOM-D_COMPATIBILITY', status: 'MIGRATION_TARGET', selector, now }),
+    ...baseView({ id: 'DEBUG_INSPECTION_WORKBENCH', capabilities, source: 'debug-inspection-workbench.mjs', status: 'MIGRATION_TARGET', selector, now }),
     legacyRoom: roomD ? { ...clone(roomD), compatibilityOnly: true } : null,
     debugSession: clone(debug),
     bugs: clone(state.bugs || []),
@@ -221,7 +204,7 @@ function debugInspectionView({ state, capabilities, selector, now }) {
 function productionEvidenceView({ state, capabilities, selector, now }) {
   const handoff = pickByIdOrLatest(state.productionHandoffs, [['handoffId', selector.handoffId]], selector);
   return {
-    ...baseView({ id: 'PRODUCTION_EVIDENCE_WORKBENCH', capabilities, source: 'production-lane.mjs', selector, now }),
+    ...baseView({ id: 'PRODUCTION_EVIDENCE_WORKBENCH', capabilities, source: 'production-evidence-workbench.mjs', selector, now }),
     handoff: clone(handoff),
     candidate: {
       experimentId: handoff?.experimentId || null,
