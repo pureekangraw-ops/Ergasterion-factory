@@ -1,5 +1,21 @@
 {
   "name": "ergasterion-factory",
   "main": "cloudflare/worker.mjs",
-  "compatibility_date": "2026-09-30"
+  "compatibility_date": "2026-09-30",
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "HANDOFF_LEDGER",
+        "class_name": "HandoffLedger"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1-handoff-ledger",
+      "new_sqlite_classes": [
+        "HandoffLedger"
+      ]
+    }
+  ]
 }
