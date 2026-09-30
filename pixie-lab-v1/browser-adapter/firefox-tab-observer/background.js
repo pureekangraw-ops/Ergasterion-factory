@@ -6,6 +6,11 @@ const VERSION = '0.3.0';
 const PAGE_SCHEMA = 'ERGASTERION_BROWSER_PAGE_SUMMARY_V2';
 const HEARTBEAT_MS = 5000;
 const COMMAND_POLL_MS = 2500;
+const WATCH_POLL_MS = 15000;
+const DEDICATED_WATCH_HOSTS = Object.freeze({
+  github: 'github.com',
+  cloudflare: 'dash.cloudflare.com',
+});
 
 const SESSION_KEYS = Object.freeze({
   id: 'ergasterionFactoryEyeSessionId',
@@ -141,6 +146,19 @@ async function disconnect() {
   }
   await clearSession();
   return { ok: true };
+}
+
+function isDedicatedWatchTab(tab) {
+  if (!isWebUrl(tab?.url)) return false;
+  try {
+    const url = new URL(tab.url);
+    if (url.hostname === DEDICATED_WATCH_HOSTS.github) {
+      return url.pathname.startsWith('/pureekangraw-ops/Ergasterion-factory');
+    }
+    return url.hostname === DEDICATED_WATCH_HOSTS.cloudflare;
+  } catch {
+    return false;
+  }
 }
 
 function tabShape(tab) {
@@ -417,6 +435,16 @@ async function observeActiveTabs() {
   }
 }
 
+async function observeDedicatedWatchTabs() {
+  if (!(await ensureRegistered())) return;
+  const tabs = await browser.tabs.query({});
+  for (const tab of tabs) {
+    if (isDedicatedWatchTab(tab) && Number.isInteger(tab.id)) {
+      await observeTab(tab.id);
+    }
+  }
+}
+
 async function pollCommands() {
   if (commandPollBusy) return;
   commandPollBusy = true;
@@ -457,6 +485,7 @@ async function boot() {
   await ensureRegistered();
   await heartbeat();
   await observeActiveTabs();
+  await observeDedicatedWatchTabs();
   return true;
 }
 
@@ -527,5 +556,6 @@ browser.action.onClicked.addListener(async (tab) => {
 
 setInterval(() => { void heartbeat(); }, HEARTBEAT_MS);
 setInterval(() => { void pollCommands(); }, COMMAND_POLL_MS);
+setInterval(() => { void observeDedicatedWatchTabs(); }, WATCH_POLL_MS);
 
 void boot();
