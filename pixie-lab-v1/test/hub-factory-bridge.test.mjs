@@ -52,7 +52,8 @@ test('ERGASTERION readback preserves the same Hub identity and evidence boundary
   assert.equal(readback.destination, 'PRYTANEION');
   assert.equal(readback.workId, work.workId);
   assert.equal(readback.checkpointId, work.checkpointId);
-  assert.deepEqual(readback.artifactRefs, ['candidate://one', 'artifact://candidate']);
+  assert.deepEqual(readback.candidateRefs, ['candidate://one']);
+  assert.deepEqual(readback.artifactRefs, ['artifact://candidate']);
   assert.deepEqual(readback.evidenceRefs, ['evidence://hub-context', 'evidence://factory-check']);
   assert.deepEqual(readback.unknowns, ['runtime deployment not observed']);
   assert.equal(readback.authorityTransferred, false);
