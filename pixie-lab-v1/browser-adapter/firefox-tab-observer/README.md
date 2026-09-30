@@ -9,11 +9,11 @@ Neutral Firefox WebExtension for the Runtime Workbench.
 - observes HTTP/HTTPS page structure through a neutral content observer
 - captures the currently visible active-tab screenshot when Firefox allows it
 - sends observations over HTTPS to the owner-paired GO Hub Factory Eye bridge
-- keeps the remote bridge **eyes-only** in v0.3.0
+- keeps the remote bridge **eyes-only** in v0.4.0
 - stores only the issued Factory Eye session id/token/expiry; the owner passcode is never stored
 - reports stale/disconnected reality instead of pretending the eye is live
 
-It contains **no site-specific profile**.
+It contains **no site-specific DOM profile**; dedicated watch mode uses only an explicit host allowlist.
 
 ## Privacy boundary
 
@@ -43,7 +43,7 @@ All collection limits are fixed in the content observer. Section and item IDs ar
 
 ## Remote Hub bridge — Firefox Android
 
-v0.3.0 uses the dedicated neutral Factory Eye ingress:
+v0.4.0 uses the dedicated neutral Factory Eye ingress:
 
 ```text
 https://go-hub.pureekangraw.workers.dev/hub/api/factory-eye/*
@@ -67,7 +67,7 @@ The bridge is currently **eyes-only**:
 - neutral page summary
 - active visible-tab screenshot when Firefox allows capture
 
-Remote navigate/click/type/scroll are not declared available in v0.3.0.
+Remote navigate/click/type/scroll are not declared available in v0.4.0.
 
 ### Readback
 
@@ -108,7 +108,7 @@ The signer does **not** use GO Hub Browser Policy, Gumroad allowlists, legacy br
 
 ### Version rule
 
-AMO will not accept the same extension version twice. After a successful signing of `0.2.0`, remote-bridge source moved to `0.2.1`; every changed source that needs another AMO signing must continue to bump the manifest version.
+AMO will not accept the same extension version twice. After a successful signing of `0.3.0`, dedicated watch mode source moved to `0.4.0`; every changed source that needs another AMO signing must continue to bump the manifest version.
 
 ### Acceptance boundary
 
@@ -125,7 +125,7 @@ Factory Eye is accepted as the real Runtime eye only after physical Firefox test
 
 ## Firefox Android foreground wake
 
-Firefox for Android can suspend or kill idle extension background/event processes. Factory Eye v0.3.0 therefore does not treat background timers as the only liveness source.
+Firefox for Android can suspend or kill idle extension background/event processes. Factory Eye v0.4.0 therefore does not treat background timers as the only liveness source.
 
 When an ordinary HTTP/HTTPS page is visible, the content observer sends a sanitized foreground pulse every 8 seconds and immediately on `pageshow` / returning to `visible`. That message wakes the extension event page, which validates the sender tab and same-origin page summary before forwarding a fresh observation to GO Hub.
 
@@ -136,9 +136,21 @@ This pulse:
 - retries naturally after Android suspends the background process
 
 
+
+## Dedicated watch mode — GitHub + Cloudflare
+
+Factory Eye v0.4.0 adds an explicit, bounded watch set for the custom Android browser shell:
+
+- `github.com/pureekangraw-ops/Ergasterion-factory`
+- `dash.cloudflare.com`
+
+The Android shell opens these as dedicated watch tabs after the built-in extension is installed. The observer keeps submitting bounded page summaries for matching tabs even when they are not active. Inactive watch observations do not include a screenshot and are not promoted to the current active view; they remain watch evidence for Runtime/Factory readback.
+
+This is a host allowlist for dedicated watch tabs, not a site-specific DOM profile. The observer still captures no input values and declares no remote interaction authority.
+
 ## Fresh observation contract
 
-Factory Eye v0.3.0 treats a visible-page heartbeat as a candidate observation, not proof by itself.
+Factory Eye v0.4.0 treats a visible-page heartbeat as a candidate observation, not proof by itself.
 
 A web observation is accepted as current only when:
 - the content script reports the same generation as the installed add-on
