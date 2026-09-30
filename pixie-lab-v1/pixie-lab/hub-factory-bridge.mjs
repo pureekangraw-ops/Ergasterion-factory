@@ -54,7 +54,7 @@ export function receiveHubFactoryHandoff(input = {}) {
   });
 }
 
-export function createHubFactoryReadback({ handoff, status = 'UNKNOWN', artifactRefs = [], evidenceRefs = [], unknowns = [], result = null, now = nowIso } = {}) {
+export function createHubFactoryReadback({ handoff, status = 'UNKNOWN', candidateRefs = [], artifactRefs = [], evidenceRefs = [], unknowns = [], result = null, now = nowIso } = {}) {
   if (!handoff || handoff.protocol !== HUB_FACTORY_PROTOCOL) throw new Error('HUB_FACTORY_HANDOFF_REQUIRED');
   const id = identity(handoff);
   return freeze({
@@ -63,6 +63,7 @@ export function createHubFactoryReadback({ handoff, status = 'UNKNOWN', artifact
     source: 'ERGASTERION',
     destination: 'PRYTANEION',
     status: required(status, 'status'),
+    candidateRefs: unique([...clone(handoff.candidateRefs || []), ...candidateRefs]),
     artifactRefs: unique([...clone(handoff.artifactRefs || []), ...artifactRefs]),
     evidenceRefs: unique([...clone(handoff.evidenceRefs || []), ...evidenceRefs]),
     unknowns: unique([...clone(handoff.unknowns || []), ...unknowns]),
@@ -82,6 +83,7 @@ export function projectHubFactoryReadback(readback = null) {
     workId: readback.workId || null,
     checkpointId: readback.checkpointId || null,
     status: readback.status || 'UNKNOWN',
+    candidateRefs: clone(readback.candidateRefs || []),
     artifactRefs: clone(readback.artifactRefs || []),
     evidenceRefs: clone(readback.evidenceRefs || []),
     unknowns: clone(readback.unknowns || []),
