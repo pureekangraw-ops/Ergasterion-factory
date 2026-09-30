@@ -8,6 +8,13 @@ pixie-lab-v1/browser-adapter/firefox-tab-observer/
 
 Do not move the observer into LIGHTHOUSE. ERGASTERION owns the observer source and package; the GO Hub Factory Eye bridge remains the remote ingress/readback boundary.
 
+## Gate 2 scope
+
+- installs the sibling Factory Eye WebExtension with GeckoView `WebExtensionController.ensureBuiltIn`
+- copies `../firefox-tab-observer/` into APK assets at build time; the observer source is not duplicated
+- opens dedicated GitHub + Cloudflare watch tabs
+- keeps the browser shell separate from pairing/session/readback authority
+
 ## Current scope
 
 - GeckoView-backed Android browser shell
@@ -17,14 +24,14 @@ Do not move the observer into LIGHTHOUSE. ERGASTERION owns the observer source a
 - explicit separation between browser surface and observer source
 - no remote navigation, click, type, or scroll authority
 
-The Android shell is not yet a claim that Factory Eye is physically attached to this custom GeckoView runtime. That requires a separate GeckoView WebExtension installation/bridge test. Until then, Runtime evidence remains `UNKNOWN` rather than being inferred from the shell.
+The Android shell now has the Gate 2 install path. Physical Android testing is still required to prove the extension starts, observes both dedicated watch tabs, and keeps observing the non-active tab. Until then, runtime acceptance remains `UNKNOWN`.
 
 ## Open
 
 1. Open this directory in Android Studio.
 2. Sync Gradle and install Android SDK 35 if needed.
 3. Run on an Android emulator or device.
-4. Use the sibling Firefox WebExtension for the current Factory Eye / Browser Observer path.
+4. Tap **Watch** to open the dedicated GitHub and Cloudflare watch tabs.
 
 ## Key files
 
@@ -34,4 +41,4 @@ The Android shell is not yet a claim that Factory Eye is physically attached to 
 
 ## Next governed step
 
-Add a GeckoView `WebExtensionController` host only after the Factory Eye extension contract is tested in this runtime. Keep pairing, session tokens, observation freshness, and readback owned by the existing Factory Eye bridge; the Android shell must not duplicate that authority.
+Test on Android: extension installation, owner pairing, GitHub/Cloudflare watch tabs, inactive-tab observation, redirect URL readback, and GO Hub `source=FACTORY_EYE` evidence. Keep pairing, session tokens, observation freshness, and readback owned by the existing Factory Eye bridge; the Android shell must not duplicate that authority.
