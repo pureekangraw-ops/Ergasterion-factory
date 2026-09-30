@@ -17,5 +17,15 @@
         "HandoffLedger"
       ]
     }
-  ]
+  ],
+  "previews": {
+    "durable_objects": {
+      "bindings": [
+        {
+          "name": "HANDOFF_LEDGER",
+          "class_name": "HandoffLedger"
+        }
+      ]
+    }
+  }
 }
