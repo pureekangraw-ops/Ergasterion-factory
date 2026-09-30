@@ -23,6 +23,9 @@ import {
 } from './idea-workspace.mjs';
 import { createImageActionRequest, acceptImageActionResult } from './image-tool-adapter.mjs';
 import { prepareProductionHandoff } from './production-evidence-workbench.mjs';
+import {
+  receiveHubFactoryHandoff, createHubFactoryReadback, projectHubFactoryReadback,
+} from './hub-factory-bridge.mjs';
 import { prepareFactoryHandoff } from './production-lane.mjs';
 import { getErgasterionCapabilities } from './capabilities.mjs';
 import { projectWorkbenchFloor } from './workbench-floor.mjs';
@@ -89,7 +92,7 @@ export class PixieLab {
       memory: [], grants: [], snapshots: [], artifacts: [], passports: [], factorySimulations: [], evidence: [],
       debugSessions: [], selfTests: [], crossRoomChecks: [], contradictions: [],
       ideas: [], experiments: [], variants: [], appPrototypes: [],
-      logicDrafts: [], productionHandoffs: [], factoryHandoffs: [],
+      logicDrafts: [], productionHandoffs: [], factoryHandoffs: [], hubFactoryHandoffs: [], hubFactoryReadbacks: [],
       visualDrafts: [], visualRenderPackets: [], visualVerifications: [],
       imageActions: [], imageReceipts: [],
       runtimeObservations: [], runtimeInteractions: [],
@@ -574,6 +577,24 @@ export class PixieLab {
     return clone(result);
   }
 
+  receiveHubFactoryHandoff(input = {}) {
+    const result = receiveHubFactoryHandoff({ ...(input.handoff || input), now: this.now });
+    const existing = this.state.hubFactoryHandoffs.find((item) => item.handoffId === result.handoffId);
+    if (existing) return clone(existing);
+    this.state.hubFactoryHandoffs.push(result);
+    return clone(result);
+  }
+
+  createHubFactoryReadback(input = {}) {
+    const handoff = this.state.hubFactoryHandoffs.find((item) => item.handoffId === input.handoffId);
+    if (!handoff) throw new Error('HUB_FACTORY_HANDOFF_NOT_FOUND');
+    const result = createHubFactoryReadback({ ...input, handoff, now: this.now });
+    const existing = this.state.hubFactoryReadbacks.find((item) => item.handoffId === result.handoffId);
+    if (existing) return clone(existing);
+    this.state.hubFactoryReadbacks.push(result);
+    return clone(result);
+  }
+
   runSelfTest({ checks = [] } = {}) { const selfTest = createMasterSelfTest({ selfTestId: `SELF-${this.now()}`, checks, now: this.now }); this.state.selfTests.push(selfTest); return clone(selfTest); }
   runCrossRoom({ subjectRef, experimentId = null, observations = [], source = null } = {}) {
     const distinct = new Set(observations.map((item) => JSON.stringify(item.observed)));
@@ -650,6 +671,8 @@ export class PixieLab {
       this.state.logicDrafts = Array.isArray(this.state.logicDrafts) ? this.state.logicDrafts : [];
       this.state.productionHandoffs = Array.isArray(this.state.productionHandoffs) ? this.state.productionHandoffs : [];
       this.state.factoryHandoffs = Array.isArray(this.state.factoryHandoffs) ? this.state.factoryHandoffs : [];
+      this.state.hubFactoryHandoffs = Array.isArray(this.state.hubFactoryHandoffs) ? this.state.hubFactoryHandoffs : [];
+      this.state.hubFactoryReadbacks = Array.isArray(this.state.hubFactoryReadbacks) ? this.state.hubFactoryReadbacks : [];
       this.state.visualDrafts = Array.isArray(this.state.visualDrafts) ? this.state.visualDrafts : [];
       this.state.visualRenderPackets = Array.isArray(this.state.visualRenderPackets) ? this.state.visualRenderPackets : [];
       this.state.visualVerifications = Array.isArray(this.state.visualVerifications) ? this.state.visualVerifications : [];
@@ -707,6 +730,8 @@ export class PixieLab {
       exampleZone: listExampleExperiments(),
       productionHandoffs: clone(this.state.productionHandoffs || []),
       factoryHandoffs: clone(this.state.factoryHandoffs || []),
+      hubFactoryHandoffs: clone(this.state.hubFactoryHandoffs || []),
+      hubFactoryReadbacks: clone(this.state.hubFactoryReadbacks || []).map(projectHubFactoryReadback),
       counts: {
         ...base.counts,
         crossRoomChecks: (this.state.crossRoomChecks || []).length,
@@ -727,6 +752,8 @@ export class PixieLab {
         examples: listExampleExperiments().length,
         productionHandoffs: (this.state.productionHandoffs || []).length,
         factoryHandoffs: (this.state.factoryHandoffs || []).length,
+        hubFactoryHandoffs: (this.state.hubFactoryHandoffs || []).length,
+        hubFactoryReadbacks: (this.state.hubFactoryReadbacks || []).length,
       },
     };
   }
