@@ -8,7 +8,19 @@ async function read(name) {
   return readFile(new URL(name, root), 'utf8');
 }
 
-test('Factory Eye v0.3.0 targets GO Hub remote bridge rather than localhost', async () => {
+test('Factory Eye package, background, and content script versions stay aligned', async () => {
+  const manifest = JSON.parse(await read('manifest.json'));
+  const background = await read('background.js');
+  const content = await read('content-observer.js');
+
+  const backgroundVersion = background.match(/const VERSION = '([^']+)'/)?.[1];
+  const contentVersion = content.match(/CONTENT_SCRIPT_VERSION = '([^']+)'/)?.[1];
+
+  assert.equal(backgroundVersion, manifest.version);
+  assert.equal(contentVersion, manifest.version);
+});
+
+test('Factory Eye v0.4.0 targets GO Hub remote bridge rather than localhost', async () => {
   const background = await read('background.js');
   assert.match(background, /https:\/\/go-hub\.pureekangraw\.workers\.dev/);
   assert.match(background, /\/hub\/api\/factory-eye/);
@@ -73,11 +85,11 @@ test('Factory Eye remote pulse does not expand write capabilities', async () => 
 });
 
 
-test('Factory Eye v0.3.0 rejects stale content generations and verifies the active sender tab', async () => {
+test('Factory Eye v0.4.0 rejects stale content generations and verifies the active sender tab', async () => {
   const background = await read('background.js');
   const content = await read('content-observer.js');
 
-  assert.match(content, /CONTENT_SCRIPT_VERSION = '0\.3\.0'/);
+  assert.match(content, /CONTENT_SCRIPT_VERSION = '0\.4\.0'/);
   assert.match(content, /observerVersion: CONTENT_SCRIPT_VERSION/);
   assert.match(content, /visibilityState: document\.visibilityState/);
   assert.match(content, /documentFocused: document\.hasFocus\(\)/);
@@ -90,7 +102,7 @@ test('Factory Eye v0.3.0 rejects stale content generations and verifies the acti
   assert.doesNotMatch(background, /active:\s*message\?\.visible === true/);
 });
 
-test('Factory Eye v0.3.0 sends freshness evidence without adding page authority', async () => {
+test('Factory Eye v0.4.0 sends freshness evidence without adding page authority', async () => {
   const background = await read('background.js');
   assert.match(background, /evidenceReason:/);
   assert.match(background, /documentVisible:/);
@@ -98,4 +110,22 @@ test('Factory Eye v0.3.0 sends freshness evidence without adding page authority'
   assert.match(background, /navigate:\s*false/);
   assert.match(background, /click:\s*false/);
   assert.match(background, /type:\s*false/);
+});
+
+
+test('Factory Eye v0.4.0 observes dedicated GitHub and Cloudflare watch tabs while inactive', async () => {
+  const background = await read('background.js');
+  assert.match(background, /WATCH_POLL_MS = 15000/);
+  assert.match(background, /WATCH_RULES_STORAGE_KEY/);
+  assert.match(background, /DEFAULT_DEDICATED_WATCH_RULES/);
+  assert.match(background, /github\.com/);
+  assert.match(background, /\/pureekangraw-ops/);
+  assert.match(background, /\/orgs\/pureekangraw-ops/);
+  assert.match(background, /dash\.cloudflare\.com/);
+  assert.match(background, /loadDedicatedWatchRules/);
+  assert.match(background, /isDedicatedWatchTab/);
+  assert.match(background, /observeDedicatedWatchTabs/);
+  assert.doesNotMatch(background, /pureekangraw-ops\/Ergasterion-factory/);
+  assert.match(background, /setInterval\(\(\) => \{ void observeDedicatedWatchTabs\(\); \}, WATCH_POLL_MS\)/);
+  assert.match(background, /documentVisible: observed\.page\?\.visibilityState === 'visible'/);
 });
