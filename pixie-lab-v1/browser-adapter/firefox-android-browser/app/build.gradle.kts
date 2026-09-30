@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.Copy
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -36,6 +38,16 @@ android {
 }
 
 val geckoviewVersion = "157.0.20260924084938"
+
+val factoryEyeSource = projectDir.parentFile.resolve("firefox-tab-observer")
+val syncFactoryEye = tasks.register<Copy>("syncFactoryEyeExtension") {
+    from(factoryEyeSource)
+    into(layout.projectDirectory.dir("src/main/assets/factory-eye"))
+}
+
+tasks.named("preBuild") {
+    dependsOn(syncFactoryEye)
+}
 
 dependencies {
     implementation("org.mozilla.geckoview:geckoview-omni:$geckoviewVersion")
