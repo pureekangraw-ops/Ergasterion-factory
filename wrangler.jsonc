@@ -1,5 +1,5 @@
 {
-  "name": "go-calalog",
+  "name": "ergasterion-factory",
   "main": "cloudflare/worker.mjs",
   "compatibility_date": "2026-09-30"
 }
