@@ -141,10 +141,10 @@ This pulse:
 
 Factory Eye v0.4.0 adds an explicit, bounded watch set for the custom Android browser shell:
 
-- `github.com/pureekangraw-ops/Ergasterion-factory`
-- `dash.cloudflare.com`
+- `github.com/pureekangraw-ops/*` and `github.com/orgs/pureekangraw-ops/*`
+- `dash.cloudflare.com/*`
 
-The Android shell opens these as dedicated watch tabs after the built-in extension is installed. The observer keeps submitting bounded page summaries for matching tabs even when they are not active. Inactive watch observations do not include a screenshot and are not promoted to the current active view; they remain watch evidence for Runtime/Factory readback.
+The Android shell opens the `pureekangraw-ops` organization page plus Cloudflare as dedicated watch tabs after the built-in extension is installed. The observer keeps submitting bounded page summaries for matching tabs even when they are not active. GitHub matching is organization-wide rather than tied to one repository. The bounded watch rules are stored under `ergasterionDedicatedWatchRules`; only the approved GitHub and Cloudflare hosts are accepted, so targets can be refined later without widening host authority. Inactive watch observations do not include a screenshot and are not promoted to the current active view; they remain watch evidence for Runtime/Factory readback.
 
 This is a host allowlist for dedicated watch tabs, not a site-specific DOM profile. The observer still captures no input values and declares no remote interaction authority.
 
