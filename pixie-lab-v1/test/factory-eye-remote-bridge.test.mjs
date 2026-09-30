@@ -8,6 +8,18 @@ async function read(name) {
   return readFile(new URL(name, root), 'utf8');
 }
 
+test('Factory Eye package, background, and content script versions stay aligned', async () => {
+  const manifest = JSON.parse(await read('manifest.json'));
+  const background = await read('background.js');
+  const content = await read('content-observer.js');
+
+  const backgroundVersion = background.match(/const VERSION = '([^']+)'/)?.[1];
+  const contentVersion = content.match(/CONTENT_SCRIPT_VERSION = '([^']+)'/)?.[1];
+
+  assert.equal(backgroundVersion, manifest.version);
+  assert.equal(contentVersion, manifest.version);
+});
+
 test('Factory Eye v0.4.0 targets GO Hub remote bridge rather than localhost', async () => {
   const background = await read('background.js');
   assert.match(background, /https:\/\/go-hub\.pureekangraw\.workers\.dev/);
@@ -104,11 +116,16 @@ test('Factory Eye v0.4.0 sends freshness evidence without adding page authority'
 test('Factory Eye v0.4.0 observes dedicated GitHub and Cloudflare watch tabs while inactive', async () => {
   const background = await read('background.js');
   assert.match(background, /WATCH_POLL_MS = 15000/);
-  assert.match(background, /DEDICATED_WATCH_HOSTS/);
-  assert.match(background, /pureekangraw-ops\/Ergasterion-factory/);
+  assert.match(background, /WATCH_RULES_STORAGE_KEY/);
+  assert.match(background, /DEFAULT_DEDICATED_WATCH_RULES/);
+  assert.match(background, /github\.com/);
+  assert.match(background, /\/pureekangraw-ops/);
+  assert.match(background, /\/orgs\/pureekangraw-ops/);
   assert.match(background, /dash\.cloudflare\.com/);
+  assert.match(background, /loadDedicatedWatchRules/);
   assert.match(background, /isDedicatedWatchTab/);
   assert.match(background, /observeDedicatedWatchTabs/);
+  assert.doesNotMatch(background, /pureekangraw-ops\/Ergasterion-factory/);
   assert.match(background, /setInterval\(\(\) => \{ void observeDedicatedWatchTabs\(\); \}, WATCH_POLL_MS\)/);
   assert.match(background, /documentVisible: observed\.page\?\.visibilityState === 'visible'/);
 });
