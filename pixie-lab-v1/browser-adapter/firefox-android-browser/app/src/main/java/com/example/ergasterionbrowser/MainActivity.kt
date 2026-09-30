@@ -16,7 +16,7 @@ class MainActivity : Activity() {
     companion object {
         private const val HOME_URL = "https://www.mozilla.org"
         private val WATCH_URLS = listOf(
-            "https://github.com/pureekangraw-ops/Ergasterion-factory",
+            "https://github.com/pureekangraw-ops",
             "https://dash.cloudflare.com/",
         )
         private var runtime: GeckoRuntime? = null
