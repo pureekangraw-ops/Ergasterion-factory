@@ -2,15 +2,27 @@ const HUB_ORIGIN = 'https://go-hub.pureekangraw.workers.dev';
 const API_ROOT = '/hub/api/factory-eye';
 const PROTOCOL_VERSION = '2';
 const HOST = 'firefox-addon';
-const VERSION = '0.3.0';
+const VERSION = '0.4.0';
 const PAGE_SCHEMA = 'ERGASTERION_BROWSER_PAGE_SUMMARY_V2';
 const HEARTBEAT_MS = 5000;
 const COMMAND_POLL_MS = 2500;
 const WATCH_POLL_MS = 15000;
-const DEDICATED_WATCH_HOSTS = Object.freeze({
-  github: 'github.com',
-  cloudflare: 'dash.cloudflare.com',
-});
+const WATCH_RULES_STORAGE_KEY = 'ergasterionDedicatedWatchRules';
+const DEFAULT_DEDICATED_WATCH_RULES = Object.freeze([
+  Object.freeze({
+    id: 'github-pureekangraw-ops',
+    hostname: 'github.com',
+    pathPrefixes: Object.freeze(['/pureekangraw-ops', '/orgs/pureekangraw-ops']),
+  }),
+  Object.freeze({
+    id: 'cloudflare-dashboard',
+    hostname: 'dash.cloudflare.com',
+    pathPrefixes: Object.freeze(['/']),
+  }),
+]);
+const DEDICATED_WATCH_ALLOWED_HOSTS = new Set(
+  DEFAULT_DEDICATED_WATCH_RULES.map((rule) => rule.hostname),
+);
 
 const SESSION_KEYS = Object.freeze({
   id: 'ergasterionFactoryEyeSessionId',
@@ -148,14 +160,41 @@ async function disconnect() {
   return { ok: true };
 }
 
-function isDedicatedWatchTab(tab) {
+function sanitizeDedicatedWatchRules(value) {
+  if (!Array.isArray(value)) return DEFAULT_DEDICATED_WATCH_RULES;
+  const rules = value
+    .filter((rule) => rule && DEDICATED_WATCH_ALLOWED_HOSTS.has(String(rule.hostname || '')))
+    .map((rule, index) => {
+      const hostname = String(rule.hostname);
+      const pathPrefixes = Array.isArray(rule.pathPrefixes)
+        ? rule.pathPrefixes
+            .map((prefix) => String(prefix || '').trim())
+            .filter((prefix) => prefix.startsWith('/'))
+            .slice(0, 16)
+        : [];
+      return {
+        id: String(rule.id || `watch-${index + 1}`),
+        hostname,
+        pathPrefixes: pathPrefixes.length ? pathPrefixes : ['/'],
+      };
+    })
+    .slice(0, 16);
+  return rules.length ? rules : DEFAULT_DEDICATED_WATCH_RULES;
+}
+
+async function loadDedicatedWatchRules() {
+  const stored = await browser.storage.local.get(WATCH_RULES_STORAGE_KEY);
+  return sanitizeDedicatedWatchRules(stored[WATCH_RULES_STORAGE_KEY]);
+}
+
+function isDedicatedWatchTab(tab, rules) {
   if (!isWebUrl(tab?.url)) return false;
   try {
     const url = new URL(tab.url);
-    if (url.hostname === DEDICATED_WATCH_HOSTS.github) {
-      return url.pathname.startsWith('/pureekangraw-ops/Ergasterion-factory');
-    }
-    return url.hostname === DEDICATED_WATCH_HOSTS.cloudflare;
+    return rules.some((rule) => (
+      url.hostname === rule.hostname
+      && rule.pathPrefixes.some((prefix) => url.pathname.startsWith(prefix))
+    ));
   } catch {
     return false;
   }
@@ -437,9 +476,12 @@ async function observeActiveTabs() {
 
 async function observeDedicatedWatchTabs() {
   if (!(await ensureRegistered())) return;
-  const tabs = await browser.tabs.query({});
+  const [tabs, rules] = await Promise.all([
+    browser.tabs.query({}),
+    loadDedicatedWatchRules(),
+  ]);
   for (const tab of tabs) {
-    if (isDedicatedWatchTab(tab) && Number.isInteger(tab.id)) {
+    if (isDedicatedWatchTab(tab, rules) && Number.isInteger(tab.id)) {
       await observeTab(tab.id);
     }
   }
