@@ -16,7 +16,7 @@ test('Factory Eye manifest observes generic HTTP and HTTPS tabs', async () => {
   assert.ok(manifest.host_permissions.includes('<all_urls>'));
   assert.equal(manifest.options_ui?.page, 'options.html');
   assert.deepEqual(manifest.browser_specific_settings?.gecko?.data_collection_permissions?.required, ['websiteActivity', 'websiteContent']);
-  assert.equal(manifest.version, '0.2.3');
+  assert.equal(manifest.version, '0.3.0');
   assert.equal(
     manifest.browser_specific_settings?.gecko?.id,
     'ergasterion-factory-eye@pureekangraw.local',

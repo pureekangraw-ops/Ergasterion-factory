@@ -79,7 +79,7 @@ test('Firefox bridge registers arbitrary tabs and records observation into Runti
           active: true,
         },
         page: {
-          schema: 'ERGASTERION_BROWSER_PAGE_SUMMARY_V1',
+          schema: 'ERGASTERION_BROWSER_PAGE_SUMMARY_V2',
           headings: [{ level: 1, text: 'MDN Web Docs' }],
           buttons: [],
           links: [],
@@ -159,7 +159,7 @@ test('Runtime action reaches Firefox command queue without inventing outcome suc
         workId: 'WORK-E2E',
         checkpointId: 'CP-E2E',
         tab: { tabId: 3, windowId: 1, url: 'https://example.org/', title: 'Example Domain', active: true },
-        page: { schema: 'ERGASTERION_BROWSER_PAGE_SUMMARY_V1', headings: [{ level: 1, text: 'Example Domain' }], capturesInputValues: false },
+        page: { schema: 'ERGASTERION_BROWSER_PAGE_SUMMARY_V2', headings: [{ level: 1, text: 'Example Domain' }], capturesInputValues: false },
         status: 'OBSERVED',
       }),
     });

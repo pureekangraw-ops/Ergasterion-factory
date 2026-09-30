@@ -63,7 +63,7 @@ test('neutral browser observation maps arbitrary web tab into Runtime Workbench 
       active: true,
     },
     page: {
-      schema: 'ERGASTERION_BROWSER_PAGE_SUMMARY_V1',
+      schema: 'ERGASTERION_BROWSER_PAGE_SUMMARY_V2',
       headings: [{ level: 1, text: 'Hello' }],
       capturesInputValues: false,
     },

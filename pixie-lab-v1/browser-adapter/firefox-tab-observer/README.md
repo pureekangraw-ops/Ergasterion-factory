@@ -9,7 +9,7 @@ Neutral Firefox WebExtension for the Runtime Workbench.
 - observes HTTP/HTTPS page structure through a neutral content observer
 - captures the currently visible active-tab screenshot when Firefox allows it
 - sends observations over HTTPS to the owner-paired GO Hub Factory Eye bridge
-- keeps the remote bridge **eyes-only** in v0.2.3
+- keeps the remote bridge **eyes-only** in v0.3.0
 - stores only the issued Factory Eye session id/token/expiry; the owner passcode is never stored
 - reports stale/disconnected reality instead of pretending the eye is live
 
@@ -17,19 +17,33 @@ It contains **no site-specific profile**.
 
 ## Privacy boundary
 
-The page observer reports structure and labels, not field values.
+The page observer reports bounded structure and labels, not field values.
 
 It does not capture:
-- password values
-- OTP values
-- payment field values
-- ordinary input/textarea/select values
+- password, OTP, token, secret, or payment values
+- ordinary input/textarea/select/contenteditable values
+- unrestricted raw DOM or image bytes
 
-Firefox privileged pages that normal extensions cannot inspect are reported as unsupported/partial rather than faked as observed.
+Form/private-editor subtrees are excluded from semantic text, list, table, and image summaries. Visible text that matches common credential/card patterns is dropped. Firefox privileged pages that normal extensions cannot inspect are reported as unsupported/partial rather than faked as observed.
+
+## Semantic page summary v2
+
+The observer contract is `ERGASTERION_BROWSER_PAGE_SUMMARY_V2`. In addition to the existing tabs, URL/title, headings, buttons, links, fields, landmarks, screenshot, freshness, and Workbench evidence flow, it reports bounded:
+
+- `sections` with role, label, heading, and parent-section relationships
+- `textBlocks` for meaningful visible paragraphs and text blocks
+- `lists` with ordered/unordered type and bounded item summaries
+- `tables` with optional caption and bounded row/cell summaries
+- `images` with alt, caption, decorative, and safe context metadata; image bytes and source URLs are not captured
+- `states` plus button state for ARIA-selected, expanded, pressed, and current/active state
+- `contentGeneration`, a stable semantic fingerprint excluding capture time
+- `semanticDiff`, when a prior snapshot exists, for bounded text, section, state, URL/title, and meaningful structural changes
+
+All collection limits are fixed in the content observer. Section and item IDs are snapshot-local; cross-observation continuity is represented by `contentGeneration`, not by raw DOM identity.
 
 ## Remote Hub bridge — Firefox Android
 
-v0.2.3 uses the dedicated neutral Factory Eye ingress:
+v0.3.0 uses the dedicated neutral Factory Eye ingress:
 
 ```text
 https://go-hub.pureekangraw.workers.dev/hub/api/factory-eye/*
@@ -53,7 +67,7 @@ The bridge is currently **eyes-only**:
 - neutral page summary
 - active visible-tab screenshot when Firefox allows capture
 
-Remote navigate/click/type/scroll are not declared available in v0.2.3.
+Remote navigate/click/type/scroll are not declared available in v0.3.0.
 
 ### Readback
 
@@ -111,7 +125,7 @@ Factory Eye is accepted as the real Runtime eye only after physical Firefox test
 
 ## Firefox Android foreground wake
 
-Firefox for Android can suspend or kill idle extension background/event processes. Factory Eye v0.2.3 therefore does not treat background timers as the only liveness source.
+Firefox for Android can suspend or kill idle extension background/event processes. Factory Eye v0.3.0 therefore does not treat background timers as the only liveness source.
 
 When an ordinary HTTP/HTTPS page is visible, the content observer sends a sanitized foreground pulse every 8 seconds and immediately on `pageshow` / returning to `visible`. That message wakes the extension event page, which validates the sender tab and same-origin page summary before forwarding a fresh observation to GO Hub.
 
@@ -124,7 +138,7 @@ This pulse:
 
 ## Fresh observation contract
 
-Factory Eye v0.2.3 treats a visible-page heartbeat as a candidate observation, not proof by itself.
+Factory Eye v0.3.0 treats a visible-page heartbeat as a candidate observation, not proof by itself.
 
 A web observation is accepted as current only when:
 - the content script reports the same generation as the installed add-on

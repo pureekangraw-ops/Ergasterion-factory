@@ -2,7 +2,8 @@ const HUB_ORIGIN = 'https://go-hub.pureekangraw.workers.dev';
 const API_ROOT = '/hub/api/factory-eye';
 const PROTOCOL_VERSION = '2';
 const HOST = 'firefox-addon';
-const VERSION = '0.2.3';
+const VERSION = '0.3.0';
+const PAGE_SCHEMA = 'ERGASTERION_BROWSER_PAGE_SUMMARY_V2';
 const HEARTBEAT_MS = 5000;
 const COMMAND_POLL_MS = 2500;
 
@@ -190,6 +191,8 @@ async function register() {
       limits: [
         'HTTP_HTTPS_CONTENT_ONLY',
         'NO_INPUT_VALUES_CAPTURED',
+        'BOUNDED_SEMANTIC_SUMMARY',
+        'NO_RAW_DOM_OR_IMAGE_BYTES',
         'PRIVILEGED_FIREFOX_PAGES_UNSUPPORTED',
         'REMOTE_BRIDGE_EYES_ONLY',
       ],
@@ -309,7 +312,7 @@ async function observeFromContentPulse(message, sender) {
   }
 
   const page = message?.page;
-  if (!page || page.capturesInputValues !== false || page.createsAuthority !== false) {
+  if (!page || page.schema !== PAGE_SCHEMA || page.capturesInputValues !== false || page.createsAuthority !== false) {
     return { ok: false, error: 'CONTENT_PULSE_PAGE_INVALID' };
   }
 
