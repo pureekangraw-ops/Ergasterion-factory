@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ERGASTERION Browser</string>
+    <string name="hint_url">ใส่ URL หรือคำค้นหา</string>
+</resources>
