@@ -5,6 +5,18 @@
     android:orientation="vertical"
     android:background="#111111">
 
+    <TextView
+        android:id="@+id/observerStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="10dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="6dp"
+        android:text="Factory Eye: installing"
+        android:textColor="#FFB86C"
+        android:textSize="12sp" />
+
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -75,6 +87,12 @@
             android:minWidth="0dp"
             android:text="↻"
             android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/watchButton"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:text="Watch" />
     </LinearLayout>
 
     <org.mozilla.geckoview.GeckoView
