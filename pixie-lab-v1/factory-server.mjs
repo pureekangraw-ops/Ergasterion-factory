@@ -7,6 +7,7 @@ import { createJsonFilePersistence } from './pixie-lab/adapters.mjs';
 import { createLocalCodingExecutor } from './pixie-lab/coding-local-adapter.mjs';
 import { createNeutralBrowserRuntimeAdapter } from './pixie-lab/browser-runtime-adapter.mjs';
 import { createPixieCommander } from './pixie-lab/command.mjs';
+import { verifyHubFactoryRequest } from './pixie-lab/hub-factory-auth.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const UI_ROOT = resolve(HERE, 'ui');
@@ -77,6 +78,20 @@ export function createFactoryServer({
   return createServer(async (req, res) => {
     try {
       const url = new URL(req.url || '/', 'http://localhost');
+
+      if (req.method === 'GET' && url.pathname === '/api/hub-factory/health') {
+        return json(res, 200, { ok: true, protocol: 'GO_HUB_ERGASTERION_FACTORY_V1', authenticatedTransport: Boolean(process.env.ERGASTERION_HUB_SHARED_SECRET || process.env.GO_HUB_FACTORY_SECRET) });
+      }
+
+      if (req.method === 'POST' && (url.pathname === '/api/hub-factory/receive' || url.pathname === '/api/hub-factory/readback')) {
+        const input = await readJson(req, 2 * 1024 * 1024);
+        const secret = process.env.ERGASTERION_HUB_SHARED_SECRET || process.env.GO_HUB_FACTORY_SECRET || '';
+        const requiredAuth = process.env.ERGASTERION_REQUIRE_HUB_AUTH === '1' || Boolean(secret);
+        const auth = verifyHubFactoryRequest(input, req.headers, { secret, required: requiredAuth });
+        const command = url.pathname.endsWith('/receive') ? 'hub_factory_receive' : 'hub_factory_readback';
+        const output = await liveCommander.execute({ command, args: input });
+        return json(res, output.ok === false ? 400 : 200, { ...output, transport: auth });
+      }
 
       if (req.method === 'GET' && url.pathname === '/api/health') {
         return json(res, 200, {

@@ -25,7 +25,7 @@ export const PIXIE_COMMANDS = Object.freeze([
   'logic_create', 'logic_edit', 'logic_compare',
   'visual_create', 'visual_scan', 'visual_edit', 'visual_compare', 'visual_render_packet', 'visual_verify',
   'image_request', 'image_result',
-  'production_handoff_prepare',
+  'production_handoff_prepare', 'hub_factory_receive', 'hub_factory_readback',
   'candidate_passport', 'door_guard',
   'persist',
 ]);
@@ -44,7 +44,7 @@ const MUTATING = new Set([
   'logic_create', 'logic_edit',
   'visual_create', 'visual_scan', 'visual_edit', 'visual_render_packet', 'visual_verify',
   'image_request', 'image_result',
-  'production_handoff_prepare',
+  'production_handoff_prepare', 'hub_factory_receive', 'hub_factory_readback',
   'runtime_record', 'runtime_interaction_record',
   'candidate_passport',
   'persist',
@@ -268,6 +268,12 @@ export function createPixieCommander({ persistence, evidenceVerifier = null, cod
         break;
       case 'production_handoff_prepare':
         result = lab.prepareProductionHandoff(args);
+        break;
+      case 'hub_factory_receive':
+        result = lab.receiveHubFactoryHandoff(args.handoff || args);
+        break;
+      case 'hub_factory_readback':
+        result = lab.createHubFactoryReadback(args);
         break;
       case 'candidate_passport':
         result = lab.candidatePassport(args.artifactId);
