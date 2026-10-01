@@ -108,6 +108,27 @@ test('Retry creates a new attempt identity and preserves prior dispatch/receipt 
   assert.equal(lab.state.visualDispatches[0].dispatchId, first.dispatchId);
 });
 
+test('Late verified receipt after FAILED/CANCELLED is rejected without partial mutation', () => {
+  const { lab, packet } = setup();
+  const dispatch = lab.createVisualDispatch('VIS-P3', { dispatchId: 'DISPATCH-LATE', packetId: packet.packetId, ...ctx, actionType: 'GENERATE' });
+  lab.updateVisualDispatch(dispatch.dispatchId, { status: 'FAILED', error: 'executor timeout' });
+  assert.throws(() => lab.createVisualReceipt(dispatch.dispatchId, { receiptId: 'RECEIPT-LATE', artifactRef: 'artifact://late', executorIdentity: 'GO_IMAGE_TOOL', evidenceRefs: ['readback://late'], readbackStatus: 'VERIFIED', artifactUsable: true }), /VISUAL_RECEIPT_AFTER_TERMINAL_DISPATCH/);
+  assert.equal(lab.state.visualReceipts.length, 0);
+  assert.equal(lab.state.visualDrafts[0].workingSpec.spatial.resultRefs.includes('artifact://late'), false);
+  assert.equal(lab.state.visualDispatches[0].status, 'FAILED');
+});
+
+test('Duplicate artifact from a second dispatch is rejected and first provenance remains', () => {
+  const { lab, packet } = setup();
+  const first = lab.createVisualDispatch('VIS-P3', { dispatchId: 'DISPATCH-DUP-A', packetId: packet.packetId, ...ctx, actionType: 'GENERATE' });
+  const firstReceipt = lab.createVisualReceipt(first.dispatchId, { receiptId: 'RECEIPT-DUP-A', artifactRef: 'artifact://same', executorIdentity: 'GO_IMAGE_TOOL', evidenceRefs: ['readback://same-a'], readbackStatus: 'VERIFIED', artifactUsable: true });
+  const secondPacket = lab.createVisualRenderPacket('VIS-P3', { packetId: 'VIS-P3-PACKET-2', packetVersion: 'V3', intent: 'retry same context', requestedResult: 'another result' });
+  const second = lab.createVisualDispatch('VIS-P3', { dispatchId: 'DISPATCH-DUP-B', packetId: secondPacket.packetId, ...ctx, actionType: 'GENERATE' });
+  assert.throws(() => lab.createVisualReceipt(second.dispatchId, { receiptId: 'RECEIPT-DUP-B', artifactRef: 'artifact://same', executorIdentity: 'GO_IMAGE_TOOL', evidenceRefs: ['readback://same-b'], readbackStatus: 'VERIFIED', artifactUsable: true }), /VISUAL_RESULT_DUPLICATE_ARTIFACT/);
+  assert.equal(lab.state.visualReceipts.length, 1);
+  assert.equal(lab.state.visualDrafts[0].workingSpec.spatial.resultProvenance[0].receiptId, firstReceipt.receiptId);
+});
+
 test('Recovery and lineage are readable after persistence reload', async () => {
   const persistence = createMemoryPersistence();
   const lab = new PixieLab({ persistence, now: clock() });
