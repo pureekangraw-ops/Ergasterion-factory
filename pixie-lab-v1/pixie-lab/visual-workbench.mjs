@@ -288,6 +288,8 @@ export function createVisualDraft({
   spec = {},
   parentVisualDraftId = null,
   lineage = null,
+  workId = null,
+  checkpointId = null,
   now = nowIso,
 } = {}) {
   const inputSpec = clone(spec ?? {});
@@ -303,6 +305,8 @@ export function createVisualDraft({
     sourceHash: text(sourceHash) || null,
     parentVisualDraftId: text(parentVisualDraftId) || null,
     lineage: clone(lineage),
+    workId: text(workId) || null,
+    checkpointId: text(checkpointId) || null,
     sourceLocked: true,
     labOwned: true,
     table: {
@@ -488,6 +492,8 @@ export function createVisualRenderPacket(draft, {
     sourceVersion: draft.sourceVersion,
     sourceHash: draft.sourceHash,
     parentVisualDraftId: draft.parentVisualDraftId || null,
+    workId: draft.workId || null,
+    checkpointId: draft.checkpointId || null,
     workingSpec: clone(draft.workingSpec),
     references: clone(packetSpatial.references),
     focusFrame: packetFocusFrame ? clone(packetSpatial.focusFrames.find((frame) => frame.id === packetFocusFrame.id)) : null,
