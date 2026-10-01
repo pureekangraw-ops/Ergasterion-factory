@@ -606,17 +606,22 @@ export class PixieLab {
     if (!dispatch) throw new Error('VISUAL_DISPATCH_NOT_FOUND');
     if (this.state.visualReceipts.some((item) => item.receiptId === input.receiptId)) throw new Error('DUPLICATE_VISUAL_RECEIPT_ID');
     if (this.state.visualReceipts.some((item) => item.dispatchId === dispatchId)) throw new Error('VISUAL_RECEIPT_DUPLICATE_DISPATCH');
+    if (['FAILED', 'CANCELLED'].includes(dispatch.status)) throw new Error('VISUAL_RECEIPT_AFTER_TERMINAL_DISPATCH');
     const received = createVisualReceipt(dispatch, { ...input, dispatchId, status: input.status || 'RECEIVED', now: this.now });
     if (isUsableVisualReceipt(received)) {
       const draftIndex = this.state.visualDrafts.findIndex((item) => item.visualDraftId === received.visualDraftId);
       if (draftIndex < 0) throw new Error('VISUAL_DRAFT_NOT_FOUND');
-      // Import first. Commit receipt and draft together only after all lineage/readback checks pass.
+      const duplicate = this.state.visualDrafts.some((candidate) => (candidate.workingSpec?.spatial?.resultRefs || []).includes(received.artifactRef));
+      if (duplicate) throw new Error('VISUAL_RESULT_DUPLICATE_ARTIFACT');
+      // Preflight the terminal transition before any draft/receipt mutation.
+      const dispatchIndex = this.state.visualDispatches.findIndex((item) => item.dispatchId === dispatchId);
+      const nextDispatch = updateVisualDispatchStatus(this.state.visualDispatches[dispatchIndex], 'RECEIVED', { providerJobId: received.providerJobId, evidenceRefs: received.evidenceRefs, now: this.now });
+      // Import and all lineage checks happen before committing the three related records.
       const imported = importVisualReceipt(this.state.visualDrafts[draftIndex], received, { now: this.now });
       const linked = Object.freeze({ ...received, status: 'LINKED' });
       this.state.visualDrafts[draftIndex] = imported.draft;
       this.state.visualReceipts.push(linked);
-      const dispatchIndex = this.state.visualDispatches.findIndex((item) => item.dispatchId === dispatchId);
-      this.state.visualDispatches[dispatchIndex] = updateVisualDispatchStatus(this.state.visualDispatches[dispatchIndex], 'RECEIVED', { providerJobId: received.providerJobId, evidenceRefs: received.evidenceRefs, now: this.now });
+      this.state.visualDispatches[dispatchIndex] = nextDispatch;
       return clone(linked);
     }
     this.state.visualReceipts.push(received);
