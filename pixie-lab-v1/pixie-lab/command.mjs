@@ -24,7 +24,7 @@ export const PIXIE_COMMANDS = Object.freeze([
   'examples', 'run_example',
   'logic_create', 'logic_edit', 'logic_compare',
   'visual_create', 'visual_scan', 'visual_edit', 'visual_compare', 'visual_render_packet', 'visual_verify',
-  'image_request', 'image_result',
+  'image_request', 'image_result', 'visual_dispatch', 'visual_dispatch_update', 'visual_receipt', 'visual_result_import', 'visual_retry', 'visual_recover', 'visual_lineage',
   'production_handoff_prepare',
   'candidate_passport', 'door_guard',
   'persist',
@@ -43,7 +43,7 @@ const MUTATING = new Set([
   'self_test', 'cross_room', 'run_example',
   'logic_create', 'logic_edit',
   'visual_create', 'visual_scan', 'visual_edit', 'visual_render_packet', 'visual_verify',
-  'image_request', 'image_result',
+  'image_request', 'image_result', 'visual_dispatch', 'visual_dispatch_update', 'visual_receipt', 'visual_result_import', 'visual_retry',
   'production_handoff_prepare',
   'runtime_record', 'runtime_interaction_record',
   'candidate_passport',
@@ -265,6 +265,27 @@ export function createPixieCommander({ persistence, evidenceVerifier = null, cod
         break;
       case 'image_result':
         result = lab.acceptImageResult(args.actionId, requireObject(args.result, 'args.result'));
+        break;
+      case 'visual_dispatch':
+        result = lab.createVisualDispatch(args.visualDraftId, requireObject(args.dispatch, 'args.dispatch'));
+        break;
+      case 'visual_dispatch_update':
+        result = lab.updateVisualDispatch(args.dispatchId, requireObject(args.update, 'args.update'));
+        break;
+      case 'visual_receipt':
+        result = lab.createVisualReceipt(args.dispatchId, requireObject(args.receipt, 'args.receipt'));
+        break;
+      case 'visual_result_import':
+        result = lab.importVisualResult(args.receiptId, requireObject(args.options, 'args.options'));
+        break;
+      case 'visual_retry':
+        result = lab.retryVisualDispatch(args.dispatchId, requireObject(args.dispatch, 'args.dispatch'));
+        break;
+      case 'visual_recover':
+        result = lab.recoverVisualWork(args.visualDraftId);
+        break;
+      case 'visual_lineage':
+        result = lab.visualLineage(args.visualDraftId);
         break;
       case 'production_handoff_prepare':
         result = lab.prepareProductionHandoff(args);

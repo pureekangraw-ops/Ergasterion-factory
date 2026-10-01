@@ -53,6 +53,9 @@ import {
   createVisualDraft, scanVisualDraft, editVisualDraft, compareVisualDraft,
   createVisualRenderPacket, verifyVisualRender,
 } from './visual-workbench.mjs';
+import {
+  createVisualDispatchContract, updateVisualDispatchStatus, createVisualReceipt, importVisualReceipt, isUsableVisualReceipt, buildVisualRecovery,
+} from './visual-transport.mjs';
 
 const clone = (value) => value == null ? value : structuredClone(value);
 const text = (value) => String(value ?? '').trim();
@@ -92,6 +95,7 @@ export class PixieLab {
       logicDrafts: [], productionHandoffs: [], factoryHandoffs: [],
       visualDrafts: [], visualRenderPackets: [], visualVerifications: [],
       imageActions: [], imageReceipts: [],
+      visualDispatches: [], visualReceipts: [],
       runtimeObservations: [], runtimeInteractions: [],
       archives: [], cleanRuns: [],
     };
@@ -557,6 +561,120 @@ export class PixieLab {
     return clone(receipt);
   }
 
+  createVisualDispatch(visualDraftId, input = {}) {
+    const draft = this.state.visualDrafts.find((item) => item.visualDraftId === visualDraftId);
+    if (!draft) throw new Error('VISUAL_DRAFT_NOT_FOUND');
+    const packet = this.state.visualRenderPackets.find((item) => item.packetId === input.packetId);
+    if (!packet) throw new Error('VISUAL_RENDER_PACKET_NOT_FOUND');
+    if (packet.visualDraftId !== visualDraftId) throw new Error('VISUAL_DISPATCH_DRAFT_MISMATCH');
+    const draftBranchId = text(draft.workingSpec?.spatial?.branch?.branchId) || null;
+    const packetBranchId = text(packet.branchId) || null;
+    const canonicalBranchId = packetBranchId || draftBranchId;
+    if (packetBranchId !== draftBranchId) throw new Error('VISUAL_DISPATCH_BRANCH_MISMATCH');
+    if ((text(input.branchId) || null) !== canonicalBranchId) throw new Error('VISUAL_DISPATCH_BRANCH_MISMATCH');
+    const canonicalWorkId = text(packet.workId || draft.workId);
+    const canonicalCheckpointId = text(packet.checkpointId || draft.checkpointId);
+    if (!canonicalWorkId || !canonicalCheckpointId) throw new Error('VISUAL_WORK_CONTEXT_UNKNOWN');
+    if (text(input.workId) !== canonicalWorkId || text(input.checkpointId) !== canonicalCheckpointId) throw new Error('VISUAL_WORK_CONTEXT_MISMATCH');
+    if (String(input.actionType || '').toUpperCase() === 'EDIT') {
+      const target = text(input.targetResultRef);
+      if (target && !(draft.workingSpec?.spatial?.resultRefs || []).includes(target)) throw new Error('VISUAL_EDIT_TARGET_NOT_FOUND');
+    }
+    if (this.state.visualDispatches.some((item) => item.dispatchId === input.dispatchId)) throw new Error('DUPLICATE_VISUAL_DISPATCH_ID');
+    const dispatch = createVisualDispatchContract(packet, { ...input, visualDraftId, branchId: canonicalBranchId, workId: canonicalWorkId, checkpointId: canonicalCheckpointId, now: this.now });
+    this.state.visualDispatches.push(dispatch);
+    const request = this.createImageAction(packet.packetId, {
+      actionId: dispatch.dispatchId,
+      workId: dispatch.workId,
+      checkpointId: dispatch.checkpointId,
+      requestedBy: dispatch.requestedBy,
+    });
+    const sent = updateVisualDispatchStatus(dispatch, 'SENT', { providerJobId: request.actionId, now: this.now });
+    this.state.visualDispatches[this.state.visualDispatches.length - 1] = Object.freeze({ ...sent, imageActionId: request.actionId });
+    return clone(this.state.visualDispatches.at(-1));
+  }
+
+  updateVisualDispatch(dispatchId, input = {}) {
+    const index = this.state.visualDispatches.findIndex((item) => item.dispatchId === dispatchId);
+    if (index < 0) throw new Error('VISUAL_DISPATCH_NOT_FOUND');
+    this.state.visualDispatches[index] = updateVisualDispatchStatus(this.state.visualDispatches[index], input.status, { ...input, now: this.now });
+    return clone(this.state.visualDispatches[index]);
+  }
+
+  createVisualReceipt(dispatchId, input = {}) {
+    const dispatch = this.state.visualDispatches.find((item) => item.dispatchId === dispatchId);
+    if (!dispatch) throw new Error('VISUAL_DISPATCH_NOT_FOUND');
+    if (this.state.visualReceipts.some((item) => item.receiptId === input.receiptId)) throw new Error('DUPLICATE_VISUAL_RECEIPT_ID');
+    if (this.state.visualReceipts.some((item) => item.dispatchId === dispatchId)) throw new Error('VISUAL_RECEIPT_DUPLICATE_DISPATCH');
+    if (['FAILED', 'CANCELLED'].includes(dispatch.status)) throw new Error('VISUAL_RECEIPT_AFTER_TERMINAL_DISPATCH');
+    const received = createVisualReceipt(dispatch, { ...input, dispatchId, status: input.status || 'RECEIVED', now: this.now });
+    if (isUsableVisualReceipt(received)) {
+      const draftIndex = this.state.visualDrafts.findIndex((item) => item.visualDraftId === received.visualDraftId);
+      if (draftIndex < 0) throw new Error('VISUAL_DRAFT_NOT_FOUND');
+      const duplicate = this.state.visualDrafts.some((candidate) => (candidate.workingSpec?.spatial?.resultRefs || []).includes(received.artifactRef));
+      if (duplicate) throw new Error('VISUAL_RESULT_DUPLICATE_ARTIFACT');
+      // Preflight the terminal transition before any draft/receipt mutation.
+      const dispatchIndex = this.state.visualDispatches.findIndex((item) => item.dispatchId === dispatchId);
+      const nextDispatch = updateVisualDispatchStatus(this.state.visualDispatches[dispatchIndex], 'RECEIVED', { providerJobId: received.providerJobId, evidenceRefs: received.evidenceRefs, now: this.now });
+      // Import and all lineage checks happen before committing the three related records.
+      const imported = importVisualReceipt(this.state.visualDrafts[draftIndex], received, { now: this.now });
+      const linked = Object.freeze({ ...received, status: 'LINKED' });
+      this.state.visualDrafts[draftIndex] = imported.draft;
+      this.state.visualReceipts.push(linked);
+      this.state.visualDispatches[dispatchIndex] = nextDispatch;
+      return clone(linked);
+    }
+    this.state.visualReceipts.push(received);
+    return clone(received);
+  }
+
+  importVisualResult(receiptId, input = {}) {
+    const receiptIndex = this.state.visualReceipts.findIndex((item) => item.receiptId === receiptId);
+    if (receiptIndex < 0) throw new Error('VISUAL_RECEIPT_NOT_FOUND');
+    const receipt = this.state.visualReceipts[receiptIndex];
+    const draftIndex = this.state.visualDrafts.findIndex((item) => item.visualDraftId === receipt.visualDraftId);
+    if (draftIndex < 0) throw new Error('VISUAL_DRAFT_NOT_FOUND');
+    const imported = importVisualReceipt(this.state.visualDrafts[draftIndex], receipt, { placeOnTable: input.placeOnTable === true, now: this.now });
+    this.state.visualDrafts[draftIndex] = imported.draft;
+    return clone({ receipt: this.state.visualReceipts[receiptIndex], draft: this.state.visualDrafts[draftIndex], resultRef: imported.resultRef, placedOnTable: imported.placedOnTable });
+  }
+
+  retryVisualDispatch(dispatchId, input = {}) {
+    const previous = this.state.visualDispatches.find((item) => item.dispatchId === dispatchId);
+    if (!previous) throw new Error('VISUAL_DISPATCH_NOT_FOUND');
+    const packet = this.state.visualRenderPackets.find((item) => item.packetId === previous.packetId);
+    if (!packet) throw new Error('VISUAL_RENDER_PACKET_NOT_FOUND');
+    return this.createVisualDispatch(previous.visualDraftId, {
+      ...input,
+      dispatchId: required(input.dispatchId, 'dispatchId'),
+      packetId: previous.packetId,
+      branchId: previous.branchId,
+      workId: input.workId || previous.workId,
+      checkpointId: input.checkpointId || previous.checkpointId,
+      actionType: input.actionType || previous.actionType,
+      sourceResultRefs: input.sourceResultRefs || previous.sourceResultRefs,
+      targetResultRef: input.targetResultRef || previous.targetResultRef,
+      requestedBy: input.requestedBy || previous.requestedBy,
+      attempt: previous.attempt + 1,
+      retryOfDispatchId: previous.dispatchId,
+    });
+  }
+
+  recoverVisualWork(visualDraftId) {
+    const draft = this.state.visualDrafts.find((item) => item.visualDraftId === visualDraftId) || null;
+    return clone(buildVisualRecovery({ draft, dispatches: this.state.visualDispatches, receipts: this.state.visualReceipts }));
+  }
+
+  visualLineage(visualDraftId) {
+    const draft = this.state.visualDrafts.find((item) => item.visualDraftId === visualDraftId);
+    if (!draft) throw new Error('VISUAL_DRAFT_NOT_FOUND');
+    const packetIds = new Set(this.state.visualRenderPackets.filter((item) => item.visualDraftId === visualDraftId).map((item) => item.packetId));
+    const dispatches = this.state.visualDispatches.filter((item) => packetIds.has(item.packetId));
+    const dispatchIds = new Set(dispatches.map((item) => item.dispatchId));
+    const receipts = this.state.visualReceipts.filter((item) => dispatchIds.has(item.dispatchId));
+    return clone({ visualDraftId, branchId: draft.workingSpec?.spatial?.branch?.branchId || null, draft: { visualDraftId, parentVisualDraftId: draft.parentVisualDraftId || null, lineage: draft.lineage || null }, packets: this.state.visualRenderPackets.filter((item) => packetIds.has(item.packetId)), dispatches, receipts, resultProvenance: draft.workingSpec?.spatial?.resultProvenance || [] });
+  }
+
   prepareProductionHandoff(input = {}) {
     const experiment = this.state.experiments.find((item) => item.experimentId === input.experimentId);
     if (!experiment) throw new Error('EXPERIMENT_NOT_FOUND');
@@ -655,6 +773,8 @@ export class PixieLab {
       this.state.visualVerifications = Array.isArray(this.state.visualVerifications) ? this.state.visualVerifications : [];
       this.state.imageActions = Array.isArray(this.state.imageActions) ? this.state.imageActions : [];
       this.state.imageReceipts = Array.isArray(this.state.imageReceipts) ? this.state.imageReceipts : [];
+      this.state.visualDispatches = Array.isArray(this.state.visualDispatches) ? this.state.visualDispatches : [];
+      this.state.visualReceipts = Array.isArray(this.state.visualReceipts) ? this.state.visualReceipts : [];
       this.state.runtimeObservations = Array.isArray(this.state.runtimeObservations) ? this.state.runtimeObservations : [];
       this.state.runtimeInteractions = Array.isArray(this.state.runtimeInteractions) ? this.state.runtimeInteractions : [];
       this.state.archives = Array.isArray(this.state.archives) ? this.state.archives : [];
@@ -700,6 +820,8 @@ export class PixieLab {
       visualVerifications: clone(this.state.visualVerifications || []),
       imageActions: clone(this.state.imageActions || []),
       imageReceipts: clone(this.state.imageReceipts || []),
+      visualDispatches: clone(this.state.visualDispatches || []),
+      visualReceipts: clone(this.state.visualReceipts || []),
       runtimeObservations: clone(this.state.runtimeObservations || []),
       runtimeInteractions: clone(this.state.runtimeInteractions || []),
       archives: clone(this.state.archives || []),
@@ -720,6 +842,8 @@ export class PixieLab {
         visualVerifications: (this.state.visualVerifications || []).length,
         imageActions: (this.state.imageActions || []).length,
         imageReceipts: (this.state.imageReceipts || []).length,
+        visualDispatches: (this.state.visualDispatches || []).length,
+        visualReceipts: (this.state.visualReceipts || []).length,
         runtimeObservations: (this.state.runtimeObservations || []).length,
         runtimeInteractions: (this.state.runtimeInteractions || []).length,
         archives: (this.state.archives || []).length,

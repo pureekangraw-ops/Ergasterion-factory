@@ -23,7 +23,7 @@ const SHELL_COMMANDS = [
   'status','capabilities','workbench_floor','workbench_open','checkpoint_dock','reality_screen','big_view','intent_review',
   'idea_create','experiment_create','variant_create','variant_evaluate','experiment_select',
   'logic_create','logic_edit','logic_compare',
-  'visual_create','visual_scan','visual_edit','visual_compare','visual_render_packet','visual_verify','image_request','image_result',
+  'visual_create','visual_scan','visual_edit','visual_compare','visual_render_packet','visual_verify','image_request','image_result','visual_dispatch','visual_dispatch_update','visual_receipt','visual_result_import','visual_retry','visual_recover','visual_lineage',
   'add_matrix','start_matrix','update_matrix','add_test_run','rerun_test_run','add_golden_case','replay_golden',
   'add_bug','add_attention','update_attention','debug_start','debug_step','debug_complete',
   'production_handoff_prepare',
@@ -173,7 +173,8 @@ async function renderVisual(view) {
 
   const draft = view.draft;
   const packets = view.renderPackets || [];
-  const receipts = view.imageReceipts || [];
+  const receipts = [...(view.imageReceipts || []), ...(view.visualReceipts || [])];
+  const dispatches = view.visualDispatches || [];
   const latestPacket = packets.at(-1);
   const latestReceipt = receipts.at(-1);
   const spatial = draft?.workingSpec?.spatial || draft?.originalSpec?.spatial || {};
@@ -281,6 +282,29 @@ async function renderVisual(view) {
   $('#visual-keep').value = (latestPacket?.mustKeep || []).join('\n');
   $('#visual-remove').value = (latestPacket?.mustRemove || []).join('\n');
   $('#visual-compare-note').value = compareNotes.at(-1)?.text || '';
+
+  const phase3Host = $('#visual-history')?.parentElement;
+  if (phase3Host && !$('#visual-phase3')) {
+    const phase3 = document.createElement('section');
+    phase3.id = 'visual-phase3';
+    phase3.className = 'data-card phase3-transport';
+    phase3.innerHTML = `<div class="section-heading"><div><span class="eyebrow">PHASE 3 · RETURN LOOP</span><h3>Generate / Edit transport</h3></div><span class="truth ${truthStatus(view.recovery?.status || 'UNKNOWN')}">${esc(view.recovery?.status || 'UNKNOWN')}</span></div>
+      <div class="inline-form"><select id="visual-dispatch-action"><option value="GENERATE">Generate</option><option value="EDIT">Edit</option></select><input id="visual-edit-target" placeholder="Edit target result ref (required for Edit)"><button id="visual-dispatch">Dispatch</button></div>
+      <div class="muted">Executor: GO_IMAGE_TOOL · Pixie prepares context only · no winner/branch/production decisions are automatic.</div>
+      <div id="visual-dispatch-status" class="phase3-status"></div>
+      <div class="inline-form"><input id="visual-receipt-artifact" placeholder="Returned artifact ref"><label><input type="checkbox" id="visual-receipt-verified"> observed readback verified</label><button id="visual-receive">Record result receipt</button><button id="visual-place-result">Place latest result on table</button></div>
+      <div id="visual-lineage-strip" class="provenance-strip"></div>`;
+    phase3Host.before(phase3);
+  }
+  if ($('#visual-dispatch-status')) {
+    const latestDispatch = dispatches.at(-1);
+    $('#visual-dispatch-status').innerHTML = dispatches.length
+      ? dispatches.map((item) => `<span class="spatial-chip"><strong>${esc(item.actionType)} · ${esc(item.status)}</strong><span>${esc(item.dispatchId)} · attempt ${esc(item.attempt)}</span></span>`).join('')
+      : '<span class="muted">No dispatch yet.</span>';
+    $('#visual-lineage-strip').textContent = latestDispatch
+      ? `lineage · ${latestDispatch.visualDraftId} → ${latestDispatch.branchId || 'root'} → ${latestDispatch.packetId} → ${latestDispatch.dispatchId}`
+      : 'lineage · UNKNOWN';
+  }
 
   $('#visual-reference-roles').innerHTML = intentLinks.length
     ? intentLinks.filter((link) => link.sourceId === draft?.sourceRef).map((link) => `<span class="spatial-chip"><strong>${esc(link.role)}</strong><span>${esc(link.note || link.sourceId)}</span></span>`).join('')
@@ -426,7 +450,7 @@ async function renderVisual(view) {
     const childSpatial = { references, focusFrames: frames, activeFocusFrameId: spatial.activeFocusFrameId, intentLinks, freezeSet, exploreSet, compareNotes, resultRefs: selectedResultRefs, compareSessions: [{ compareSessionId: `COMPARE-${branchId}`, selectedResultRefs, winnerRef, compareNoteRefs: nextIntent.compareNoteRefs, createdAt: new Date().toISOString() }], activeCompareSessionId: `COMPARE-${branchId}`, winnerRef, promotedParts: nextIntent.promotedParts, branch, nextIntents: [nextIntent], activeNextIntentId: nextIntent.nextIntentId, nextIntent };
     const childSpec = structuredClone(draft.workingSpec || {});
     childSpec.spatial = childSpatial;
-    await command('visual_create', { visualDraftId: childId, sourceRef: winnerRef, sourceVersion: `branch:${branchId}`, parentVisualDraftId: draft.visualDraftId, lineage: { parentVisualDraftId: draft.visualDraftId, parentResultRefs: selectedResultRefs, compareSessionId: activeCompareSession.compareSessionId, winnerRef, branchId, createdAt: new Date().toISOString() }, spec: childSpec });
+    await command('visual_create', { visualDraftId: childId, sourceRef: winnerRef, sourceVersion: `branch:${branchId}`, ...contextSelector(), parentVisualDraftId: draft.visualDraftId, lineage: { parentVisualDraftId: draft.visualDraftId, parentResultRefs: selectedResultRefs, compareSessionId: activeCompareSession.compareSessionId, winnerRef, branchId, createdAt: new Date().toISOString() }, spec: childSpec });
     await refreshBootstrap();
     await openWorkbench('VISUAL_WORKBENCH');
   });
@@ -449,6 +473,7 @@ async function renderVisual(view) {
       visualDraftId,
       sourceRef,
       sourceVersion: 'ui',
+      ...contextSelector(),
       spec: { brief: '', referenceRoles: ['INSPIRATION'], spatial: { focusFrames: [], intentLinks: [], freezeSet: [], exploreSet: [], resultRefs: [], compareSessions: [], promotedParts: [], nextIntents: [] } },
     });
     await refreshBootstrap();
@@ -522,14 +547,40 @@ async function renderVisual(view) {
         nextIntent: spatial.nextIntent || spatial.nextIntents?.find((item) => item.nextIntentId === spatial.activeNextIntentId) || null,
       },
     });
-    await command('image_request', {
-      packetId,
-      request: {
-        actionId: `IMG-${Date.now()}`,
+    const dispatchAction = $('#visual-dispatch-action')?.value || 'GENERATE';
+    const editTarget = $('#visual-edit-target')?.value.trim() || null;
+    await command('visual_dispatch', {
+      visualDraftId: draft.visualDraftId,
+      dispatch: {
+        dispatchId: `DISPATCH-${Date.now()}`,
+        packetId,
         ...contextSelector(),
-        requestedBy: 'GO',
+        branchId: spatial.branch?.branchId || null,
+        actionType: dispatchAction,
+        targetResultRef: editTarget,
+        sourceResultRefs: editTarget ? [editTarget] : [...compareIds],
+        requestedBy: 'PIXIE',
       },
     });
+    await refreshBootstrap();
+    await openWorkbench('VISUAL_WORKBENCH');
+  });
+  $('#visual-dispatch')?.addEventListener('click', async () => {
+    $('#visual-prepare')?.click();
+  });
+  $('#visual-receive')?.addEventListener('click', async () => {
+    const dispatch = dispatches.at(-1);
+    const artifactRef = $('#visual-receipt-artifact').value.trim();
+    if (!dispatch || !artifactRef) { window.alert('A pending dispatch and returned artifact ref are required.'); return; }
+    const readbackVerified = $('#visual-receipt-verified')?.checked === true;
+    await command('visual_receipt', { dispatchId: dispatch.dispatchId, receipt: { receiptId: `RECEIPT-${Date.now()}`, artifactRef, status: 'RECEIVED', executorIdentity: 'GO_IMAGE_TOOL', evidenceRefs: readbackVerified ? [`readback://${dispatch.dispatchId}`] : [], readbackStatus: readbackVerified ? 'VERIFIED' : 'OBSERVED', artifactUsable: readbackVerified } });
+    await refreshBootstrap();
+    await openWorkbench('VISUAL_WORKBENCH');
+  });
+  $('#visual-place-result')?.addEventListener('click', async () => {
+    const receipt = (view.visualReceipts || []).filter((item) => item.status === 'LINKED').at(-1);
+    if (!receipt || !receipt.receiptId) { window.alert('No linked Phase 3 result is available.'); return; }
+    await command('visual_result_import', { receiptId: receipt.receiptId, options: { placeOnTable: true } });
     await refreshBootstrap();
     await openWorkbench('VISUAL_WORKBENCH');
   });
