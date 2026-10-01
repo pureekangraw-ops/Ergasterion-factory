@@ -200,3 +200,20 @@ test('Visual vNext normalizes focus frame bounds and carries multiple references
   assert.equal(packet.references.length, 2);
   assert.equal(packet.focusFrame.id, 'FRAME-2');
 });
+
+test('Visual vNext persists compare notes and carries them into the packet', () => {
+  const lab = new PixieLab({ now: clock() });
+  lab.createVisualDraft({ visualDraftId: 'VIS-NOTE', sourceRef: 'image://source', spec: { spatial: { compareNotes: [] } } });
+  const noted = lab.editVisualDraft('VIS-NOTE', {
+    op: 'SET',
+    path: 'spatial.compareNotes',
+    value: [{ id: 'NOTE-1', text: 'Keep the face from V2', comparedRefs: ['image://v2'] }],
+  });
+  assert.equal(noted.workingSpec.spatial.compareNotes[0].text, 'Keep the face from V2');
+  const packet = lab.createVisualRenderPacket('VIS-NOTE', {
+    packetId: 'PACK-NOTE',
+    intent: 'Continue from compare note',
+    requestedResult: 'Next focused variant',
+  });
+  assert.equal(packet.compareNotes[0].comparedRefs[0], 'image://v2');
+});
