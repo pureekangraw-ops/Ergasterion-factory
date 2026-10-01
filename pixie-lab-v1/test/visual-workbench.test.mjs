@@ -133,3 +133,31 @@ test('PIXIE identity is used in Lab visual experimentation without inventing a s
   assert.equal(packet.table.history, 'V1_V2_V3_PLUS');
   assert.equal(packet.targetTool, 'GO_IMAGE_TOOL');
 });
+
+
+test('Visual vNext packet carries focus frame, intent links, freeze and explore context', () => {
+  const lab = new PixieLab({ now: clock() });
+  lab.createVisualDraft({
+    visualDraftId: 'VIS-VNEXT',
+    sourceRef: 'image://portrait',
+    spec: {
+      spatial: {
+        focusFrames: [{ id: 'FRAME-1', label: 'face', bounds: { x: 0.1, y: 0.1, width: 0.4, height: 0.4 } }],
+        activeFocusFrameId: 'FRAME-1',
+        intentLinks: [{ id: 'LINK-1', sourceId: 'image://portrait', role: 'FACE', note: 'use the face only' }],
+        freezeSet: ['face', 'palette'],
+        exploreSet: ['background'],
+      },
+    },
+  });
+  const packet = lab.createVisualRenderPacket('VIS-VNEXT', {
+    packetId: 'PACK-VNEXT',
+    intent: 'Keep the character and explore the setting',
+    requestedResult: 'One focused visual variant',
+  });
+  assert.equal(packet.focusFrame.label, 'face');
+  assert.equal(packet.intentLinks[0].role, 'FACE');
+  assert.deepEqual(packet.freezeSet, ['face', 'palette']);
+  assert.deepEqual(packet.exploreSet, ['background']);
+  assert.equal(packet.imageGenerationAuthority, false);
+});
