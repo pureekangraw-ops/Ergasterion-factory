@@ -203,3 +203,47 @@ test('durable readback rejects missing identity and unknown handoff', async () =
   assert.equal(unknown.status, 404);
   assert.equal((await unknown.json()).error, 'HANDOFF_NOT_FOUND');
 });
+
+
+test('Factory reports only verified evidence to Olympus without transferring ownership', async () => {
+  const originalFetch = globalThis.fetch;
+  let seen;
+  globalThis.fetch = async (url, init) => {
+    seen = { url:String(url), init };
+    return Response.json({ status:'CURRENT', appId:'ergasterion', owner:'ERGASTERION' });
+  };
+  try {
+    const env = { OLYMPUS_URL:'https://olympus.example/' };
+    const input = {
+      version:'1.2.3',
+      sourceRevision:'rev-123',
+      artifactSha:'sha256:factory',
+      provenanceRef:'github://Ergasterion-factory/rev-123',
+      verified:true,
+      evidence:['factory-readback://HANDOFF-001'],
+    };
+    const response = await worker.fetch(new Request('https://factory.example/api/olympus/current-report', {
+      method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify(input),
+    }), env);
+    assert.equal(response.status, 202);
+    const body = await response.json();
+    assert.equal(body.status, 'REPORTED');
+    assert.equal(body.authorityTransferred, false);
+    assert.equal(seen.url, 'https://olympus.example/reports/current');
+    const payload = JSON.parse(seen.init.body);
+    assert.equal(payload.appId, 'ergasterion');
+    assert.equal(payload.owner, 'ERGASTERION');
+    assert.equal(payload.verified, true);
+    assert.deepEqual(payload.evidence, ['factory-readback://HANDOFF-001']);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('Factory refuses to report unverified Current to Olympus', async () => {
+  const response = await worker.fetch(new Request('https://factory.example/api/olympus/current-report', {
+    method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({
+      version:'1', sourceRevision:'rev', artifactSha:'sha', provenanceRef:'github://factory/rev', verified:false, evidence:[],
+    }),
+  }), { OLYMPUS_URL:'https://olympus.example' });
+  assert.equal(response.status, 409);
+  assert.equal((await response.json()).error, 'CURRENT_REPORT_VERIFIED_EVIDENCE_REQUIRED');
+});

@@ -2,6 +2,9 @@
   "name": "ergasterion-factory",
   "main": "cloudflare/worker.mjs",
   "compatibility_date": "2026-09-30",
+  "vars": {
+    "OLYMPUS_URL": "https://olympus.pureekangraw.workers.dev"
+  },
   "durable_objects": {
     "bindings": [
       {

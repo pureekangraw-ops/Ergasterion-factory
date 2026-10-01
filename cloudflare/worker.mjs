@@ -166,6 +166,37 @@ async function readbackHandoff(request, env) {
   return ledger.fetch('https://handoff-ledger.internal/readback', { method: 'GET' });
 }
 
+async function reportCurrentToOlympus(request, env) {
+  const olympusUrl = text(env?.OLYMPUS_URL);
+  if (!olympusUrl) return reject('OLYMPUS_URL_NOT_CONFIGURED', 503);
+  let input;
+  try { input = await request.json(); } catch { return reject('CURRENT_REPORT_JSON_INVALID', 400); }
+  const evidence = Array.isArray(input.evidence) ? input.evidence.filter(Boolean) : [];
+  const payload = {
+    appId: 'ergasterion',
+    version: text(input.version),
+    sourceRevision: text(input.sourceRevision),
+    artifactSha: text(input.artifactSha),
+    runtimeIdentity: text(input.runtimeIdentity) || 'CLOUDFLARE_WORKER',
+    owner: 'ERGASTERION',
+    provenanceRef: text(input.provenanceRef),
+    verified: input.verified === true,
+    evidence,
+  };
+  for (const field of ['version','sourceRevision','artifactSha','provenanceRef']) {
+    if (!payload[field]) return reject(`CURRENT_REPORT_${field.toUpperCase()}_REQUIRED`, 400);
+  }
+  if (!payload.verified || !payload.evidence.length) return reject('CURRENT_REPORT_VERIFIED_EVIDENCE_REQUIRED', 409);
+  const response = await fetch(`${olympusUrl.replace(/\/+$/, '')}/reports/current`, {
+    method:'POST',
+    headers:{'content-type':'application/json'},
+    body:JSON.stringify(payload),
+  });
+  const body = await response.json();
+  if (!response.ok) return json({ ok:false, status:'REJECTED', error:'OLYMPUS_CURRENT_REPORT_FAILED', upstreamStatus:response.status, upstream:body }, 502);
+  return json({ ok:true, status:'REPORTED', authorityTransferred:false, sourceOwner:'ERGASTERION', olympus:body }, 202);
+}
+
 function transportHealth(env) {
   const secretConfigured = Boolean(text(env?.ERGASTERION_HUB_SHARED_SECRET));
   const ledgerBound = Boolean(env?.HANDOFF_LEDGER);
@@ -193,6 +224,10 @@ export default {
         surface: 'CLOUDFLARE_FACTORY_EDGE',
         status: 'READY',
       });
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/olympus/current-report') {
+      return reportCurrentToOlympus(request, env);
     }
 
     if (request.method === 'GET' && url.pathname === '/api/hub-factory/health') {
