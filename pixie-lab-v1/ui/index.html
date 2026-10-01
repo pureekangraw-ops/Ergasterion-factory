@@ -75,36 +75,62 @@
   <template id="visual-template">
     <div class="visual-grid">
       <section class="panel reference-panel">
-        <div class="panel-head"><span>REFERENCE TRAY</span><span class="muted">source / keep</span></div>
+        <div class="panel-head"><span>REFERENCE TRAY</span><span class="muted">source / meaning</span></div>
         <div class="reference-drop">
           <div class="reference-thumb" id="visual-source-thumb">REF</div>
           <div>
             <strong id="visual-source">No source yet</strong>
-            <small>Current source stays locked. Roles such as STYLE / COMPOSITION / MUST KEEP can be added as metadata without creating a new image engine.</small>
+            <small>Source stays locked. Attach meaning to references instead of turning every image into a prompt.</small>
           </div>
+        </div>
+        <div class="spatial-section">
+          <div class="subhead">REFERENCE ROLES</div>
+          <div id="visual-reference-roles" class="chip-list"></div>
         </div>
       </section>
 
       <section class="panel canvas-panel">
-        <div class="panel-head"><span>MAIN CANVAS</span><span id="visual-status" class="truth unknown">UNKNOWN</span></div>
+        <div class="panel-head"><span>SPATIAL WORKTABLE</span><span id="visual-status" class="truth unknown">UNKNOWN</span></div>
+        <div class="focus-toolbar">
+          <label>Focus Frame<input id="visual-frame-label" placeholder="face / light / top-left"></label>
+          <button id="visual-add-frame">Add frame</button>
+          <select id="visual-focus-frame" aria-label="Active focus frame"></select>
+          <button id="visual-use-frame">Use</button>
+        </div>
         <div id="visual-canvas" class="visual-canvas">
           <div class="canvas-placeholder">
             <div class="canvas-mark">✦</div>
             <strong>No visual artifact selected</strong>
-            <span>Create/open a Visual Draft, prepare a render packet, then receive an image artifact through GO_IMAGE_TOOL.</span>
+            <span>Place references, define a focus frame, then let Pixie read the intent before sending a packet to GO_IMAGE_TOOL.</span>
           </div>
         </div>
+        <div class="focus-caption"><span id="visual-focus-status">No active focus frame</span><span class="muted">temporary attention mask</span></div>
         <div class="generate-bar">
-          <input id="visual-prompt" placeholder="Brief / what should change?">
-          <button id="visual-prepare" class="primary">Prepare render</button>
+          <input id="visual-prompt" placeholder="Intent / what should change?"><button id="visual-prepare" class="primary">Prepare render</button>
         </div>
       </section>
 
       <section class="panel brief-panel">
-        <div class="panel-head"><span>BRIEF + PIXIE</span><span class="muted">intent guard</span></div>
+        <div class="panel-head"><span>PIXIE INTERPRETATION</span><span class="muted">intent graph</span></div>
         <label>Requested Result<textarea id="visual-requested" placeholder="What should be true after this image?"></textarea></label>
         <label>Must Keep<textarea id="visual-keep" placeholder="one item per line"></textarea></label>
         <label>Must Remove<textarea id="visual-remove" placeholder="one item per line"></textarea></label>
+        <div class="intent-graph">
+          <div class="subhead">VISUAL INTENT LINKS</div>
+          <div id="visual-intent-links" class="chip-list"></div>
+          <div class="intent-form">
+            <input id="visual-link-source" placeholder="reference / note / result">
+            <select id="visual-link-role">
+              <option>FACE</option><option>LIGHTING</option><option>COMPOSITION</option><option>COLOR</option><option>STYLE</option><option>OUTFIT</option><option>BACKGROUND</option><option>NEGATIVE_CONSTRAINT</option>
+            </select>
+            <input id="visual-link-note" placeholder="use for…">
+            <button id="visual-add-link">Link</button>
+          </div>
+        </div>
+        <div class="freeze-explore">
+          <div class="freeze-column"><div class="subhead"><span>FREEZE</span><span class="muted">keep</span></div><div id="visual-freeze" class="chip-list"></div><div class="state-form"><input id="visual-freeze-item" placeholder="face / palette"><button id="visual-add-freeze">+</button></div></div>
+          <div class="freeze-column"><div class="subhead"><span>EXPLORE</span><span class="muted">try</span></div><div id="visual-explore" class="chip-list"></div><div class="state-form"><input id="visual-explore-item" placeholder="background / angle"><button id="visual-add-explore">+</button></div></div>
+        </div>
         <div id="visual-pixie" class="pixie-box"></div>
       </section>
 
