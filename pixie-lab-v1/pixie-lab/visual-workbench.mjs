@@ -5,6 +5,7 @@ const nowIso = () => new Date().toISOString();
 const required = (value, label) => { const out = text(value); if (!out) throw new Error(`${label} is required`); return out; };
 const unique = (values = []) => [...new Set((Array.isArray(values) ? values : [values]).map(text).filter(Boolean))];
 const INTENT_ROLES = Object.freeze(['FACE', 'LIGHTING', 'COMPOSITION', 'COLOR', 'STYLE', 'OUTFIT', 'BACKGROUND', 'NEGATIVE_CONSTRAINT']);
+const SEMANTIC_PART_ROLES = Object.freeze([...INTENT_ROLES, 'OBJECT', 'POSE', 'TEXTURE']);
 const clamp01 = (value, fallback = 0) => Number.isFinite(Number(value)) ? Math.min(1, Math.max(0, Number(value))) : fallback;
 
 function normalizeBounds(bounds = {}, fallback = { x: 0.18, y: 0.18, width: 0.64, height: 0.64 }) {
@@ -61,7 +62,118 @@ function normalizeFreezeExplore(freezeSet, exploreSet) {
   return { freezeSet: frozen, exploreSet: exploring };
 }
 
-function normalizeSpatial(spatial, sourceRef) {
+function normalizeCompareNotes(notes, resultRefs) {
+  return (Array.isArray(notes) ? notes : []).map((note, index) => {
+    const comparedRefs = unique(note?.comparedRefs);
+    if (resultRefs.length && comparedRefs.some((ref) => !resultRefs.includes(ref))) throw new Error('VISUAL_COMPARE_NOTE_RESULT_NOT_FOUND');
+    return {
+      id: text(note?.id) || `NOTE-${index + 1}`,
+      text: text(note?.text),
+      comparedRefs,
+      compareSessionId: text(note?.compareSessionId) || null,
+      createdAt: text(note?.createdAt) || null,
+    };
+  }).filter((note) => note.text);
+}
+
+function normalizeCompareSessions(sessions, resultRefs, compareNotes) {
+  const noteIds = new Set(compareNotes.map((note) => note.id));
+  return (Array.isArray(sessions) ? sessions : []).map((session, index) => {
+    const selectedResultRefs = unique(session?.selectedResultRefs || session?.resultRefs);
+    if (selectedResultRefs.length < 2 || selectedResultRefs.length > 4) throw new Error('VISUAL_COMPARE_SELECTION_INVALID');
+    if (resultRefs.length && selectedResultRefs.some((ref) => !resultRefs.includes(ref))) throw new Error('VISUAL_COMPARE_RESULT_NOT_FOUND');
+    const compareNoteRefs = unique(session?.compareNoteRefs);
+    if (compareNoteRefs.some((ref) => !noteIds.has(ref))) throw new Error('VISUAL_COMPARE_NOTE_NOT_FOUND');
+    const winnerRef = text(session?.winnerRef) || null;
+    if (winnerRef && !selectedResultRefs.includes(winnerRef)) throw new Error('VISUAL_WINNER_NOT_IN_COMPARE');
+    return {
+      compareSessionId: required(session?.compareSessionId || session?.id || `COMPARE-${index + 1}`, 'compareSessionId'),
+      selectedResultRefs,
+      winnerRef,
+      compareNoteRefs,
+      createdAt: text(session?.createdAt) || null,
+    };
+  });
+}
+
+function normalizePromotedParts(parts, resultRefs, compareSessions, focusFrames, visualDraftId) {
+  const selectedRefs = new Set(compareSessions.flatMap((session) => session.selectedResultRefs));
+  const frameIds = new Set(focusFrames.map((frame) => frame.id));
+  return (Array.isArray(parts) ? parts : []).map((part, index) => {
+    const sourceResultRef = required(part?.sourceResultRef || part?.resultRef, 'promotedPart.sourceResultRef');
+    if (!resultRefs.includes(sourceResultRef)) throw new Error('VISUAL_PROMOTED_RESULT_NOT_FOUND');
+    if (!selectedRefs.has(sourceResultRef)) throw new Error('VISUAL_PROMOTED_RESULT_NOT_SELECTED');
+    const role = upper(part?.role);
+    if (!SEMANTIC_PART_ROLES.includes(role)) throw new Error('VISUAL_SEMANTIC_ROLE_INVALID');
+    const focusFrameId = text(part?.focusFrameId) || null;
+    if (focusFrameId && !frameIds.has(focusFrameId)) throw new Error('VISUAL_PROMOTED_FOCUS_FRAME_NOT_FOUND');
+    const regionRef = text(part?.regionRef) || null;
+    if (regionRef && !frameIds.has(regionRef)) throw new Error('VISUAL_PROMOTED_REGION_NOT_FOUND');
+    return {
+      partId: text(part?.partId || part?.id) || `PART-${index + 1}`,
+      sourceResultRef,
+      role,
+      note: text(part?.note) || null,
+      focusFrameId,
+      regionRef,
+      visualDraftId: text(part?.visualDraftId) || text(visualDraftId) || null,
+      createdAt: text(part?.createdAt) || null,
+    };
+  });
+}
+
+function normalizeBranch(branch, references, resultRefs, focusFrames, visualDraftId) {
+  if (!branch) return null;
+  const parentVisualDraftId = required(branch.parentVisualDraftId, 'branch.parentVisualDraftId');
+  if (visualDraftId && parentVisualDraftId === visualDraftId) throw new Error('VISUAL_BRANCH_PARENT_SELF');
+  const parentResultRefs = unique(branch.parentResultRefs);
+  if (!parentResultRefs.length) throw new Error('VISUAL_BRANCH_PARENT_RESULTS_REQUIRED');
+  if (parentResultRefs.some((ref) => !resultRefs.includes(ref))) throw new Error('VISUAL_BRANCH_PARENT_RESULT_NOT_FOUND');
+  const frameIds = new Set(focusFrames.map((frame) => frame.id));
+  if (branch.activeFocusFrameId && !frameIds.has(branch.activeFocusFrameId)) throw new Error('VISUAL_BRANCH_FOCUS_FRAME_NOT_FOUND');
+  return {
+    branchId: required(branch.branchId, 'branchId'),
+    parentVisualDraftId,
+    parentResultRefs,
+    promotedParts: normalizePromotedParts(branch.promotedParts, resultRefs, [{ selectedResultRefs: parentResultRefs }], focusFrames, visualDraftId),
+    inheritedFreezeSet: unique(branch.inheritedFreezeSet),
+    inheritedExploreSet: unique(branch.inheritedExploreSet),
+    inheritedIntentLinks: normalizeIntentLinks(branch.inheritedIntentLinks, references),
+    compareNoteRefs: unique(branch.compareNoteRefs),
+    createdAt: text(branch.createdAt) || null,
+  };
+}
+
+function normalizeNextIntents(intents, resultRefs, compareSessions, focusFrames, references, visualDraftId) {
+  const sessions = new Map(compareSessions.map((session) => [session.compareSessionId, session]));
+  const frameIds = new Set(focusFrames.map((frame) => frame.id));
+  return (Array.isArray(intents) ? intents : []).map((intent, index) => {
+    const compareSessionId = text(intent?.compareSessionId) || null;
+    const session = compareSessionId ? sessions.get(compareSessionId) : null;
+    if (compareSessionId && !session) throw new Error('VISUAL_NEXT_INTENT_COMPARE_NOT_FOUND');
+    const selected = session?.selectedResultRefs || unique(intent?.selectedResultRefs);
+    const winnerRef = text(intent?.winnerRef) || null;
+    if (winnerRef && !selected.includes(winnerRef)) throw new Error('VISUAL_NEXT_INTENT_WINNER_INVALID');
+    const focusFrameId = text(intent?.focusFrameId) || null;
+    if (focusFrameId && !frameIds.has(focusFrameId)) throw new Error('VISUAL_NEXT_INTENT_FOCUS_FRAME_NOT_FOUND');
+    return {
+      nextIntentId: required(intent?.nextIntentId || intent?.id || `NEXT-INTENT-${index + 1}`, 'nextIntentId'),
+      compareSessionId,
+      selectedResultRefs: selected,
+      winnerRef,
+      promotedParts: normalizePromotedParts(intent?.promotedParts, resultRefs, session ? [session] : [{ selectedResultRefs: selected }], focusFrames, visualDraftId),
+      compareNoteRefs: unique(intent?.compareNoteRefs),
+      freezeSet: unique(intent?.freezeSet),
+      exploreSet: unique(intent?.exploreSet),
+      focusFrameId,
+      intentLinks: normalizeIntentLinks(intent?.intentLinks, references),
+      createdAt: text(intent?.createdAt) || null,
+      visualDraftId: text(intent?.visualDraftId) || text(visualDraftId) || null,
+    };
+  });
+}
+
+function normalizeSpatial(spatial, sourceRef, visualDraftId = null) {
   const input = spatial && typeof spatial === 'object' ? spatial : {};
   const references = normalizeReferences(sourceRef, input.references);
   const focusFrames = (Array.isArray(input.focusFrames) ? input.focusFrames : []).map((frame, index) => ({
@@ -71,6 +183,19 @@ function normalizeSpatial(spatial, sourceRef) {
   }));
   const activeFocusFrameId = focusFrames.some((frame) => frame.id === input.activeFocusFrameId) ? input.activeFocusFrameId : null;
   const { freezeSet, exploreSet } = normalizeFreezeExplore(input.freezeSet, input.exploreSet);
+  const resultRefs = unique(input.resultRefs);
+  const compareNotes = normalizeCompareNotes(input.compareNotes, resultRefs);
+  const compareSessions = normalizeCompareSessions(input.compareSessions, resultRefs, compareNotes);
+  const activeCompareSessionId = compareSessions.some((session) => session.compareSessionId === input.activeCompareSessionId)
+    ? input.activeCompareSessionId
+    : null;
+  const winnerRef = text(input.winnerRef) || (compareSessions.find((session) => session.compareSessionId === activeCompareSessionId)?.winnerRef || null);
+  const activeSession = compareSessions.find((session) => session.compareSessionId === activeCompareSessionId);
+  if (winnerRef && activeSession && !activeSession.selectedResultRefs.includes(winnerRef)) throw new Error('VISUAL_WINNER_NOT_IN_COMPARE');
+  const promotedParts = normalizePromotedParts(input.promotedParts, resultRefs, compareSessions, focusFrames, visualDraftId);
+  const branch = normalizeBranch(input.branch, references, resultRefs, focusFrames, visualDraftId);
+  const nextIntents = normalizeNextIntents(input.nextIntents, resultRefs, compareSessions, focusFrames, references, visualDraftId);
+  const activeNextIntentId = nextIntents.some((intent) => intent.nextIntentId === input.activeNextIntentId) ? input.activeNextIntentId : null;
   return {
     references,
     focusFrames,
@@ -78,15 +203,18 @@ function normalizeSpatial(spatial, sourceRef) {
     intentLinks: normalizeIntentLinks(input.intentLinks, references),
     freezeSet,
     exploreSet,
-    compareNotes: (Array.isArray(input.compareNotes) ? input.compareNotes : []).map((note, index) => ({
-      id: text(note?.id) || `NOTE-${index + 1}`,
-      text: text(note?.text),
-      comparedRefs: unique(note?.comparedRefs),
-      createdAt: text(note?.createdAt) || null,
-    })).filter((note) => note.text),
+    compareNotes,
+    resultRefs,
+    compareSessions,
+    activeCompareSessionId,
+    winnerRef,
+    promotedParts,
+    branch,
+    nextIntents,
+    activeNextIntentId,
+    nextIntent: input.nextIntent ? clone(input.nextIntent) : null,
   };
 }
-
 function freeze(value) {
   if (value && typeof value === 'object' && !Object.isFrozen(value)) {
     Object.values(value).forEach(freeze);
@@ -129,11 +257,13 @@ export function createVisualDraft({
   sourceVersion = 'unknown',
   sourceHash = null,
   spec = {},
+  parentVisualDraftId = null,
+  lineage = null,
   now = nowIso,
 } = {}) {
   const inputSpec = clone(spec ?? {});
   const inputSpatial = inputSpec.spatial && typeof inputSpec.spatial === 'object' ? inputSpec.spatial : {};
-  const normalizedSpatial = normalizeSpatial(inputSpatial, sourceRef);
+  const normalizedSpatial = normalizeSpatial(inputSpatial, sourceRef, visualDraftId);
   const originalSpec = { ...inputSpec, spatial: normalizedSpatial };
   return freeze({
     visualDraftId: required(visualDraftId, 'visualDraftId'),
@@ -142,6 +272,8 @@ export function createVisualDraft({
     sourceRef: required(sourceRef, 'sourceRef'),
     sourceVersion: required(sourceVersion, 'sourceVersion'),
     sourceHash: text(sourceHash) || null,
+    parentVisualDraftId: text(parentVisualDraftId) || null,
+    lineage: clone(lineage),
     sourceLocked: true,
     labOwned: true,
     table: {
@@ -213,7 +345,7 @@ export function editVisualDraft(draft, edit = {}, { now = nowIso } = {}) {
   if (op === 'SET') {
     if (!location.parent || location.key == null) throw new Error('VISUAL_WORKBENCH_ROOT_SET_FORBIDDEN');
     if (pathParts(edit.path)[0] === 'spatial') {
-      const spatial = normalizeSpatial({ ...workingSpec.spatial, [pathParts(edit.path)[1]]: clone(edit.value) }, draft.sourceRef);
+      const spatial = normalizeSpatial({ ...workingSpec.spatial, [pathParts(edit.path)[1]]: clone(edit.value) }, draft.sourceRef, draft.visualDraftId);
       workingSpec.spatial = spatial;
     } else {
       location.parent[location.key] = clone(edit.value);
@@ -277,20 +409,41 @@ export function createVisualRenderPacket(draft, {
   intentLinks = undefined,
   freezeSet = undefined,
   exploreSet = undefined,
+  packetVersion = 'V2',
+  compareSessionId = undefined,
+  compareSession = undefined,
+  selectedResultRefs = undefined,
+  winnerRef = undefined,
+  promotedParts = undefined,
+  branchId = undefined,
+  parentLineage = undefined,
+  nextIntent = undefined,
   now = nowIso,
 } = {}) {
   requireDraft(draft);
   const scanEvidence = (draft.scans || []).flatMap((item) => item.evidenceRefs || []);
   const scanUnknowns = (draft.scans || []).flatMap((item) => item.unknowns || []);
-  const spatial = normalizeSpatial(draft.workingSpec?.spatial, draft.sourceRef);
+  const spatial = normalizeSpatial(draft.workingSpec?.spatial, draft.sourceRef, draft.visualDraftId);
   const packetFocusFrame = focusFrame === undefined
     ? (spatial.focusFrames || []).find((item) => item.id === spatial.activeFocusFrameId) || null
     : clone(focusFrame);
   const packetIntentLinks = intentLinks === undefined ? spatial.intentLinks || [] : intentLinks;
   const packetFreezeSet = freezeSet === undefined ? spatial.freezeSet || [] : freezeSet;
   const packetExploreSet = exploreSet === undefined ? spatial.exploreSet || [] : exploreSet;
-  const packetSpatial = normalizeSpatial({ ...spatial, intentLinks: packetIntentLinks, freezeSet: packetFreezeSet, exploreSet: packetExploreSet }, draft.sourceRef);
+  const packetSpatial = normalizeSpatial({ ...spatial, intentLinks: packetIntentLinks, freezeSet: packetFreezeSet, exploreSet: packetExploreSet }, draft.sourceRef, draft.visualDraftId);
   if (packetFocusFrame && !packetSpatial.focusFrames.some((frame) => frame.id === packetFocusFrame.id)) throw new Error('VISUAL_FOCUS_FRAME_NOT_FOUND');
+  const inferredCompareSessionId = compareSessionId || packetSpatial.activeCompareSessionId || (packetSpatial.compareSessions.length === 1 ? packetSpatial.compareSessions[0].compareSessionId : null);
+  const activeCompareSession = compareSession || (compareSessionId === null ? null : packetSpatial.compareSessions.find((session) => session.compareSessionId === inferredCompareSessionId)) || null;
+  const packetSelectedResultRefs = selectedResultRefs === undefined ? (activeCompareSession?.selectedResultRefs || []) : unique(selectedResultRefs);
+  if (packetSelectedResultRefs.some((ref) => !packetSpatial.resultRefs.includes(ref))) throw new Error('VISUAL_PACKET_RESULT_NOT_FOUND');
+  const packetWinnerRef = winnerRef === undefined ? (activeCompareSession?.winnerRef || packetSpatial.winnerRef || null) : text(winnerRef) || null;
+  if (packetWinnerRef && !packetSelectedResultRefs.includes(packetWinnerRef)) throw new Error('VISUAL_WINNER_NOT_IN_COMPARE');
+  const packetPromotedParts = promotedParts === undefined
+    ? packetSpatial.promotedParts.filter((part) => packetSelectedResultRefs.includes(part.sourceResultRef))
+    : normalizePromotedParts(promotedParts, packetSpatial.resultRefs, packetSpatial.compareSessions, packetSpatial.focusFrames, draft.visualDraftId);
+  const activeNextIntent = nextIntent === undefined
+    ? (packetSpatial.nextIntent || packetSpatial.nextIntents.find((intent) => intent.nextIntentId === packetSpatial.activeNextIntentId) || null)
+    : clone(nextIntent);
   return freeze({
     packetId: required(packetId, 'packetId'),
     visualDraftId: draft.visualDraftId,
@@ -299,6 +452,7 @@ export function createVisualRenderPacket(draft, {
     sourceRef: draft.sourceRef,
     sourceVersion: draft.sourceVersion,
     sourceHash: draft.sourceHash,
+    parentVisualDraftId: draft.parentVisualDraftId || null,
     workingSpec: clone(draft.workingSpec),
     references: clone(packetSpatial.references),
     focusFrame: packetFocusFrame ? clone(packetSpatial.focusFrames.find((frame) => frame.id === packetFocusFrame.id)) : null,
@@ -306,6 +460,17 @@ export function createVisualRenderPacket(draft, {
     freezeSet: unique(packetSpatial.freezeSet),
     exploreSet: unique(packetSpatial.exploreSet),
     compareNotes: clone(packetSpatial.compareNotes),
+    packetVersion: upper(packetVersion) === 'V3' ? 'V3' : 'V2',
+    compareSession: clone(activeCompareSession),
+    compareSessionId: activeCompareSession?.compareSessionId || null,
+    selectedResultRefs: clone(packetSelectedResultRefs),
+    winnerRef: packetWinnerRef,
+    promotedParts: clone(packetPromotedParts),
+    branchId: text(branchId) || packetSpatial.branch?.branchId || null,
+    parentLineage: clone(parentLineage === undefined ? draft.lineage : parentLineage),
+    nextIntent: activeNextIntent,
+    inheritedFreezeSet: unique(packetSpatial.branch?.inheritedFreezeSet || packetSpatial.freezeSet),
+    inheritedExploreSet: unique(packetSpatial.branch?.inheritedExploreSet || packetSpatial.exploreSet),
     intent: required(intent, 'intent'),
     requestedResult: required(requestedResult, 'requestedResult'),
     mustKeep: unique(mustKeep),
