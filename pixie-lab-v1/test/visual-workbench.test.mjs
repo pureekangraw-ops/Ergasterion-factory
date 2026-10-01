@@ -217,3 +217,59 @@ test('Visual vNext persists compare notes and carries them into the packet', () 
   });
   assert.equal(packet.compareNotes[0].comparedRefs[0], 'image://v2');
 });
+
+test('Visual Phase 2 persists compare selection, linked note and creative winner', () => {
+  const lab = new PixieLab({ now: clock() });
+  lab.createVisualDraft({ visualDraftId: 'VIS-P2-COMPARE', sourceRef: 'image://source', spec: { spatial: { resultRefs: ['result://v1', 'result://v2', 'result://v3'], compareSessions: [] } } });
+  const compared = lab.editVisualDraft('VIS-P2-COMPARE', { op: 'SET', path: 'spatial.compareSessions', value: [{ compareSessionId: 'COMPARE-1', selectedResultRefs: ['result://v1', 'result://v2'], winnerRef: 'result://v2', compareNoteRefs: [], createdAt: '2026-09-26T07:45:00.000Z' }] });
+  const noted = lab.editVisualDraft('VIS-P2-COMPARE', { op: 'SET', path: 'spatial.compareNotes', value: [{ id: 'NOTE-1', text: 'Keep the light from V2', comparedRefs: ['result://v1', 'result://v2'], compareSessionId: 'COMPARE-1', createdAt: '2026-09-26T07:45:01.000Z' }] });
+  const linked = lab.editVisualDraft('VIS-P2-COMPARE', { op: 'SET', path: 'spatial.compareSessions', value: [{ ...compared.workingSpec.spatial.compareSessions[0], compareNoteRefs: ['NOTE-1'] }] });
+  assert.deepEqual(linked.workingSpec.spatial.compareSessions[0].selectedResultRefs, ['result://v1', 'result://v2']);
+  assert.equal(linked.workingSpec.spatial.compareSessions[0].winnerRef, 'result://v2');
+  assert.equal(linked.workingSpec.spatial.compareSessions[0].compareNoteRefs[0], 'NOTE-1');
+  assert.equal(linked.workingSpec.spatial.compareNotes[0].compareSessionId, 'COMPARE-1');
+});
+
+test('Visual Phase 2 promotes semantic parts with referential integrity', () => {
+  const lab = new PixieLab({ now: clock() });
+  lab.createVisualDraft({ visualDraftId: 'VIS-P2-PARTS', sourceRef: 'image://source', spec: { spatial: { resultRefs: ['result://v1', 'result://v2'], focusFrames: [{ id: 'FRAME-FACE', label: 'face', bounds: { x: 0.1, y: 0.1, width: 0.3, height: 0.3 } }], compareSessions: [{ compareSessionId: 'COMPARE-1', selectedResultRefs: ['result://v1', 'result://v2'] }] } } });
+  const promoted = lab.editVisualDraft('VIS-P2-PARTS', { op: 'SET', path: 'spatial.promotedParts', value: [{ partId: 'PART-FACE', sourceResultRef: 'result://v2', role: 'FACE', note: 'preserve this face', focusFrameId: 'FRAME-FACE', regionRef: 'FRAME-FACE', createdAt: '2026-09-26T07:45:00.000Z' }] });
+  assert.equal(promoted.workingSpec.spatial.promotedParts[0].role, 'FACE');
+  assert.equal(promoted.workingSpec.spatial.promotedParts[0].sourceResultRef, 'result://v2');
+  assert.throws(() => lab.editVisualDraft('VIS-P2-PARTS', { op: 'SET', path: 'spatial.promotedParts', value: [{ sourceResultRef: 'result://missing', role: 'FACE' }] }), /VISUAL_PROMOTED_RESULT_NOT_FOUND/);
+  assert.throws(() => lab.editVisualDraft('VIS-P2-PARTS', { op: 'SET', path: 'spatial.promotedParts', value: [{ sourceResultRef: 'result://v1', role: 'NOT_A_ROLE' }] }), /VISUAL_SEMANTIC_ROLE_INVALID/);
+  assert.throws(() => lab.editVisualDraft('VIS-P2-PARTS', { op: 'SET', path: 'spatial.promotedParts', value: [{ sourceResultRef: 'result://v1', role: 'POSE', focusFrameId: 'FRAME-MISSING' }] }), /VISUAL_PROMOTED_FOCUS_FRAME_NOT_FOUND/);
+});
+
+test('Visual Phase 2 creates a child branch with lineage without mutating its parent draft', () => {
+  const lab = new PixieLab({ now: clock() });
+  const parent = lab.createVisualDraft({ visualDraftId: 'VIS-P2-PARENT', sourceRef: 'image://source', spec: { spatial: { resultRefs: ['result://v1', 'result://v2'], compareSessions: [{ compareSessionId: 'COMPARE-1', selectedResultRefs: ['result://v1', 'result://v2'], winnerRef: 'result://v2' }], promotedParts: [{ partId: 'PART-LIGHT', sourceResultRef: 'result://v1', role: 'LIGHTING' }] } } });
+  const child = lab.createVisualDraft({ visualDraftId: 'VIS-P2-BRANCH', parentVisualDraftId: parent.visualDraftId, lineage: { parentVisualDraftId: parent.visualDraftId, parentResultRefs: ['result://v1', 'result://v2'], branchId: 'BRANCH-1' }, sourceRef: 'result://v2', sourceVersion: 'branch:BRANCH-1', spec: { spatial: { resultRefs: ['result://v1', 'result://v2'], compareSessions: [{ compareSessionId: 'COMPARE-BRANCH-1', selectedResultRefs: ['result://v1', 'result://v2'], winnerRef: 'result://v2' }], promotedParts: [{ partId: 'PART-LIGHT', sourceResultRef: 'result://v1', role: 'LIGHTING' }], branch: { branchId: 'BRANCH-1', parentVisualDraftId: parent.visualDraftId, parentResultRefs: ['result://v1', 'result://v2'], promotedParts: [{ partId: 'PART-LIGHT', sourceResultRef: 'result://v1', role: 'LIGHTING' }], inheritedFreezeSet: ['face'], inheritedIntentLinks: [], compareNoteRefs: [], createdAt: '2026-09-26T07:45:00.000Z' } } } });
+  assert.equal(child.parentVisualDraftId, 'VIS-P2-PARENT');
+  assert.equal(child.lineage.branchId, 'BRANCH-1');
+  assert.equal(child.workingSpec.spatial.branch.parentVisualDraftId, 'VIS-P2-PARENT');
+  assert.equal(parent.workingSpec.spatial.branch, null);
+  assert.equal(parent.workingSpec.spatial.promotedParts[0].role, 'LIGHTING');
+});
+
+test('Visual Phase 2 Render Packet v3 carries compare, promotion, next intent and lineage state', () => {
+  const lab = new PixieLab({ now: clock() });
+  lab.createVisualDraft({ visualDraftId: 'VIS-P2-PACKET', parentVisualDraftId: 'VIS-P2-PARENT', lineage: { parentVisualDraftId: 'VIS-P2-PARENT', parentResultRefs: ['result://v1', 'result://v2'], branchId: 'BRANCH-2' }, sourceRef: 'result://v2', sourceVersion: 'branch:BRANCH-2', spec: { spatial: { resultRefs: ['result://v1', 'result://v2'], focusFrames: [{ id: 'FRAME-1', label: 'face', bounds: { x: 0.1, y: 0.1, width: 0.4, height: 0.4 } }], activeFocusFrameId: 'FRAME-1', compareSessions: [{ compareSessionId: 'COMPARE-2', selectedResultRefs: ['result://v1', 'result://v2'], winnerRef: 'result://v2' }], promotedParts: [{ partId: 'PART-FACE', sourceResultRef: 'result://v2', role: 'FACE', focusFrameId: 'FRAME-1' }], branch: { branchId: 'BRANCH-2', parentVisualDraftId: 'VIS-P2-PARENT', parentResultRefs: ['result://v1', 'result://v2'], promotedParts: [], inheritedFreezeSet: ['face'], inheritedIntentLinks: [], compareNoteRefs: [], createdAt: '2026-09-26T07:45:00.000Z' }, nextIntents: [{ nextIntentId: 'NEXT-2', compareSessionId: 'COMPARE-2', selectedResultRefs: ['result://v1', 'result://v2'], winnerRef: 'result://v2', promotedParts: [], compareNoteRefs: [], freezeSet: ['face'], exploreSet: ['background'], focusFrameId: 'FRAME-1', intentLinks: [], createdAt: '2026-09-26T07:45:00.000Z' }], activeNextIntentId: 'NEXT-2' } } });
+  const packet = lab.createVisualRenderPacket('VIS-P2-PACKET', { packetId: 'PACKET-V3', packetVersion: 'V3', intent: 'Keep the promoted face and explore the background', requestedResult: 'A branched visual variant' });
+  assert.equal(packet.packetVersion, 'V3');
+  assert.deepEqual(packet.selectedResultRefs, ['result://v1', 'result://v2']);
+  assert.equal(packet.winnerRef, 'result://v2');
+  assert.equal(packet.promotedParts[0].role, 'FACE');
+  assert.equal(packet.branchId, 'BRANCH-2');
+  assert.equal(packet.parentLineage.branchId, 'BRANCH-2');
+  assert.equal(packet.nextIntent.nextIntentId, 'NEXT-2');
+  assert.deepEqual(packet.inheritedFreezeSet, ['face']);
+  assert.equal(packet.targetTool, 'GO_IMAGE_TOOL');
+  assert.equal(packet.imageGenerationAuthority, false);
+});
+
+test('Visual Phase 2 rejects invalid compare winners and branch references', () => {
+  const lab = new PixieLab({ now: clock() });
+  assert.throws(() => lab.createVisualDraft({ visualDraftId: 'VIS-P2-BAD-WINNER', sourceRef: 'image://source', spec: { spatial: { resultRefs: ['result://v1', 'result://v2'], compareSessions: [{ compareSessionId: 'COMPARE-BAD', selectedResultRefs: ['result://v1', 'result://v2'], winnerRef: 'result://v3' }] } } }), /VISUAL_WINNER_NOT_IN_COMPARE/);
+  assert.throws(() => lab.createVisualDraft({ visualDraftId: 'VIS-P2-BAD-BRANCH', sourceRef: 'image://source', spec: { spatial: { resultRefs: ['result://v1'], branch: { branchId: 'BRANCH-BAD', parentVisualDraftId: 'VIS-P2-PARENT', parentResultRefs: ['result://missing'], inheritedIntentLinks: [] } } } }), /VISUAL_BRANCH_PARENT_RESULT_NOT_FOUND/);
+});

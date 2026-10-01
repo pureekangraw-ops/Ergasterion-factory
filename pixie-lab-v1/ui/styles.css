@@ -202,3 +202,16 @@ button:disabled{opacity:.45;cursor:not-allowed}
 .focus-frame-overlay span{pointer-events:none}
 .focus-frame-resize{position:absolute;right:-6px;bottom:-6px;width:16px;height:16px;border:2px solid #111;background:var(--accent);border-radius:4px;cursor:nwse-resize;box-shadow:0 2px 6px rgba(0,0,0,.35)}
 .compare-note button{padding:7px 9px;font-size:10px}
+
+/* Pixie vNext Phase 2 — compare, promotion and branching */
+.compare-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:9px}
+.compare-actions button{padding:7px 9px;font-size:10px}
+.compare-actions .muted{font-size:10px;overflow:hidden;text-overflow:ellipsis}
+.compare-card.winner{border-color:var(--accent);box-shadow:0 0 0 1px rgba(240,177,74,.25)}
+.compare-card-actions{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:6px}
+.compare-card-actions button,.compare-card-actions select,.compare-card-actions input{width:100%;min-width:0;padding:6px 7px;font-size:9px}
+.compare-card-actions input{grid-column:1/-1}
+.compare-card-actions button:last-child{grid-column:1/-1}
+.promotion-tray,.next-intent-panel{margin-top:9px;padding-top:8px;border-top:1px solid #242b33}
+.next-intent-preview{margin:0;max-height:120px;overflow:auto;color:#9eabb8;font-size:9px;white-space:pre-wrap}
+@media(max-width:1100px){.compare-actions{display:grid;grid-template-columns:1fr 1fr}.compare-actions .muted{grid-column:1/-1}}
