@@ -54,7 +54,7 @@ export function createVisualDispatchContract(packet, {
   const cleanWorkId = required(workId, 'workId');
   const cleanCheckpointId = required(checkpointId, 'checkpointId');
   const selected = unique(sourceResultRefs.length ? sourceResultRefs : packet.selectedResultRefs);
-  const target = text(targetResultRef) || (action === 'EDIT' ? selected[0] : null);
+  const target = text(targetResultRef) || null;
   if (action === 'EDIT' && !target) throw new Error('VISUAL_EDIT_TARGET_REQUIRED');
   if (action === 'EDIT' && selected.length && !selected.includes(target)) throw new Error('VISUAL_EDIT_TARGET_NOT_IN_CONTEXT');
   const attemptNumber = Number(attempt);
