@@ -54,7 +54,7 @@ import {
   createVisualRenderPacket, verifyVisualRender,
 } from './visual-workbench.mjs';
 import {
-  createVisualDispatchContract, updateVisualDispatchStatus, createVisualReceipt, importVisualReceipt, buildVisualRecovery,
+  createVisualDispatchContract, updateVisualDispatchStatus, createVisualReceipt, importVisualReceipt, isUsableVisualReceipt, buildVisualRecovery,
 } from './visual-transport.mjs';
 
 const clone = (value) => value == null ? value : structuredClone(value);
@@ -567,12 +567,21 @@ export class PixieLab {
     const packet = this.state.visualRenderPackets.find((item) => item.packetId === input.packetId);
     if (!packet) throw new Error('VISUAL_RENDER_PACKET_NOT_FOUND');
     if (packet.visualDraftId !== visualDraftId) throw new Error('VISUAL_DISPATCH_DRAFT_MISMATCH');
+    const draftBranchId = text(draft.workingSpec?.spatial?.branch?.branchId) || null;
+    const packetBranchId = text(packet.branchId) || null;
+    const canonicalBranchId = packetBranchId || draftBranchId;
+    if (packetBranchId !== draftBranchId) throw new Error('VISUAL_DISPATCH_BRANCH_MISMATCH');
+    if ((text(input.branchId) || null) !== canonicalBranchId) throw new Error('VISUAL_DISPATCH_BRANCH_MISMATCH');
+    const canonicalWorkId = text(packet.workId || draft.workId);
+    const canonicalCheckpointId = text(packet.checkpointId || draft.checkpointId);
+    if (!canonicalWorkId || !canonicalCheckpointId) throw new Error('VISUAL_WORK_CONTEXT_UNKNOWN');
+    if (text(input.workId) !== canonicalWorkId || text(input.checkpointId) !== canonicalCheckpointId) throw new Error('VISUAL_WORK_CONTEXT_MISMATCH');
     if (String(input.actionType || '').toUpperCase() === 'EDIT') {
       const target = text(input.targetResultRef);
       if (target && !(draft.workingSpec?.spatial?.resultRefs || []).includes(target)) throw new Error('VISUAL_EDIT_TARGET_NOT_FOUND');
     }
     if (this.state.visualDispatches.some((item) => item.dispatchId === input.dispatchId)) throw new Error('DUPLICATE_VISUAL_DISPATCH_ID');
-    const dispatch = createVisualDispatchContract(packet, { ...input, visualDraftId, now: this.now });
+    const dispatch = createVisualDispatchContract(packet, { ...input, visualDraftId, branchId: canonicalBranchId, workId: canonicalWorkId, checkpointId: canonicalCheckpointId, now: this.now });
     this.state.visualDispatches.push(dispatch);
     const request = this.createImageAction(packet.packetId, {
       actionId: dispatch.dispatchId,
@@ -598,18 +607,19 @@ export class PixieLab {
     if (this.state.visualReceipts.some((item) => item.receiptId === input.receiptId)) throw new Error('DUPLICATE_VISUAL_RECEIPT_ID');
     if (this.state.visualReceipts.some((item) => item.dispatchId === dispatchId)) throw new Error('VISUAL_RECEIPT_DUPLICATE_DISPATCH');
     const received = createVisualReceipt(dispatch, { ...input, dispatchId, status: input.status || 'RECEIVED', now: this.now });
-    this.state.visualReceipts.push(received);
-    if (received.status === 'RECEIVED' && received.artifactRef) {
+    if (isUsableVisualReceipt(received)) {
       const draftIndex = this.state.visualDrafts.findIndex((item) => item.visualDraftId === received.visualDraftId);
       if (draftIndex < 0) throw new Error('VISUAL_DRAFT_NOT_FOUND');
+      // Import first. Commit receipt and draft together only after all lineage/readback checks pass.
       const imported = importVisualReceipt(this.state.visualDrafts[draftIndex], received, { now: this.now });
-      this.state.visualDrafts[draftIndex] = imported.draft;
       const linked = Object.freeze({ ...received, status: 'LINKED' });
-      this.state.visualReceipts[this.state.visualReceipts.length - 1] = linked;
+      this.state.visualDrafts[draftIndex] = imported.draft;
+      this.state.visualReceipts.push(linked);
       const dispatchIndex = this.state.visualDispatches.findIndex((item) => item.dispatchId === dispatchId);
       this.state.visualDispatches[dispatchIndex] = updateVisualDispatchStatus(this.state.visualDispatches[dispatchIndex], 'RECEIVED', { providerJobId: received.providerJobId, evidenceRefs: received.evidenceRefs, now: this.now });
       return clone(linked);
     }
+    this.state.visualReceipts.push(received);
     return clone(received);
   }
 
