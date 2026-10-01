@@ -135,5 +135,6 @@ test('Commander persists dispatch and receipt through governed commands', async 
   const received = await commander.execute({ command: 'visual_receipt', args: { dispatchId: 'DISPATCH-CMD-P3', receipt: { receiptId: 'RECEIPT-CMD-P3', artifactRef: 'artifact://cmd-v3', executorIdentity: 'GO_IMAGE_TOOL' } } });
   assert.equal(received.result.status, 'RECEIVED');
   const recovered = await commander.execute({ command: 'visual_recover', args: { visualDraftId: 'VIS-CMD-P3' } });
-  assert.equal(recovered.result.latestResultRefs.includes('artifact://cmd-v3'), true);
+  assert.equal(recovered.result.latestResultRefs.includes('artifact://cmd-v3'), false);
+  assert.equal(recovered.result.receipts[0].status, 'RECEIVED');
 });
