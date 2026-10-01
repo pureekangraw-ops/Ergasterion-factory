@@ -144,6 +144,26 @@ function normalizeBranch(branch, references, resultRefs, focusFrames, visualDraf
   };
 }
 
+function normalizeResultProvenance(records, resultRefs, visualDraftId) {
+  return (Array.isArray(records) ? records : []).map((record) => {
+    const resultRef = required(record?.resultRef || record?.artifactRef, 'resultProvenance.resultRef');
+    if (!resultRefs.includes(resultRef)) throw new Error('VISUAL_RESULT_PROVENANCE_RESULT_NOT_FOUND');
+    if (record?.visualDraftId && record.visualDraftId !== visualDraftId) throw new Error('VISUAL_RESULT_PROVENANCE_DRAFT_MISMATCH');
+    return {
+      resultRef,
+      artifactRef: text(record?.artifactRef) || resultRef,
+      receiptId: text(record?.receiptId) || null,
+      dispatchId: text(record?.dispatchId) || null,
+      packetId: text(record?.packetId) || null,
+      visualDraftId: text(record?.visualDraftId) || text(visualDraftId) || null,
+      branchId: text(record?.branchId) || null,
+      sourceResultRefs: unique(record?.sourceResultRefs),
+      status: upper(record?.status || 'UNKNOWN'),
+      createdAt: text(record?.createdAt) || null,
+    };
+  });
+}
+
 function normalizeNextIntents(intents, resultRefs, compareSessions, focusFrames, references, visualDraftId) {
   const sessions = new Map(compareSessions.map((session) => [session.compareSessionId, session]));
   const frameIds = new Set(focusFrames.map((frame) => frame.id));
@@ -185,6 +205,7 @@ function normalizeSpatial(spatial, sourceRef, visualDraftId = null) {
   const activeFocusFrameId = focusFrames.some((frame) => frame.id === input.activeFocusFrameId) ? input.activeFocusFrameId : null;
   const { freezeSet, exploreSet } = normalizeFreezeExplore(input.freezeSet, input.exploreSet);
   const resultRefs = unique(input.resultRefs);
+  const resultProvenance = normalizeResultProvenance(input.resultProvenance, resultRefs, visualDraftId);
   const compareNotes = normalizeCompareNotes(input.compareNotes, resultRefs);
   const compareSessions = normalizeCompareSessions(input.compareSessions, resultRefs, compareNotes);
   const activeCompareSessionId = compareSessions.some((session) => session.compareSessionId === input.activeCompareSessionId)
@@ -212,6 +233,7 @@ function normalizeSpatial(spatial, sourceRef, visualDraftId = null) {
     exploreSet,
     compareNotes,
     resultRefs,
+    resultProvenance,
     compareSessions,
     activeCompareSessionId,
     winnerRef,
@@ -473,6 +495,7 @@ export function createVisualRenderPacket(draft, {
     freezeSet: unique(packetSpatial.freezeSet),
     exploreSet: unique(packetSpatial.exploreSet),
     compareNotes: clone(packetSpatial.compareNotes),
+    resultProvenance: clone(packetSpatial.resultProvenance),
     packetVersion: upper(packetVersion) === 'V3' ? 'V3' : 'V2',
     compareSession: clone(activeCompareSession),
     compareSessionId: activeCompareSession?.compareSessionId || null,
