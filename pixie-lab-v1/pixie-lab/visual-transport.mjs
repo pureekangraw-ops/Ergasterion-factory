@@ -172,6 +172,8 @@ export function importVisualReceipt(draft, receipt, { placeOnTable = false, now 
   const resultRef = receipt.artifactRef;
   const resultRefs = unique([...(spatial.resultRefs || []), resultRef]);
   const provenance = Array.isArray(spatial.resultProvenance) ? spatial.resultProvenance : [];
+  const existing = provenance.find((item) => item.resultRef === resultRef);
+  if (existing && (existing.receiptId !== receipt.receiptId || existing.dispatchId !== receipt.dispatchId)) throw new Error('VISUAL_RESULT_DUPLICATE_ARTIFACT');
   const record = {
     resultRef,
     artifactRef: receipt.artifactRef,
@@ -184,7 +186,7 @@ export function importVisualReceipt(draft, receipt, { placeOnTable = false, now 
     status: receipt.status,
     createdAt: receipt.receivedAt || now(),
   };
-  const nextSpatial = { ...spatial, resultRefs, resultProvenance: [...provenance.filter((item) => item.resultRef !== resultRef), record] };
+  const nextSpatial = { ...spatial, resultRefs, resultProvenance: existing ? provenance : [...provenance, record] };
   if (placeOnTable && !spatial.references?.some((item) => item.ref === resultRef)) {
     const index = Array.isArray(spatial.references) ? spatial.references.length : 0;
     nextSpatial.references = [...(spatial.references || []), { id: `REF-${receipt.receiptId}`, ref: resultRef, label: `Result ${resultRef}`, kind: 'RESULT', bounds: { x: 0.04 + (index % 4) * 0.2, y: 0.04 + Math.floor(index / 4) * 0.2, width: 0.18, height: 0.18 }, zIndex: index + 1 }];
