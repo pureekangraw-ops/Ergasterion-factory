@@ -152,6 +152,7 @@ function normalizeNextIntents(intents, resultRefs, compareSessions, focusFrames,
     const session = compareSessionId ? sessions.get(compareSessionId) : null;
     if (compareSessionId && !session) throw new Error('VISUAL_NEXT_INTENT_COMPARE_NOT_FOUND');
     const selected = session?.selectedResultRefs || unique(intent?.selectedResultRefs);
+    if (resultRefs.length && selected.some((ref) => !resultRefs.includes(ref))) throw new Error('VISUAL_NEXT_INTENT_RESULT_NOT_FOUND');
     const winnerRef = text(intent?.winnerRef) || null;
     if (winnerRef && !selected.includes(winnerRef)) throw new Error('VISUAL_NEXT_INTENT_WINNER_INVALID');
     const focusFrameId = text(intent?.focusFrameId) || null;
@@ -196,6 +197,12 @@ function normalizeSpatial(spatial, sourceRef, visualDraftId = null) {
   const branch = normalizeBranch(input.branch, references, resultRefs, focusFrames, visualDraftId);
   const nextIntents = normalizeNextIntents(input.nextIntents, resultRefs, compareSessions, focusFrames, references, visualDraftId);
   const activeNextIntentId = nextIntents.some((intent) => intent.nextIntentId === input.activeNextIntentId) ? input.activeNextIntentId : null;
+  const requestedNextIntentId = text(input.nextIntent?.nextIntentId || input.nextIntent?.id) || null;
+  if (input.nextIntent && !requestedNextIntentId) throw new Error('VISUAL_NEXT_INTENT_ID_REQUIRED');
+  const nextIntent = requestedNextIntentId
+    ? nextIntents.find((intent) => intent.nextIntentId === requestedNextIntentId) || null
+    : null;
+  if (input.nextIntent && !nextIntent) throw new Error('VISUAL_NEXT_INTENT_NOT_FOUND');
   return {
     references,
     focusFrames,
@@ -212,7 +219,7 @@ function normalizeSpatial(spatial, sourceRef, visualDraftId = null) {
     branch,
     nextIntents,
     activeNextIntentId,
-    nextIntent: input.nextIntent ? clone(input.nextIntent) : null,
+    nextIntent,
   };
 }
 function freeze(value) {
