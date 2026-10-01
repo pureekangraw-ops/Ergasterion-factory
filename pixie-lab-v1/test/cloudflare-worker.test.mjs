@@ -175,12 +175,31 @@ test('Factory rejects wrong protocol or route after authentication', async () =>
   assert.equal((await wrongRoute.json()).error, 'HANDOFF_ROUTE_INVALID');
 });
 
-test('durable readback remains explicitly P3', async () => {
-  const response = await worker.fetch(new Request('https://factory.example/hub_factory_readback'));
-  assert.equal(response.status, 501);
-  assert.deepEqual(await response.json(), {
-    ok: false,
-    status: 'NOT_WIRED',
-    next: 'P3_DURABLE_READBACK',
-  });
+test('durable readback returns the stored authenticated handoff as verified evidence', async () => {
+  const env = {
+    ERGASTERION_HUB_SHARED_SECRET: 'shared-secret',
+    HANDOFF_LEDGER: makeLedgerNamespace(),
+  };
+  await worker.fetch(await handoffRequest(packet()), env);
+  const response = await worker.fetch(new Request('https://factory.example/api/hub-factory/readback?handoffId=HANDOFF-001'), env);
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.equal(body.handoffId, 'HANDOFF-001');
+  assert.equal(body.workId, 'WORK-001');
+  assert.equal(body.checkpointId, 'CP-001');
+  assert.equal(body.readbackStatus, 'VERIFIED');
+  assert.equal(body.evidenceRefs.includes('factory-receipt://HANDOFF-001'), true);
+  assert.equal(body.evidenceRefs.includes('factory-readback://HANDOFF-001'), true);
+  assert.equal(body.authorityTransferred, false);
+});
+
+test('durable readback rejects missing identity and unknown handoff', async () => {
+  const env = { HANDOFF_LEDGER: makeLedgerNamespace() };
+  const missing = await worker.fetch(new Request('https://factory.example/hub_factory_readback'), env);
+  assert.equal(missing.status, 400);
+  assert.equal((await missing.json()).error, 'HANDOFF_ID_REQUIRED');
+
+  const unknown = await worker.fetch(new Request('https://factory.example/hub_factory_readback?handoffId=UNKNOWN'), env);
+  assert.equal(unknown.status, 404);
+  assert.equal((await unknown.json()).error, 'HANDOFF_NOT_FOUND');
 });

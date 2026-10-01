@@ -61,6 +61,16 @@ export class HandoffLedger {
   }
 
   async fetch(request) {
+    const url = new URL(request.url);
+    if (request.method === 'GET' && url.pathname === '/readback') {
+      const existing = await this.ctx.storage.get('handoff');
+      if (!existing) return reject('HANDOFF_NOT_FOUND', 404);
+      return json({
+        ...existing.receipt,
+        readbackStatus: 'VERIFIED',
+        evidenceRefs: [...new Set([...(existing.receipt.evidenceRefs || []), `factory-readback://${existing.receipt.handoffId}`])],
+      });
+    }
     if (request.method !== 'POST') return reject('METHOD_NOT_ALLOWED', 405);
     const input = await request.json();
     const existing = await this.ctx.storage.get('handoff');
@@ -147,6 +157,15 @@ async function receiveHandoff(request, env) {
   });
 }
 
+async function readbackHandoff(request, env) {
+  if (!env?.HANDOFF_LEDGER) return reject('HANDOFF_LEDGER_NOT_CONFIGURED', 503);
+  const url = new URL(request.url);
+  const handoffId = text(url.searchParams.get('handoffId'));
+  if (!handoffId) return reject('HANDOFF_ID_REQUIRED', 400);
+  const ledger = env.HANDOFF_LEDGER.get(env.HANDOFF_LEDGER.idFromName(handoffId));
+  return ledger.fetch('https://handoff-ledger.internal/readback', { method: 'GET' });
+}
+
 function transportHealth(env) {
   const secretConfigured = Boolean(text(env?.ERGASTERION_HUB_SHARED_SECRET));
   const ledgerBound = Boolean(env?.HANDOFF_LEDGER);
@@ -158,6 +177,7 @@ function transportHealth(env) {
     authenticatedTransport: secretConfigured && ledgerBound,
     secretConfigured,
     ledgerBound,
+    durableReadback: ledgerBound,
   };
 }
 
@@ -183,12 +203,8 @@ export default {
       return receiveHandoff(request, env);
     }
 
-    if (request.method === 'GET' && url.pathname === '/hub_factory_readback') {
-      return json({
-        ok: false,
-        status: 'NOT_WIRED',
-        next: 'P3_DURABLE_READBACK',
-      }, 501);
+    if (request.method === 'GET' && (url.pathname === '/api/hub-factory/readback' || url.pathname === '/hub_factory_readback')) {
+      return readbackHandoff(request, env);
     }
 
     return json({ ok: false, error: 'NOT_FOUND' }, 404);
