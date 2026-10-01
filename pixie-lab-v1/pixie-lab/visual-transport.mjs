@@ -95,6 +95,14 @@ export function updateVisualDispatchStatus(dispatch, status, { providerJobId = n
   return Object.freeze({ ...clone(dispatch), status: next, providerJobId: text(providerJobId) || dispatch.providerJobId || null, error: text(error) || null, evidenceRefs: unique([...(dispatch.evidenceRefs || []), ...evidenceRefs]), updatedAt: now() });
 }
 
+export function isUsableVisualReceipt(receipt) {
+  return Boolean(receipt?.artifactRef)
+    && upper(receipt?.readbackStatus) === 'VERIFIED'
+    && receipt?.artifactUsable === true
+    && Array.isArray(receipt?.evidenceRefs)
+    && receipt.evidenceRefs.length > 0;
+}
+
 export function createVisualReceipt(dispatch, {
   receiptId,
   packetId = dispatch?.packetId,
@@ -107,6 +115,8 @@ export function createVisualReceipt(dispatch, {
   executorIdentity = IMAGE_TOOL_TARGET,
   providerJobId = null,
   error = null,
+  readbackStatus = 'UNKNOWN',
+  artifactUsable = false,
   createdAt,
   receivedAt,
   now = nowIso,
@@ -119,9 +129,10 @@ export function createVisualReceipt(dispatch, {
   const normalized = upper(status);
   if (!RECEIPT_STATUSES.includes(normalized)) throw new Error('VISUAL_RECEIPT_STATUS_INVALID');
   const artifact = text(artifactRef) || null;
+  const verifiedReadback = upper(readbackStatus) === 'VERIFIED' && artifactUsable === true && Array.isArray(evidenceRefs) && evidenceRefs.length > 0;
   let finalStatus = normalized;
-  if (normalized === 'RECEIVED' && !artifact) finalStatus = 'UNKNOWN';
-  if (normalized === 'LINKED' && !artifact) finalStatus = 'UNKNOWN';
+  if (!artifact) finalStatus = 'UNKNOWN';
+  else if (normalized === 'LINKED' && !verifiedReadback) finalStatus = 'RECEIVED';
   return Object.freeze({
     receiptId: required(receiptId, 'receiptId'),
     dispatchId: dispatch.dispatchId,
@@ -135,6 +146,8 @@ export function createVisualReceipt(dispatch, {
     executorIdentity: IMAGE_TOOL_TARGET,
     providerJobId: text(providerJobId) || null,
     error: text(error) || null,
+    readbackStatus: upper(readbackStatus || 'UNKNOWN'),
+    artifactUsable: artifactUsable === true,
     createdAt: text(createdAt) || now(),
     receivedAt: text(receivedAt) || now(),
     lineage: {
@@ -154,7 +167,7 @@ export function importVisualReceipt(draft, receipt, { placeOnTable = false, now 
   if (!draft?.visualDraftId || !receipt?.receiptId) throw new Error('VISUAL_RESULT_IMPORT_REQUIRED');
   if (receipt.visualDraftId !== draft.visualDraftId) throw new Error('VISUAL_RESULT_DRAFT_MISMATCH');
   if (receipt.branchId !== (draft.workingSpec?.spatial?.branch?.branchId || null)) throw new Error('VISUAL_RESULT_BRANCH_MISMATCH');
-  if (!['RECEIVED', 'LINKED'].includes(receipt.status) || !receipt.artifactRef) throw new Error('VISUAL_RESULT_NOT_USABLE');
+  if (!isUsableVisualReceipt(receipt)) throw new Error('VISUAL_RESULT_NOT_USABLE');
   const spatial = clone(draft.workingSpec?.spatial || {});
   const resultRef = receipt.artifactRef;
   const resultRefs = unique([...(spatial.resultRefs || []), resultRef]);
