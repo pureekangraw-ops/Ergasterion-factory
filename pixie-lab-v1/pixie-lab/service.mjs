@@ -569,7 +569,7 @@ export class PixieLab {
     if (packet.visualDraftId !== visualDraftId) throw new Error('VISUAL_DISPATCH_DRAFT_MISMATCH');
     if (String(input.actionType || '').toUpperCase() === 'EDIT') {
       const target = text(input.targetResultRef);
-      if (!target || !(draft.workingSpec?.spatial?.resultRefs || []).includes(target)) throw new Error('VISUAL_EDIT_TARGET_NOT_FOUND');
+      if (target && !(draft.workingSpec?.spatial?.resultRefs || []).includes(target)) throw new Error('VISUAL_EDIT_TARGET_NOT_FOUND');
     }
     if (this.state.visualDispatches.some((item) => item.dispatchId === input.dispatchId)) throw new Error('DUPLICATE_VISUAL_DISPATCH_ID');
     const dispatch = createVisualDispatchContract(packet, { ...input, visualDraftId, now: this.now });
