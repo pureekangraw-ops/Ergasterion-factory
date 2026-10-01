@@ -177,13 +177,19 @@ async function renderVisual(view) {
   const latestPacket = packets.at(-1);
   const latestReceipt = receipts.at(-1);
   const spatial = draft?.workingSpec?.spatial || draft?.originalSpec?.spatial || {};
+  const references = Array.isArray(spatial.references) ? spatial.references : [];
   const frames = Array.isArray(spatial.focusFrames) ? spatial.focusFrames : [];
   const activeFrame = frames.find((item) => item.id === spatial.activeFocusFrameId) || null;
   const intentLinks = Array.isArray(spatial.intentLinks) ? spatial.intentLinks : [];
   const freezeSet = Array.isArray(spatial.freezeSet) ? spatial.freezeSet : [];
   const exploreSet = Array.isArray(spatial.exploreSet) ? spatial.exploreSet : [];
 
+  $('#visual-work-id').textContent = contextSelector().workId || 'UNKNOWN';
+  $('#visual-checkpoint-id').textContent = contextSelector().checkpointId || 'UNKNOWN';
   $('#visual-source').textContent = draft?.sourceRef || 'No source yet';
+  $('#visual-reference-list').innerHTML = references.length
+    ? references.map((reference) => `<div class="reference-list-item"><strong>${esc(reference.kind)}</strong><span title="${esc(reference.ref)}">${esc(reference.label)}</span><span class="muted">z${esc(reference.zIndex)}</span></div>`).join('')
+    : '<span class="muted">No references placed yet.</span>';
   $('#visual-status').textContent = latestReceipt?.status || (draft?.status || 'UNKNOWN');
   $('#visual-status').className = `truth ${truthStatus($('#visual-status').textContent)}`;
   $('#visual-focus-status').textContent = activeFrame ? `FOCUS · ${activeFrame.label}` : 'No active focus frame';
@@ -197,11 +203,76 @@ async function renderVisual(view) {
   } else if (latestReceipt?.artifactRef) {
     $('#visual-canvas').innerHTML = `<div class="canvas-placeholder"><div class="canvas-mark">✦</div><strong>Artifact returned</strong><span>${esc(latestReceipt.artifactRef)}</span></div>`;
   }
+  const canvas = $('#visual-canvas');
+  const boundsStyle = (element, bounds) => {
+    element.style.left = `${bounds.x * 100}%`;
+    element.style.top = `${bounds.y * 100}%`;
+    element.style.width = `${bounds.width * 100}%`;
+    element.style.height = `${bounds.height * 100}%`;
+  };
+  references.forEach((reference) => {
+    const node = document.createElement('div');
+    node.className = 'reference-node';
+    node.dataset.referenceId = reference.id;
+    node.style.zIndex = String(reference.zIndex ?? 1);
+    boundsStyle(node, reference.bounds);
+    const refUrl = artifactUrl(reference.ref);
+    node.innerHTML = `<div class="reference-node-header">${esc(reference.label)}</div>${refUrl ? `<img src="${esc(refUrl)}" alt="${esc(reference.label)}">` : `<div class="reference-node-body">${esc(reference.ref)}</div>`}`;
+    canvas.append(node);
+    let drag = null;
+    node.addEventListener('pointerdown', (event) => {
+      if (event.target.closest('button')) return;
+      const rect = canvas.getBoundingClientRect();
+      drag = { startX: event.clientX, startY: event.clientY, bounds: { ...reference.bounds }, rect };
+      node.setPointerCapture?.(event.pointerId);
+    });
+    node.addEventListener('pointermove', (event) => {
+      if (!drag) return;
+      const dx = (event.clientX - drag.startX) / drag.rect.width;
+      const dy = (event.clientY - drag.startY) / drag.rect.height;
+      const next = { ...drag.bounds, x: Math.min(1 - drag.bounds.width, Math.max(0, drag.bounds.x + dx)), y: Math.min(1 - drag.bounds.height, Math.max(0, drag.bounds.y + dy)) };
+      boundsStyle(node, next);
+      node.dataset.pendingBounds = JSON.stringify(next);
+    });
+    node.addEventListener('pointerup', async () => {
+      if (!drag) return;
+      const next = node.dataset.pendingBounds ? JSON.parse(node.dataset.pendingBounds) : reference.bounds;
+      drag = null;
+      delete node.dataset.pendingBounds;
+      if (JSON.stringify(next) !== JSON.stringify(reference.bounds)) await patchSpatial('references', references.map((item) => item.id === reference.id ? { ...item, bounds: next } : item));
+    });
+  });
   if (activeFrame) {
     const overlay = document.createElement('div');
     overlay.className = 'focus-frame-overlay';
-    overlay.innerHTML = `<span>${esc(activeFrame.label)}</span>`;
-    $('#visual-canvas').append(overlay);
+    boundsStyle(overlay, activeFrame.bounds);
+    overlay.innerHTML = `<span>${esc(activeFrame.label)}</span><i class="focus-frame-resize" aria-label="Resize focus frame"></i>`;
+    canvas.append(overlay);
+    let frameDrag = null;
+    overlay.addEventListener('pointerdown', (event) => {
+      const rect = canvas.getBoundingClientRect();
+      frameDrag = { mode: event.target.classList.contains('focus-frame-resize') ? 'resize' : 'move', startX: event.clientX, startY: event.clientY, bounds: { ...activeFrame.bounds }, rect };
+      overlay.setPointerCapture?.(event.pointerId);
+      event.preventDefault();
+    });
+    overlay.addEventListener('pointermove', (event) => {
+      if (!frameDrag) return;
+      const dx = (event.clientX - frameDrag.startX) / frameDrag.rect.width;
+      const dy = (event.clientY - frameDrag.startY) / frameDrag.rect.height;
+      const b = frameDrag.bounds;
+      const next = frameDrag.mode === 'resize'
+        ? { ...b, width: Math.min(1 - b.x, Math.max(0.06, b.width + dx)), height: Math.min(1 - b.y, Math.max(0.06, b.height + dy)) }
+        : { ...b, x: Math.min(1 - b.width, Math.max(0, b.x + dx)), y: Math.min(1 - b.height, Math.max(0, b.y + dy)) };
+      boundsStyle(overlay, next);
+      overlay.dataset.pendingBounds = JSON.stringify(next);
+    });
+    overlay.addEventListener('pointerup', async () => {
+      if (!frameDrag) return;
+      const next = overlay.dataset.pendingBounds ? JSON.parse(overlay.dataset.pendingBounds) : activeFrame.bounds;
+      frameDrag = null;
+      delete overlay.dataset.pendingBounds;
+      if (JSON.stringify(next) !== JSON.stringify(activeFrame.bounds)) await patchSpatial('focusFrames', frames.map((frame) => frame.id === activeFrame.id ? { ...frame, bounds: next } : frame));
+    });
   }
 
   $('#visual-prompt').value = latestPacket?.intent || '';
@@ -238,8 +309,19 @@ async function renderVisual(view) {
     ...receipts.map((receipt, i) => ({ label:`IMAGE V${i+1}`, ref:receipt.artifactRef || receipt.receiptId, status:receipt.status })),
   ];
   $('#visual-history').innerHTML = history.length
-    ? history.map((item) => `<div class="history-card"><strong>${esc(item.label)}</strong><span>${esc(item.ref)}</span><span>${esc(item.status)}</span></div>`).join('')
+    ? history.map((item) => {
+        const receipt = receipts.find((candidate) => (candidate.artifactRef || candidate.receiptId) === item.ref);
+        return `<div class="history-card"><strong>${esc(item.label)}</strong><span>${esc(item.ref)}</span><span>${esc(item.status)}</span>${receipt ? `<label class="compare-check"><input type="checkbox" data-compare-id="${esc(item.ref)}"> compare</label>` : ''}</div>`;
+      }).join('')
     : '<span class="muted">No visual history yet.</span>';
+  const compareIds = new Set();
+  const renderCompare = () => {
+    const selected = receipts.filter((receipt) => compareIds.has(receipt.artifactRef || receipt.receiptId)).slice(0, 4);
+    $('#visual-compare-grid').innerHTML = selected.length
+      ? selected.map((receipt) => { const url = artifactUrl(receipt.artifactRef); return `<div class="compare-card">${url ? `<img src="${esc(url)}" alt="Selected result">` : '<div class="runtime-shot-empty">No preview</div>'}<strong>${esc(receipt.artifactRef || receipt.receiptId)}</strong><span>${esc(receipt.status || 'UNKNOWN')}</span></div>`; }).join('')
+      : '<span class="muted">Select 2–4 returned results above to compare. Semantic part promotion is not implemented in Phase 1.</span>';
+  };
+  renderCompare();
 
   const patchSpatial = async (key, value) => {
     if (!draft?.visualDraftId) {
@@ -250,6 +332,20 @@ async function renderVisual(view) {
     await refreshBootstrap();
     await openWorkbench('VISUAL_WORKBENCH');
   };
+
+  $$('[data-compare-id]').forEach((checkbox) => checkbox.addEventListener('change', () => {
+    if (checkbox.checked && compareIds.size >= 4) { checkbox.checked = false; return; }
+    if (checkbox.checked) compareIds.add(checkbox.dataset.compareId); else compareIds.delete(checkbox.dataset.compareId);
+    renderCompare();
+  }));
+  $('#visual-add-reference').addEventListener('click', async () => {
+    const ref = $('#visual-reference-ref').value.trim();
+    if (!ref) return;
+    const label = $('#visual-reference-label').value.trim() || ref;
+    const index = references.length;
+    const reference = { id: `REF-${Date.now()}`, ref, label, kind: 'IMAGE', bounds: { x: 0.04 + (index % 4) * 0.2, y: 0.04 + Math.floor(index / 4) * 0.2, width: 0.18, height: 0.18 }, zIndex: index + 1 };
+    await patchSpatial('references', [...references, reference]);
+  });
 
   const create = $('#visual-create');
   if (create) create.addEventListener('click', async () => {
@@ -483,6 +579,7 @@ async function renderRuntime(view) {
 
 async function openWorkbench(id, { preserveNav = false } = {}) {
   state.currentWorkbench = id;
+  document.body.classList.toggle('pixie-workbench', id === 'VISUAL_WORKBENCH');
   $$('.nav-btn').forEach((button) => button.classList.toggle('active', button.dataset.workbench === id));
   const [name, detail] = WORKBENCH_LABELS[id] || [id, ''];
   $('#stage-kicker').textContent = 'WORKBENCH';
