@@ -176,20 +176,32 @@ async function renderVisual(view) {
   const receipts = view.imageReceipts || [];
   const latestPacket = packets.at(-1);
   const latestReceipt = receipts.at(-1);
+  const spatial = draft?.workingSpec?.spatial || draft?.originalSpec?.spatial || {};
+  const frames = Array.isArray(spatial.focusFrames) ? spatial.focusFrames : [];
+  const activeFrame = frames.find((item) => item.id === spatial.activeFocusFrameId) || null;
+  const intentLinks = Array.isArray(spatial.intentLinks) ? spatial.intentLinks : [];
+  const freezeSet = Array.isArray(spatial.freezeSet) ? spatial.freezeSet : [];
+  const exploreSet = Array.isArray(spatial.exploreSet) ? spatial.exploreSet : [];
 
   $('#visual-source').textContent = draft?.sourceRef || 'No source yet';
   $('#visual-status').textContent = latestReceipt?.status || (draft?.status || 'UNKNOWN');
   $('#visual-status').className = `truth ${truthStatus($('#visual-status').textContent)}`;
+  $('#visual-focus-status').textContent = activeFrame ? `FOCUS · ${activeFrame.label}` : 'No active focus frame';
+  $('#visual-focus-frame').innerHTML = frames.length
+    ? frames.map((frame) => `<option value="${esc(frame.id)}" ${frame.id === spatial.activeFocusFrameId ? 'selected' : ''}>${esc(frame.label)}</option>`).join('')
+    : '<option value="">No frames yet</option>';
 
   const imageUrl = artifactUrl(latestReceipt?.artifactRef);
   if (imageUrl) {
     $('#visual-canvas').innerHTML = `<img class="canvas-image" alt="Current visual artifact" src="${esc(imageUrl)}">`;
   } else if (latestReceipt?.artifactRef) {
-    $('#visual-canvas').innerHTML = `<div class="canvas-placeholder">
-      <div class="canvas-mark">✦</div>
-      <strong>Artifact returned</strong>
-      <span>${esc(latestReceipt.artifactRef)}</span>
-    </div>`;
+    $('#visual-canvas').innerHTML = `<div class="canvas-placeholder"><div class="canvas-mark">✦</div><strong>Artifact returned</strong><span>${esc(latestReceipt.artifactRef)}</span></div>`;
+  }
+  if (activeFrame) {
+    const overlay = document.createElement('div');
+    overlay.className = 'focus-frame-overlay';
+    overlay.innerHTML = `<span>${esc(activeFrame.label)}</span>`;
+    $('#visual-canvas').append(overlay);
   }
 
   $('#visual-prompt').value = latestPacket?.intent || '';
@@ -197,23 +209,47 @@ async function renderVisual(view) {
   $('#visual-keep').value = (latestPacket?.mustKeep || []).join('\n');
   $('#visual-remove').value = (latestPacket?.mustRemove || []).join('\n');
 
+  $('#visual-reference-roles').innerHTML = intentLinks.length
+    ? intentLinks.filter((link) => link.sourceId === draft?.sourceRef).map((link) => `<span class="spatial-chip"><strong>${esc(link.role)}</strong><span>${esc(link.note || link.sourceId)}</span></span>`).join('')
+    : '<span class="muted">Add a role link from the right panel.</span>';
+  $('#visual-intent-links').innerHTML = intentLinks.length
+    ? intentLinks.map((link) => `<span class="spatial-chip"><strong>${esc(link.role)}</strong><span>${esc(link.sourceId)}${link.note ? ` · ${esc(link.note)}` : ''}</span><button type="button" data-remove-intent="${esc(link.id)}" title="Remove link">×</button></span>`).join('')
+    : '<span class="muted">No intent links yet.</span>';
+  const renderStateChips = (items, kind) => items.length
+    ? items.map((item) => `<span class="spatial-chip"><span>${esc(item)}</span><button type="button" data-remove-state="${kind}" data-state-item="${esc(item)}" title="Remove">×</button></span>`).join('')
+    : '<span class="muted">None</span>';
+  $('#visual-freeze').innerHTML = renderStateChips(freezeSet, 'freeze');
+  $('#visual-explore').innerHTML = renderStateChips(exploreSet, 'explore');
+
   const scans = draft?.scans || [];
   const unknowns = [...new Set([...(view.unknowns || []), ...scans.flatMap((scan) => scan.unknowns || [])])];
   $('#visual-pixie').innerHTML = draft
-    ? `<strong>PIXIE scan</strong><br>
-       Edits: ${draft.edits?.length || 0} · Scans: ${scans.length}<br>
+    ? `<strong>PIXIE reads the table</strong><br>
+       Focus: ${activeFrame ? esc(activeFrame.label) : 'none'} · Links: ${intentLinks.length}<br>
+       Freeze: ${freezeSet.length ? esc(freezeSet.join(', ')) : 'none'}<br>
+       Explore: ${exploreSet.length ? esc(exploreSet.join(', ')) : 'none'}<br>
        Unknown: ${unknowns.length ? esc(unknowns.join(', ')) : 'none recorded'}<br>
-       <span class="muted">Source stays locked. Selection is not approval.</span>`
+       <span class="muted">Source stays locked. Freeze is context, not approval.</span>`
     : `No Visual Draft yet.<br><button id="visual-create" style="margin-top:8px">Create Visual Draft</button>`;
 
   const history = [
     ...(draft ? [{ label:'ORIGINAL', ref:draft.sourceRef, status:'LOCKED' }] : []),
-    ...packets.map((packet, i) => ({ label:`PACKET V${i+1}`, ref:packet.packetId, status:'PREPARED' })),
+    ...packets.map((packet, i) => ({ label:`PACKET V${i+1}`, ref:packet.packetId, status:packet.focusFrame ? 'FOCUSED' : 'PREPARED' })),
     ...receipts.map((receipt, i) => ({ label:`IMAGE V${i+1}`, ref:receipt.artifactRef || receipt.receiptId, status:receipt.status })),
   ];
   $('#visual-history').innerHTML = history.length
     ? history.map((item) => `<div class="history-card"><strong>${esc(item.label)}</strong><span>${esc(item.ref)}</span><span>${esc(item.status)}</span></div>`).join('')
     : '<span class="muted">No visual history yet.</span>';
+
+  const patchSpatial = async (key, value) => {
+    if (!draft?.visualDraftId) {
+      window.alert('Create a Visual Draft first.');
+      return;
+    }
+    await command('visual_edit', { visualDraftId: draft.visualDraftId, edit: { op: 'SET', path: `spatial.${key}`, value } });
+    await refreshBootstrap();
+    await openWorkbench('VISUAL_WORKBENCH');
+  };
 
   const create = $('#visual-create');
   if (create) create.addEventListener('click', async () => {
@@ -224,11 +260,43 @@ async function renderVisual(view) {
       visualDraftId,
       sourceRef,
       sourceVersion: 'ui',
-      spec: { brief: '', referenceRoles: ['INSPIRATION'] },
+      spec: { brief: '', referenceRoles: ['INSPIRATION'], spatial: { focusFrames: [], intentLinks: [], freezeSet: [], exploreSet: [] } },
     });
     await refreshBootstrap();
     await openWorkbench('VISUAL_WORKBENCH');
   });
+
+  $('#visual-add-frame').addEventListener('click', async () => {
+    const label = $('#visual-frame-label').value.trim() || `Focus ${frames.length + 1}`;
+    const frame = { id: `FRAME-${Date.now()}`, label, bounds: { x: 0.18, y: 0.18, width: 0.64, height: 0.64 } };
+    await patchSpatial('focusFrames', [...frames, frame]);
+  });
+  $('#visual-use-frame').addEventListener('click', async () => {
+    const frameId = $('#visual-focus-frame').value;
+    if (frameId) await patchSpatial('activeFocusFrameId', frameId);
+  });
+  $('#visual-add-link').addEventListener('click', async () => {
+    const sourceId = $('#visual-link-source').value.trim() || draft?.sourceRef || 'current-table';
+    const role = $('#visual-link-role').value;
+    const note = $('#visual-link-note').value.trim();
+    const link = { id: `LINK-${Date.now()}`, sourceId, role, note: note || null };
+    await patchSpatial('intentLinks', [...intentLinks, link]);
+  });
+  $('#visual-add-freeze').addEventListener('click', async () => {
+    const item = $('#visual-freeze-item').value.trim();
+    if (item) await patchSpatial('freezeSet', [...new Set([...freezeSet, item])]);
+  });
+  $('#visual-add-explore').addEventListener('click', async () => {
+    const item = $('#visual-explore-item').value.trim();
+    if (item) await patchSpatial('exploreSet', [...new Set([...exploreSet, item])]);
+  });
+  $$('[data-remove-intent]').forEach((button) => button.addEventListener('click', async () => {
+    await patchSpatial('intentLinks', intentLinks.filter((link) => link.id !== button.dataset.removeIntent));
+  }));
+  $$('[data-remove-state]').forEach((button) => button.addEventListener('click', async () => {
+    const values = button.dataset.removeState === 'freeze' ? freezeSet : exploreSet;
+    await patchSpatial(button.dataset.removeState === 'freeze' ? 'freezeSet' : 'exploreSet', values.filter((item) => item !== button.dataset.stateItem));
+  }));
 
   $('#visual-prepare').addEventListener('click', async () => {
     if (!draft?.visualDraftId) {
@@ -250,6 +318,10 @@ async function renderVisual(view) {
         requestedResult,
         mustKeep: lineList($('#visual-keep').value),
         mustRemove: lineList($('#visual-remove').value),
+        focusFrame: activeFrame,
+        intentLinks,
+        freezeSet,
+        exploreSet,
       },
     });
     await command('image_request', {
