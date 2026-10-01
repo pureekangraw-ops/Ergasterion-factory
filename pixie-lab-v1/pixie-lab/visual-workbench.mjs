@@ -4,6 +4,88 @@ const upper = (value) => text(value).toUpperCase();
 const nowIso = () => new Date().toISOString();
 const required = (value, label) => { const out = text(value); if (!out) throw new Error(`${label} is required`); return out; };
 const unique = (values = []) => [...new Set((Array.isArray(values) ? values : [values]).map(text).filter(Boolean))];
+const INTENT_ROLES = Object.freeze(['FACE', 'LIGHTING', 'COMPOSITION', 'COLOR', 'STYLE', 'OUTFIT', 'BACKGROUND', 'NEGATIVE_CONSTRAINT']);
+const clamp01 = (value, fallback = 0) => Number.isFinite(Number(value)) ? Math.min(1, Math.max(0, Number(value))) : fallback;
+
+function normalizeBounds(bounds = {}, fallback = { x: 0.18, y: 0.18, width: 0.64, height: 0.64 }) {
+  const x = clamp01(bounds.x, fallback.x);
+  const y = clamp01(bounds.y, fallback.y);
+  const width = Math.min(1 - x, Math.max(0.06, clamp01(bounds.width, fallback.width)));
+  const height = Math.min(1 - y, Math.max(0.06, clamp01(bounds.height, fallback.height)));
+  return { x, y, width, height };
+}
+
+function normalizeReferences(sourceRef, references = []) {
+  const input = Array.isArray(references) ? references : [];
+  const normalized = input.map((item, index) => ({
+    id: required(item?.id || `REF-${index + 1}`, 'reference.id'),
+    ref: required(item?.ref || item?.sourceRef, 'reference.ref'),
+    label: text(item?.label || item?.ref || item?.sourceRef) || `Reference ${index + 1}`,
+    kind: upper(item?.kind || 'IMAGE'),
+    bounds: normalizeBounds(item?.bounds, { x: 0.04 + (index % 4) * 0.2, y: 0.04 + Math.floor(index / 4) * 0.2, width: 0.18, height: 0.18 }),
+    zIndex: Number.isFinite(Number(item?.zIndex)) ? Number(item.zIndex) : index + 1,
+  }));
+  if (!normalized.some((item) => item.id === sourceRef || item.ref === sourceRef)) {
+    normalized.unshift({
+      id: sourceRef,
+      ref: sourceRef,
+      label: sourceRef,
+      kind: 'SOURCE',
+      bounds: normalizeBounds({}, { x: 0.04, y: 0.04, width: 0.22, height: 0.22 }),
+      zIndex: 0,
+    });
+  }
+  return normalized;
+}
+
+function normalizeIntentLinks(links, references) {
+  const validIds = new Set((references || []).flatMap((item) => [item.id, item.ref]));
+  return (Array.isArray(links) ? links : []).map((link, index) => {
+    const sourceId = text(link?.sourceId);
+    if (!sourceId || !validIds.has(sourceId)) throw new Error('VISUAL_INTENT_SOURCE_NOT_FOUND');
+    const role = upper(link?.role);
+    if (!INTENT_ROLES.includes(role)) throw new Error('VISUAL_INTENT_ROLE_INVALID');
+    return {
+      id: text(link?.id) || `LINK-${index + 1}`,
+      sourceId,
+      role,
+      note: text(link?.note) || null,
+    };
+  });
+}
+
+function normalizeFreezeExplore(freezeSet, exploreSet) {
+  const frozen = unique(freezeSet);
+  const exploring = unique(exploreSet);
+  if (frozen.some((item) => exploring.includes(item))) throw new Error('VISUAL_FREEZE_EXPLORE_CONFLICT');
+  return { freezeSet: frozen, exploreSet: exploring };
+}
+
+function normalizeSpatial(spatial, sourceRef) {
+  const input = spatial && typeof spatial === 'object' ? spatial : {};
+  const references = normalizeReferences(sourceRef, input.references);
+  const focusFrames = (Array.isArray(input.focusFrames) ? input.focusFrames : []).map((frame, index) => ({
+    id: required(frame?.id || `FRAME-${index + 1}`, 'focusFrame.id'),
+    label: text(frame?.label) || `Focus ${index + 1}`,
+    bounds: normalizeBounds(frame?.bounds),
+  }));
+  const activeFocusFrameId = focusFrames.some((frame) => frame.id === input.activeFocusFrameId) ? input.activeFocusFrameId : null;
+  const { freezeSet, exploreSet } = normalizeFreezeExplore(input.freezeSet, input.exploreSet);
+  return {
+    references,
+    focusFrames,
+    activeFocusFrameId,
+    intentLinks: normalizeIntentLinks(input.intentLinks, references),
+    freezeSet,
+    exploreSet,
+    compareNotes: (Array.isArray(input.compareNotes) ? input.compareNotes : []).map((note, index) => ({
+      id: text(note?.id) || `NOTE-${index + 1}`,
+      text: text(note?.text),
+      comparedRefs: unique(note?.comparedRefs),
+      createdAt: text(note?.createdAt) || null,
+    })).filter((note) => note.text),
+  };
+}
 
 function freeze(value) {
   if (value && typeof value === 'object' && !Object.isFrozen(value)) {
@@ -49,7 +131,10 @@ export function createVisualDraft({
   spec = {},
   now = nowIso,
 } = {}) {
-  const originalSpec = clone(spec ?? {});
+  const inputSpec = clone(spec ?? {});
+  const inputSpatial = inputSpec.spatial && typeof inputSpec.spatial === 'object' ? inputSpec.spatial : {};
+  const normalizedSpatial = normalizeSpatial(inputSpatial, sourceRef);
+  const originalSpec = { ...inputSpec, spatial: normalizedSpatial };
   return freeze({
     visualDraftId: required(visualDraftId, 'visualDraftId'),
     experimentId: text(experimentId) || null,
@@ -127,7 +212,12 @@ export function editVisualDraft(draft, edit = {}, { now = nowIso } = {}) {
   const location = targetAt(workingSpec, edit.path, { create: op === 'SET' });
   if (op === 'SET') {
     if (!location.parent || location.key == null) throw new Error('VISUAL_WORKBENCH_ROOT_SET_FORBIDDEN');
-    location.parent[location.key] = clone(edit.value);
+    if (pathParts(edit.path)[0] === 'spatial') {
+      const spatial = normalizeSpatial({ ...workingSpec.spatial, [pathParts(edit.path)[1]]: clone(edit.value) }, draft.sourceRef);
+      workingSpec.spatial = spatial;
+    } else {
+      location.parent[location.key] = clone(edit.value);
+    }
   } else if (op === 'DELETE') {
     if (!location.parent || location.key == null || !(location.key in location.parent)) throw new Error('VISUAL_WORKBENCH_PATH_NOT_FOUND');
     delete location.parent[location.key];
@@ -183,11 +273,24 @@ export function createVisualRenderPacket(draft, {
   constraints = [],
   evidenceRefs = [],
   unknowns = [],
+  focusFrame = undefined,
+  intentLinks = undefined,
+  freezeSet = undefined,
+  exploreSet = undefined,
   now = nowIso,
 } = {}) {
   requireDraft(draft);
   const scanEvidence = (draft.scans || []).flatMap((item) => item.evidenceRefs || []);
   const scanUnknowns = (draft.scans || []).flatMap((item) => item.unknowns || []);
+  const spatial = normalizeSpatial(draft.workingSpec?.spatial, draft.sourceRef);
+  const packetFocusFrame = focusFrame === undefined
+    ? (spatial.focusFrames || []).find((item) => item.id === spatial.activeFocusFrameId) || null
+    : clone(focusFrame);
+  const packetIntentLinks = intentLinks === undefined ? spatial.intentLinks || [] : intentLinks;
+  const packetFreezeSet = freezeSet === undefined ? spatial.freezeSet || [] : freezeSet;
+  const packetExploreSet = exploreSet === undefined ? spatial.exploreSet || [] : exploreSet;
+  const packetSpatial = normalizeSpatial({ ...spatial, intentLinks: packetIntentLinks, freezeSet: packetFreezeSet, exploreSet: packetExploreSet }, draft.sourceRef);
+  if (packetFocusFrame && !packetSpatial.focusFrames.some((frame) => frame.id === packetFocusFrame.id)) throw new Error('VISUAL_FOCUS_FRAME_NOT_FOUND');
   return freeze({
     packetId: required(packetId, 'packetId'),
     visualDraftId: draft.visualDraftId,
@@ -197,6 +300,12 @@ export function createVisualRenderPacket(draft, {
     sourceVersion: draft.sourceVersion,
     sourceHash: draft.sourceHash,
     workingSpec: clone(draft.workingSpec),
+    references: clone(packetSpatial.references),
+    focusFrame: packetFocusFrame ? clone(packetSpatial.focusFrames.find((frame) => frame.id === packetFocusFrame.id)) : null,
+    intentLinks: clone(packetSpatial.intentLinks),
+    freezeSet: unique(packetSpatial.freezeSet),
+    exploreSet: unique(packetSpatial.exploreSet),
+    compareNotes: clone(packetSpatial.compareNotes),
     intent: required(intent, 'intent'),
     requestedResult: required(requestedResult, 'requestedResult'),
     mustKeep: unique(mustKeep),

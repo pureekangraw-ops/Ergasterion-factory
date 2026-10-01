@@ -133,3 +133,87 @@ test('PIXIE identity is used in Lab visual experimentation without inventing a s
   assert.equal(packet.table.history, 'V1_V2_V3_PLUS');
   assert.equal(packet.targetTool, 'GO_IMAGE_TOOL');
 });
+
+
+test('Visual vNext packet carries focus frame, intent links, freeze and explore context', () => {
+  const lab = new PixieLab({ now: clock() });
+  lab.createVisualDraft({
+    visualDraftId: 'VIS-VNEXT',
+    sourceRef: 'image://portrait',
+    spec: {
+      spatial: {
+        focusFrames: [{ id: 'FRAME-1', label: 'face', bounds: { x: 0.1, y: 0.1, width: 0.4, height: 0.4 } }],
+        activeFocusFrameId: 'FRAME-1',
+        intentLinks: [{ id: 'LINK-1', sourceId: 'image://portrait', role: 'FACE', note: 'use the face only' }],
+        freezeSet: ['face', 'palette'],
+        exploreSet: ['background'],
+      },
+    },
+  });
+  const packet = lab.createVisualRenderPacket('VIS-VNEXT', {
+    packetId: 'PACK-VNEXT',
+    intent: 'Keep the character and explore the setting',
+    requestedResult: 'One focused visual variant',
+  });
+  assert.equal(packet.focusFrame.label, 'face');
+  assert.equal(packet.intentLinks[0].role, 'FACE');
+  assert.deepEqual(packet.freezeSet, ['face', 'palette']);
+  assert.deepEqual(packet.exploreSet, ['background']);
+  assert.equal(packet.imageGenerationAuthority, false);
+});
+
+test('Visual vNext validates intent links against placed references and rejects Freeze/Explore overlap', () => {
+  const lab = new PixieLab({ now: clock() });
+  assert.throws(() => lab.createVisualDraft({
+    visualDraftId: 'VIS-INTEGRITY',
+    sourceRef: 'image://source',
+    spec: { spatial: { intentLinks: [{ sourceId: 'image://missing', role: 'FACE' }] } },
+  }), /VISUAL_INTENT_SOURCE_NOT_FOUND/);
+  assert.throws(() => lab.createVisualDraft({
+    visualDraftId: 'VIS-CONFLICT',
+    sourceRef: 'image://source',
+    spec: { spatial: { freezeSet: ['face'], exploreSet: ['face'] } },
+  }), /VISUAL_FREEZE_EXPLORE_CONFLICT/);
+});
+
+test('Visual vNext normalizes focus frame bounds and carries multiple references', () => {
+  const lab = new PixieLab({ now: clock() });
+  const draft = lab.createVisualDraft({
+    visualDraftId: 'VIS-SPATIAL',
+    sourceRef: 'image://source',
+    spec: {
+      spatial: {
+        references: [{ id: 'REF-2', ref: 'image://palette', label: 'Palette', bounds: { x: 0.7, y: 0.7, width: 0.4, height: 0.4 }, zIndex: 4 }],
+        focusFrames: [{ id: 'FRAME-2', label: 'corner', bounds: { x: -1, y: 0.8, width: 0.8, height: 0.8 } }],
+        activeFocusFrameId: 'FRAME-2',
+      },
+    },
+  });
+  assert.equal(draft.workingSpec.spatial.references.length, 2);
+  assert.equal(draft.workingSpec.spatial.focusFrames[0].bounds.x, 0);
+  assert.equal(draft.workingSpec.spatial.focusFrames[0].bounds.width, 0.8);
+  const packet = lab.createVisualRenderPacket('VIS-SPATIAL', {
+    packetId: 'PACK-SPATIAL',
+    intent: 'Use the placed references',
+    requestedResult: 'A focused composition',
+  });
+  assert.equal(packet.references.length, 2);
+  assert.equal(packet.focusFrame.id, 'FRAME-2');
+});
+
+test('Visual vNext persists compare notes and carries them into the packet', () => {
+  const lab = new PixieLab({ now: clock() });
+  lab.createVisualDraft({ visualDraftId: 'VIS-NOTE', sourceRef: 'image://source', spec: { spatial: { compareNotes: [] } } });
+  const noted = lab.editVisualDraft('VIS-NOTE', {
+    op: 'SET',
+    path: 'spatial.compareNotes',
+    value: [{ id: 'NOTE-1', text: 'Keep the face from V2', comparedRefs: ['image://v2'] }],
+  });
+  assert.equal(noted.workingSpec.spatial.compareNotes[0].text, 'Keep the face from V2');
+  const packet = lab.createVisualRenderPacket('VIS-NOTE', {
+    packetId: 'PACK-NOTE',
+    intent: 'Continue from compare note',
+    requestedResult: 'Next focused variant',
+  });
+  assert.equal(packet.compareNotes[0].comparedRefs[0], 'image://v2');
+});
