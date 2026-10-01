@@ -78,6 +78,12 @@ function normalizeSpatial(spatial, sourceRef) {
     intentLinks: normalizeIntentLinks(input.intentLinks, references),
     freezeSet,
     exploreSet,
+    compareNotes: (Array.isArray(input.compareNotes) ? input.compareNotes : []).map((note, index) => ({
+      id: text(note?.id) || `NOTE-${index + 1}`,
+      text: text(note?.text),
+      comparedRefs: unique(note?.comparedRefs),
+      createdAt: text(note?.createdAt) || null,
+    })).filter((note) => note.text),
   };
 }
 
@@ -299,6 +305,7 @@ export function createVisualRenderPacket(draft, {
     intentLinks: clone(packetSpatial.intentLinks),
     freezeSet: unique(packetSpatial.freezeSet),
     exploreSet: unique(packetSpatial.exploreSet),
+    compareNotes: clone(packetSpatial.compareNotes),
     intent: required(intent, 'intent'),
     requestedResult: required(requestedResult, 'requestedResult'),
     mustKeep: unique(mustKeep),
