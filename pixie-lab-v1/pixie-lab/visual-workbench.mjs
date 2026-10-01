@@ -448,9 +448,15 @@ export function createVisualRenderPacket(draft, {
   const packetPromotedParts = promotedParts === undefined
     ? packetSpatial.promotedParts.filter((part) => packetSelectedResultRefs.includes(part.sourceResultRef))
     : normalizePromotedParts(promotedParts, packetSpatial.resultRefs, packetSpatial.compareSessions, packetSpatial.focusFrames, draft.visualDraftId);
-  const activeNextIntent = nextIntent === undefined
-    ? (packetSpatial.nextIntent || packetSpatial.nextIntents.find((intent) => intent.nextIntentId === packetSpatial.activeNextIntentId) || null)
-    : clone(nextIntent);
+  let activeNextIntent;
+  if (nextIntent === undefined) {
+    activeNextIntent = packetSpatial.nextIntent || packetSpatial.nextIntents.find((intent) => intent.nextIntentId === packetSpatial.activeNextIntentId) || null;
+  } else {
+    const requestedPacketNextIntentId = text(nextIntent?.nextIntentId || nextIntent?.id) || null;
+    if (!requestedPacketNextIntentId) throw new Error('VISUAL_PACKET_NEXT_INTENT_ID_REQUIRED');
+    activeNextIntent = packetSpatial.nextIntents.find((intent) => intent.nextIntentId === requestedPacketNextIntentId) || null;
+    if (!activeNextIntent) throw new Error('VISUAL_PACKET_NEXT_INTENT_NOT_FOUND');
+  }
   return freeze({
     packetId: required(packetId, 'packetId'),
     visualDraftId: draft.visualDraftId,
