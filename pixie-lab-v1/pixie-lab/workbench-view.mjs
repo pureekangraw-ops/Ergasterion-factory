@@ -139,6 +139,9 @@ function visualView({ state, capabilities, selector, now }) {
   const actions = list(state.imageActions).filter((item) => packetIds.has(item.packetId));
   const actionIds = new Set(actions.map((item) => item.actionId));
   const receipts = list(state.imageReceipts).filter((item) => actionIds.has(item.actionId));
+  const dispatches = list(state.visualDispatches).filter((item) => item.visualDraftId === draft?.visualDraftId);
+  const dispatchIds = new Set(dispatches.map((item) => item.dispatchId));
+  const visualReceipts = list(state.visualReceipts).filter((item) => dispatchIds.has(item.dispatchId));
 
   return {
     ...baseView({ id: 'VISUAL_WORKBENCH', capabilities, source: 'visual-workbench.mjs', selector, now }),
@@ -157,6 +160,15 @@ function visualView({ state, capabilities, selector, now }) {
     verifications: clone(verifications),
     imageActions: clone(actions),
     imageReceipts: clone(receipts),
+    visualDispatches: clone(dispatches),
+    visualReceipts: clone(visualReceipts),
+    recovery: clone({
+      status: draft ? 'RECOVERED' : 'UNKNOWN',
+      activeBranchId: draft?.workingSpec?.spatial?.branch?.branchId || null,
+      activeCompareSessionId: draft?.workingSpec?.spatial?.activeCompareSessionId || null,
+      pendingDispatches: dispatches.filter((item) => ['PREPARED', 'SENT', 'WAITING_RESULT'].includes(item.status)),
+      latestResultRefs: draft?.workingSpec?.spatial?.resultRefs || [],
+    }),
     unknowns: clone(list(draft?.scans).flatMap((item) => list(item?.unknowns))),
   };
 }
