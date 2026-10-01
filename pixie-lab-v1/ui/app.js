@@ -305,23 +305,49 @@ async function renderVisual(view) {
        <span class="muted">Source stays locked. Freeze is context, not approval.</span>`
     : `No Visual Draft yet.<br><button id="visual-create" style="margin-top:8px">Create Visual Draft</button>`;
 
+  const resultRef = (receipt) => receipt.artifactRef || receipt.receiptId;
+  const resultRefs = receipts.map(resultRef).filter(Boolean);
+  const compareSessions = Array.isArray(spatial.compareSessions) ? spatial.compareSessions : [];
+  const activeCompareSession = compareSessions.find((session) => session.compareSessionId === spatial.activeCompareSessionId) || null;
+  const compareIds = new Set(activeCompareSession?.selectedResultRefs || []);
+  const promotedParts = Array.isArray(spatial.promotedParts) ? spatial.promotedParts : [];
+  const semanticRoles = ['FACE', 'LIGHTING', 'COMPOSITION', 'COLOR', 'STYLE', 'OUTFIT', 'BACKGROUND', 'OBJECT', 'POSE', 'TEXTURE', 'NEGATIVE_CONSTRAINT'];
+
   const history = [
     ...(draft ? [{ label:'ORIGINAL', ref:draft.sourceRef, status:'LOCKED' }] : []),
-    ...packets.map((packet, i) => ({ label:`PACKET V${i+1}`, ref:packet.packetId, status:packet.focusFrame ? 'FOCUSED' : 'PREPARED' })),
-    ...receipts.map((receipt, i) => ({ label:`IMAGE V${i+1}`, ref:receipt.artifactRef || receipt.receiptId, status:receipt.status })),
+    ...packets.map((packet, i) => ({ label:`PACKET V${i+1}`, ref:packet.packetId, status:packet.packetVersion === 'V3' ? 'V3 · STRUCTURED' : (packet.focusFrame ? 'FOCUSED' : 'PREPARED') })),
+    ...receipts.map((receipt, i) => ({ label:`IMAGE V${i+1}`, ref:resultRef(receipt), status:receipt.status })),
   ];
   $('#visual-history').innerHTML = history.length
     ? history.map((item) => {
-        const receipt = receipts.find((candidate) => (candidate.artifactRef || candidate.receiptId) === item.ref);
-        return `<div class="history-card"><strong>${esc(item.label)}</strong><span>${esc(item.ref)}</span><span>${esc(item.status)}</span>${receipt ? `<label class="compare-check"><input type="checkbox" data-compare-id="${esc(item.ref)}"> compare</label>` : ''}</div>`;
+        const receipt = receipts.find((candidate) => resultRef(candidate) === item.ref);
+        const checked = receipt && compareIds.has(item.ref) ? ' checked' : '';
+        return `<div class="history-card"><strong>${esc(item.label)}</strong><span>${esc(item.ref)}</span><span>${esc(item.status)}</span>${receipt ? `<label class="compare-check"><input type="checkbox" data-compare-id="${esc(item.ref)}"${checked}> compare</label>` : ''}</div>`;
       }).join('')
     : '<span class="muted">No visual history yet.</span>';
-  const compareIds = new Set();
+
+  const renderPromotedParts = () => {
+    $('#visual-promoted-parts').innerHTML = promotedParts.length
+      ? promotedParts.map((part) => `<span class="spatial-chip"><strong>${esc(part.role)}</strong><span>${esc(part.sourceResultRef)}${part.note ? ` · ${esc(part.note)}` : ''}</span></span>`).join('')
+      : '<span class="muted">Promote a face, light, composition, or other semantic part from a selected result.</span>';
+  };
+  const renderNextIntent = () => {
+    const nextIntent = spatial.nextIntent || spatial.nextIntents?.find((item) => item.nextIntentId === spatial.activeNextIntentId);
+    $('#visual-next-intent').textContent = nextIntent ? pretty(nextIntent) : 'Build a Next Intent from this compare session.';
+  };
   const renderCompare = () => {
-    const selected = receipts.filter((receipt) => compareIds.has(receipt.artifactRef || receipt.receiptId)).slice(0, 4);
+    const selected = receipts.filter((receipt) => compareIds.has(resultRef(receipt))).slice(0, 4);
     $('#visual-compare-grid').innerHTML = selected.length
-      ? selected.map((receipt) => { const url = artifactUrl(receipt.artifactRef); return `<div class="compare-card">${url ? `<img src="${esc(url)}" alt="Selected result">` : '<div class="runtime-shot-empty">No preview</div>'}<strong>${esc(receipt.artifactRef || receipt.receiptId)}</strong><span>${esc(receipt.status || 'UNKNOWN')}</span></div>`; }).join('')
-      : '<span class="muted">Select 2–4 returned results above to compare. Semantic part promotion is not implemented in Phase 1.</span>';
+      ? selected.map((receipt) => {
+          const ref = resultRef(receipt);
+          const url = artifactUrl(receipt.artifactRef);
+          const winner = activeCompareSession?.winnerRef === ref;
+          return `<div class="compare-card ${winner ? 'winner' : ''}">${url ? `<img src="${esc(url)}" alt="Selected result">` : '<div class="runtime-shot-empty">No preview</div>'}<strong>${esc(ref)}</strong><span>${esc(receipt.status || 'UNKNOWN')}${winner ? ' · WINNER' : ''}</span><div class="compare-card-actions"><button type="button" data-winner-ref="${esc(ref)}">${winner ? 'Winner' : 'Set winner'}</button><select data-promote-role="${esc(ref)}"><option value="">Promote as…</option>${semanticRoles.map((role) => `<option>${role}</option>`).join('')}</select><input data-promote-note="${esc(ref)}" placeholder="part note"><button type="button" data-promote-ref="${esc(ref)}">Promote</button></div></div>`;
+        }).join('')
+      : '<span class="muted">Select 2–4 returned results above, then persist the compare session.</span>';
+    $('#visual-branch-indicator').textContent = spatial.branch ? `Branch ${spatial.branch.branchId} · from ${spatial.branch.parentVisualDraftId}` : 'No branch selected';
+    renderPromotedParts();
+    renderNextIntent();
   };
   renderCompare();
 
@@ -343,6 +369,65 @@ async function renderVisual(view) {
     if (checkbox.checked) compareIds.add(checkbox.dataset.compareId); else compareIds.delete(checkbox.dataset.compareId);
     renderCompare();
   }));
+  $('#visual-create-compare').addEventListener('click', async () => {
+    const selectedResultRefs = [...compareIds];
+    if (selectedResultRefs.length < 2 || selectedResultRefs.length > 4) {
+      window.alert('Choose 2–4 results before persisting a compare session.');
+      return;
+    }
+    const sessionId = activeCompareSession?.compareSessionId || `COMPARE-${Date.now()}`;
+    const existingWinner = activeCompareSession?.winnerRef && selectedResultRefs.includes(activeCompareSession.winnerRef) ? activeCompareSession.winnerRef : null;
+    const session = { compareSessionId: sessionId, selectedResultRefs, winnerRef: existingWinner, compareNoteRefs: activeCompareSession?.compareNoteRefs || [], createdAt: activeCompareSession?.createdAt || new Date().toISOString() };
+    const sessions = [...compareSessions.filter((item) => item.compareSessionId !== sessionId), session];
+    await patchSpatialFields({ resultRefs, compareSessions: sessions, activeCompareSessionId: sessionId, winnerRef: existingWinner });
+  });
+  $$('[data-winner-ref]').forEach((button) => button.addEventListener('click', async () => {
+    if (!activeCompareSession) { window.alert('Persist a compare session first.'); return; }
+    const winnerRef = button.dataset.winnerRef;
+    const sessions = compareSessions.map((session) => session.compareSessionId === activeCompareSession.compareSessionId ? { ...session, winnerRef } : session);
+    await patchSpatialFields({ winnerRef, compareSessions: sessions });
+  }));
+  $$('[data-promote-ref]').forEach((button) => button.addEventListener('click', async () => {
+    if (!activeCompareSession) { window.alert('Persist a compare session first.'); return; }
+    const sourceResultRef = button.dataset.promoteRef;
+    const role = $(`[data-promote-role="${CSS.escape(sourceResultRef)}"]`)?.value;
+    if (!role) { window.alert('Choose a semantic role before promoting.'); return; }
+    const note = $(`[data-promote-note="${CSS.escape(sourceResultRef)}"]`)?.value.trim() || null;
+    const part = { partId: `PART-${Date.now()}`, sourceResultRef, role, note, focusFrameId: activeFrame?.id || null, regionRef: activeFrame ? activeFrame.id : null, visualDraftId: draft.visualDraftId, createdAt: new Date().toISOString() };
+    await patchSpatial('promotedParts', [...promotedParts, part]);
+  }));
+  $('#visual-save-compare-note').addEventListener('click', async () => {
+    const noteText = $('#visual-compare-note').value.trim();
+    if (!noteText) return;
+    if (!activeCompareSession) { window.alert('Persist a compare session before saving a linked note.'); return; }
+    const noteId = `NOTE-${Date.now()}`;
+    const note = { id: noteId, text: noteText, comparedRefs: [...compareIds], compareSessionId: activeCompareSession.compareSessionId, createdAt: new Date().toISOString() };
+    const sessions = compareSessions.map((session) => session.compareSessionId === activeCompareSession.compareSessionId ? { ...session, compareNoteRefs: [...new Set([...(session.compareNoteRefs || []), noteId])] } : session);
+    await patchSpatial('compareNotes', [...compareNotes, note]);
+    await patchSpatialFields({ compareSessions: sessions });
+  });
+  const buildNextIntent = () => {
+    if (!activeCompareSession) return null;
+    return { nextIntentId: `NEXT-INTENT-${Date.now()}`, compareSessionId: activeCompareSession.compareSessionId, selectedResultRefs: [...compareIds], winnerRef: activeCompareSession.winnerRef || spatial.winnerRef || null, promotedParts: promotedParts.filter((part) => compareIds.has(part.sourceResultRef)), compareNoteRefs: activeCompareSession.compareNoteRefs || [], freezeSet, exploreSet, focusFrameId: activeFrame?.id || null, intentLinks, createdAt: new Date().toISOString(), visualDraftId: draft.visualDraftId };
+  };
+  $('#visual-create-branch').addEventListener('click', async () => {
+    if (!draft?.visualDraftId || !activeCompareSession) { window.alert('Persist a compare session before creating a branch.'); return; }
+    const selectedResultRefs = [...compareIds];
+    const nextIntent = buildNextIntent();
+    if (!nextIntent) return;
+    const branchId = `BRANCH-${Date.now()}`;
+    const childId = `VIS-${Date.now()}`;
+    const winnerRef = nextIntent.winnerRef || selectedResultRefs[0];
+    const branch = { branchId, parentVisualDraftId: draft.visualDraftId, parentResultRefs: selectedResultRefs, promotedParts: nextIntent.promotedParts, inheritedFreezeSet: freezeSet, inheritedExploreSet: exploreSet, inheritedIntentLinks: intentLinks, compareNoteRefs: nextIntent.compareNoteRefs, createdAt: new Date().toISOString() };
+    const childSpatial = { references, focusFrames: frames, activeFocusFrameId: spatial.activeFocusFrameId, intentLinks, freezeSet, exploreSet, compareNotes, resultRefs: selectedResultRefs, compareSessions: [{ compareSessionId: `COMPARE-${branchId}`, selectedResultRefs, winnerRef, compareNoteRefs: nextIntent.compareNoteRefs, createdAt: new Date().toISOString() }], activeCompareSessionId: `COMPARE-${branchId}`, winnerRef, promotedParts: nextIntent.promotedParts, branch, nextIntents: [nextIntent], activeNextIntentId: nextIntent.nextIntentId, nextIntent };
+    const childSpec = structuredClone(draft.workingSpec || {});
+    childSpec.spatial = childSpatial;
+    await patchSpatialFields({ nextIntents: [...(spatial.nextIntents || []), nextIntent], activeNextIntentId: nextIntent.nextIntentId, nextIntent });
+    await command('visual_create', { visualDraftId: childId, sourceRef: winnerRef, sourceVersion: `branch:${branchId}`, parentVisualDraftId: draft.visualDraftId, lineage: { parentVisualDraftId: draft.visualDraftId, parentResultRefs: selectedResultRefs, compareSessionId: activeCompareSession.compareSessionId, winnerRef, branchId, createdAt: new Date().toISOString() }, spec: childSpec });
+    await refreshBootstrap();
+    await openWorkbench('VISUAL_WORKBENCH');
+  });
+
   $('#visual-add-reference').addEventListener('click', async () => {
     const ref = $('#visual-reference-ref').value.trim();
     if (!ref) return;
@@ -361,7 +446,7 @@ async function renderVisual(view) {
       visualDraftId,
       sourceRef,
       sourceVersion: 'ui',
-      spec: { brief: '', referenceRoles: ['INSPIRATION'], spatial: { focusFrames: [], intentLinks: [], freezeSet: [], exploreSet: [] } },
+      spec: { brief: '', referenceRoles: ['INSPIRATION'], spatial: { focusFrames: [], intentLinks: [], freezeSet: [], exploreSet: [], resultRefs: [], compareSessions: [], promotedParts: [], nextIntents: [] } },
     });
     await refreshBootstrap();
     await openWorkbench('VISUAL_WORKBENCH');
@@ -399,12 +484,6 @@ async function renderVisual(view) {
     await patchSpatial(button.dataset.removeState === 'freeze' ? 'freezeSet' : 'exploreSet', values.filter((item) => item !== button.dataset.stateItem));
   }));
 
-  $('#visual-save-compare-note').addEventListener('click', async () => {
-    const noteText = $('#visual-compare-note').value.trim();
-    if (!noteText) return;
-    await patchSpatial('compareNotes', [...compareNotes, { id: `NOTE-${Date.now()}`, text: noteText, comparedRefs: [...compareIds], createdAt: new Date().toISOString() }]);
-  });
-
   $('#visual-prepare').addEventListener('click', async () => {
     if (!draft?.visualDraftId) {
       window.alert('Create a Visual Draft first.');
@@ -430,6 +509,14 @@ async function renderVisual(view) {
         freezeSet,
         exploreSet,
         compareNotes,
+        packetVersion: 'V3',
+        compareSessionId: activeCompareSession?.compareSessionId || null,
+        selectedResultRefs: [...compareIds],
+        winnerRef: activeCompareSession?.winnerRef || spatial.winnerRef || null,
+        promotedParts,
+        branchId: spatial.branch?.branchId || null,
+        parentLineage: draft.lineage || null,
+        nextIntent: spatial.nextIntent || spatial.nextIntents?.find((item) => item.nextIntentId === spatial.activeNextIntentId) || null,
       },
     });
     await command('image_request', {
