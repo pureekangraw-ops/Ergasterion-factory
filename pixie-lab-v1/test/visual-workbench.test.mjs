@@ -161,3 +161,42 @@ test('Visual vNext packet carries focus frame, intent links, freeze and explore 
   assert.deepEqual(packet.exploreSet, ['background']);
   assert.equal(packet.imageGenerationAuthority, false);
 });
+
+test('Visual vNext validates intent links against placed references and rejects Freeze/Explore overlap', () => {
+  const lab = new PixieLab({ now: clock() });
+  assert.throws(() => lab.createVisualDraft({
+    visualDraftId: 'VIS-INTEGRITY',
+    sourceRef: 'image://source',
+    spec: { spatial: { intentLinks: [{ sourceId: 'image://missing', role: 'FACE' }] } },
+  }), /VISUAL_INTENT_SOURCE_NOT_FOUND/);
+  assert.throws(() => lab.createVisualDraft({
+    visualDraftId: 'VIS-CONFLICT',
+    sourceRef: 'image://source',
+    spec: { spatial: { freezeSet: ['face'], exploreSet: ['face'] } },
+  }), /VISUAL_FREEZE_EXPLORE_CONFLICT/);
+});
+
+test('Visual vNext normalizes focus frame bounds and carries multiple references', () => {
+  const lab = new PixieLab({ now: clock() });
+  const draft = lab.createVisualDraft({
+    visualDraftId: 'VIS-SPATIAL',
+    sourceRef: 'image://source',
+    spec: {
+      spatial: {
+        references: [{ id: 'REF-2', ref: 'image://palette', label: 'Palette', bounds: { x: 0.7, y: 0.7, width: 0.4, height: 0.4 }, zIndex: 4 }],
+        focusFrames: [{ id: 'FRAME-2', label: 'corner', bounds: { x: -1, y: 0.8, width: 0.8, height: 0.8 } }],
+        activeFocusFrameId: 'FRAME-2',
+      },
+    },
+  });
+  assert.equal(draft.workingSpec.spatial.references.length, 2);
+  assert.equal(draft.workingSpec.spatial.focusFrames[0].bounds.x, 0);
+  assert.equal(draft.workingSpec.spatial.focusFrames[0].bounds.width, 0.8);
+  const packet = lab.createVisualRenderPacket('VIS-SPATIAL', {
+    packetId: 'PACK-SPATIAL',
+    intent: 'Use the placed references',
+    requestedResult: 'A focused composition',
+  });
+  assert.equal(packet.references.length, 2);
+  assert.equal(packet.focusFrame.id, 'FRAME-2');
+});
