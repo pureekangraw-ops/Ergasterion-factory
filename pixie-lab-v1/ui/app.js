@@ -183,6 +183,7 @@ async function renderVisual(view) {
   const intentLinks = Array.isArray(spatial.intentLinks) ? spatial.intentLinks : [];
   const freezeSet = Array.isArray(spatial.freezeSet) ? spatial.freezeSet : [];
   const exploreSet = Array.isArray(spatial.exploreSet) ? spatial.exploreSet : [];
+  const compareNotes = Array.isArray(spatial.compareNotes) ? spatial.compareNotes : [];
 
   $('#visual-work-id').textContent = contextSelector().workId || 'UNKNOWN';
   $('#visual-checkpoint-id').textContent = contextSelector().checkpointId || 'UNKNOWN';
@@ -279,6 +280,7 @@ async function renderVisual(view) {
   $('#visual-requested').value = latestPacket?.requestedResult || '';
   $('#visual-keep').value = (latestPacket?.mustKeep || []).join('\n');
   $('#visual-remove').value = (latestPacket?.mustRemove || []).join('\n');
+  $('#visual-compare-note').value = compareNotes.at(-1)?.text || '';
 
   $('#visual-reference-roles').innerHTML = intentLinks.length
     ? intentLinks.filter((link) => link.sourceId === draft?.sourceRef).map((link) => `<span class="spatial-chip"><strong>${esc(link.role)}</strong><span>${esc(link.note || link.sourceId)}</span></span>`).join('')
@@ -323,12 +325,15 @@ async function renderVisual(view) {
   };
   renderCompare();
 
-  const patchSpatial = async (key, value) => {
+  const patchSpatial = async (key, value) => patchSpatialFields({ [key]: value });
+  const patchSpatialFields = async (changes) => {
     if (!draft?.visualDraftId) {
       window.alert('Create a Visual Draft first.');
       return;
     }
-    await command('visual_edit', { visualDraftId: draft.visualDraftId, edit: { op: 'SET', path: `spatial.${key}`, value } });
+    for (const [key, value] of Object.entries(changes)) {
+      await command('visual_edit', { visualDraftId: draft.visualDraftId, edit: { op: 'SET', path: `spatial.${key}`, value } });
+    }
     await refreshBootstrap();
     await openWorkbench('VISUAL_WORKBENCH');
   };
@@ -380,11 +385,11 @@ async function renderVisual(view) {
   });
   $('#visual-add-freeze').addEventListener('click', async () => {
     const item = $('#visual-freeze-item').value.trim();
-    if (item) await patchSpatial('freezeSet', [...new Set([...freezeSet, item])]);
+    if (item) await patchSpatialFields({ freezeSet: [...new Set([...freezeSet, item])], exploreSet: exploreSet.filter((value) => value !== item) });
   });
   $('#visual-add-explore').addEventListener('click', async () => {
     const item = $('#visual-explore-item').value.trim();
-    if (item) await patchSpatial('exploreSet', [...new Set([...exploreSet, item])]);
+    if (item) await patchSpatialFields({ exploreSet: [...new Set([...exploreSet, item])], freezeSet: freezeSet.filter((value) => value !== item) });
   });
   $$('[data-remove-intent]').forEach((button) => button.addEventListener('click', async () => {
     await patchSpatial('intentLinks', intentLinks.filter((link) => link.id !== button.dataset.removeIntent));
@@ -393,6 +398,12 @@ async function renderVisual(view) {
     const values = button.dataset.removeState === 'freeze' ? freezeSet : exploreSet;
     await patchSpatial(button.dataset.removeState === 'freeze' ? 'freezeSet' : 'exploreSet', values.filter((item) => item !== button.dataset.stateItem));
   }));
+
+  $('#visual-save-compare-note').addEventListener('click', async () => {
+    const noteText = $('#visual-compare-note').value.trim();
+    if (!noteText) return;
+    await patchSpatial('compareNotes', [...compareNotes, { id: `NOTE-${Date.now()}`, text: noteText, comparedRefs: [...compareIds], createdAt: new Date().toISOString() }]);
+  });
 
   $('#visual-prepare').addEventListener('click', async () => {
     if (!draft?.visualDraftId) {
@@ -418,6 +429,7 @@ async function renderVisual(view) {
         intentLinks,
         freezeSet,
         exploreSet,
+        compareNotes,
       },
     });
     await command('image_request', {
