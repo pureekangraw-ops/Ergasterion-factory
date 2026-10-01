@@ -75,14 +75,21 @@
   <template id="visual-template">
     <div class="visual-grid">
       <section class="panel reference-panel">
-        <div class="panel-head"><span>REFERENCE TRAY</span><span class="muted">source / meaning</span></div>
+        <div class="visual-provenance"><span>WORK <b id="visual-work-id">UNKNOWN</b></span><span>CHECKPOINT <b id="visual-checkpoint-id">UNKNOWN</b></span></div>
+        <div class="panel-head"><span>REFERENCE TRAY</span><span class="muted">multi-reference</span></div>
         <div class="reference-drop">
           <div class="reference-thumb" id="visual-source-thumb">REF</div>
           <div>
             <strong id="visual-source">No source yet</strong>
-            <small>Source stays locked. Attach meaning to references instead of turning every image into a prompt.</small>
+            <small>Source stays locked. Place multiple references on the canvas and attach meaning to each one.</small>
           </div>
         </div>
+        <div class="reference-add">
+          <input id="visual-reference-ref" placeholder="image:// or artifact ref">
+          <input id="visual-reference-label" placeholder="label">
+          <button id="visual-add-reference">Place</button>
+        </div>
+        <div id="visual-reference-list" class="reference-list"></div>
         <div class="spatial-section">
           <div class="subhead">REFERENCE ROLES</div>
           <div id="visual-reference-roles" class="chip-list"></div>
@@ -135,8 +142,10 @@
       </section>
 
       <section class="panel history-panel">
-        <div class="panel-head"><span>HISTORY</span><span class="muted">Original → V1 → V2 → V3+</span></div>
+        <div class="panel-head"><span>RESULTS + COMPARE</span><span class="muted">select 2–4</span></div>
         <div id="visual-history" class="history-strip"></div>
+        <div id="visual-compare-grid" class="compare-grid"><span class="muted">Compare loop not started.</span></div>
+        <div class="compare-note"><input id="visual-compare-note" placeholder="What should we preserve from the selected results?"><span class="muted">Semantic part promotion is not implemented in Phase 1.</span></div>
       </section>
     </div>
   </template>
