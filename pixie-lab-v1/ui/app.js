@@ -381,21 +381,25 @@ async function renderVisual(view) {
     const sessions = [...compareSessions.filter((item) => item.compareSessionId !== sessionId), session];
     await patchSpatialFields({ resultRefs, compareSessions: sessions, activeCompareSessionId: sessionId, winnerRef: existingWinner });
   });
-  $$('[data-winner-ref]').forEach((button) => button.addEventListener('click', async () => {
+  $('#visual-compare-grid').addEventListener('click', async (event) => {
+    const winnerButton = event.target.closest('[data-winner-ref]');
+    if (winnerButton) {
+      if (!activeCompareSession) { window.alert('Persist a compare session first.'); return; }
+      const winnerRef = winnerButton.dataset.winnerRef;
+      const sessions = compareSessions.map((session) => session.compareSessionId === activeCompareSession.compareSessionId ? { ...session, winnerRef } : session);
+      await patchSpatialFields({ winnerRef, compareSessions: sessions });
+      return;
+    }
+    const promoteButton = event.target.closest('[data-promote-ref]');
+    if (!promoteButton) return;
     if (!activeCompareSession) { window.alert('Persist a compare session first.'); return; }
-    const winnerRef = button.dataset.winnerRef;
-    const sessions = compareSessions.map((session) => session.compareSessionId === activeCompareSession.compareSessionId ? { ...session, winnerRef } : session);
-    await patchSpatialFields({ winnerRef, compareSessions: sessions });
-  }));
-  $$('[data-promote-ref]').forEach((button) => button.addEventListener('click', async () => {
-    if (!activeCompareSession) { window.alert('Persist a compare session first.'); return; }
-    const sourceResultRef = button.dataset.promoteRef;
+    const sourceResultRef = promoteButton.dataset.promoteRef;
     const role = $(`[data-promote-role="${CSS.escape(sourceResultRef)}"]`)?.value;
     if (!role) { window.alert('Choose a semantic role before promoting.'); return; }
     const note = $(`[data-promote-note="${CSS.escape(sourceResultRef)}"]`)?.value.trim() || null;
     const part = { partId: `PART-${Date.now()}`, sourceResultRef, role, note, focusFrameId: activeFrame?.id || null, regionRef: activeFrame ? activeFrame.id : null, visualDraftId: draft.visualDraftId, createdAt: new Date().toISOString() };
     await patchSpatial('promotedParts', [...promotedParts, part]);
-  }));
+  });
   $('#visual-save-compare-note').addEventListener('click', async () => {
     const noteText = $('#visual-compare-note').value.trim();
     if (!noteText) return;
@@ -422,7 +426,6 @@ async function renderVisual(view) {
     const childSpatial = { references, focusFrames: frames, activeFocusFrameId: spatial.activeFocusFrameId, intentLinks, freezeSet, exploreSet, compareNotes, resultRefs: selectedResultRefs, compareSessions: [{ compareSessionId: `COMPARE-${branchId}`, selectedResultRefs, winnerRef, compareNoteRefs: nextIntent.compareNoteRefs, createdAt: new Date().toISOString() }], activeCompareSessionId: `COMPARE-${branchId}`, winnerRef, promotedParts: nextIntent.promotedParts, branch, nextIntents: [nextIntent], activeNextIntentId: nextIntent.nextIntentId, nextIntent };
     const childSpec = structuredClone(draft.workingSpec || {});
     childSpec.spatial = childSpatial;
-    await patchSpatialFields({ nextIntents: [...(spatial.nextIntents || []), nextIntent], activeNextIntentId: nextIntent.nextIntentId, nextIntent });
     await command('visual_create', { visualDraftId: childId, sourceRef: winnerRef, sourceVersion: `branch:${branchId}`, parentVisualDraftId: draft.visualDraftId, lineage: { parentVisualDraftId: draft.visualDraftId, parentResultRefs: selectedResultRefs, compareSessionId: activeCompareSession.compareSessionId, winnerRef, branchId, createdAt: new Date().toISOString() }, spec: childSpec });
     await refreshBootstrap();
     await openWorkbench('VISUAL_WORKBENCH');
