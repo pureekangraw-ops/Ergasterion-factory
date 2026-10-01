@@ -1,3 +1,4 @@
+import { cloudflareAdminCapabilities, verifyCloudflareAuth, listKvNamespaces, createKvNamespace } from './cloudflare-admin.mjs';
 const PROTOCOL = 'GO_HUB_ERGASTERION_FACTORY_V1';
 const MAX_CLOCK_SKEW_MS = 5 * 60 * 1000;
 
@@ -166,6 +167,29 @@ async function readbackHandoff(request, env) {
   return ledger.fetch('https://handoff-ledger.internal/readback', { method: 'GET' });
 }
 
+async function receiveCloudflareAdmin(request, env) {
+  if (!text(env?.ERGASTERION_HUB_SHARED_SECRET)) return reject('FACTORY_SHARED_SECRET_NOT_CONFIGURED', 503);
+  const timestamp = text(request.headers.get('x-go-hub-timestamp'));
+  const signature = text(request.headers.get('x-go-hub-signature'));
+  const headerProtocol = text(request.headers.get('x-go-hub-protocol'));
+  if (headerProtocol !== PROTOCOL) return reject('HUB_FACTORY_PROTOCOL_HEADER_INVALID', 400);
+  const numericTimestamp = Number(timestamp);
+  if (!Number.isFinite(numericTimestamp) || Math.abs(Date.now() - numericTimestamp) > MAX_CLOCK_SKEW_MS) return reject('HUB_FACTORY_TIMESTAMP_INVALID', 401);
+  const body = await request.text();
+  const authenticated = await verifyHmac({ body, secret: env.ERGASTERION_HUB_SHARED_SECRET, timestamp, signature });
+  if (!authenticated) return reject('HUB_FACTORY_SIGNATURE_INVALID', 401);
+  let input;
+  try { input = JSON.parse(body); } catch { return reject('CLOUDFLARE_ADMIN_JSON_INVALID', 400); }
+  const operation = text(input?.operation);
+  if (operation === 'verify_auth') return json(await verifyCloudflareAuth(env));
+  if (operation === 'list_kv_namespaces') return json(await listKvNamespaces(env));
+  if (operation === 'create_kv_namespace') {
+    const result = await createKvNamespace(env, input?.title);
+    return json(result, result.ok ? 200 : (Number(result.status) || 502));
+  }
+  return reject('CLOUDFLARE_ADMIN_OPERATION_UNSUPPORTED', 400, { operation });
+}
+
 async function reportCurrentToOlympus(request, env) {
   const olympusUrl = text(env?.OLYMPUS_URL);
   if (!olympusUrl) return reject('OLYMPUS_URL_NOT_CONFIGURED', 503);
@@ -209,6 +233,7 @@ function transportHealth(env) {
     secretConfigured,
     ledgerBound,
     durableReadback: ledgerBound,
+    cloudflareAdmin: cloudflareAdminCapabilities(env),
   };
 }
 
@@ -224,6 +249,10 @@ export default {
         surface: 'CLOUDFLARE_FACTORY_EDGE',
         status: 'READY',
       });
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/cloudflare/admin') {
+      return receiveCloudflareAdmin(request, env);
     }
 
     if (request.method === 'POST' && url.pathname === '/api/olympus/current-report') {

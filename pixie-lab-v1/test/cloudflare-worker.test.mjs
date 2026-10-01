@@ -247,3 +247,93 @@ test('Factory refuses to report unverified Current to Olympus', async () => {
   assert.equal(response.status, 409);
   assert.equal((await response.json()).error, 'CURRENT_REPORT_VERIFIED_EVIDENCE_REQUIRED');
 });
+
+
+async function adminRequest(payload, secret = 'shared-secret') {
+  const body = JSON.stringify(payload);
+  const timestamp = String(Date.now());
+  return new Request('https://factory.example/api/cloudflare/admin', {
+    method:'POST',
+    headers:{
+      'content-type':'application/json',
+      'x-go-hub-protocol':PROTOCOL,
+      'x-go-hub-timestamp':timestamp,
+      'x-go-hub-signature':await sign(body, secret, timestamp),
+    },
+    body,
+  });
+}
+
+test('Cloudflare admin route is Hub-authenticated and never exposes secrets', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url) => {
+    assert.match(String(url), /api\.cloudflare\.com\/client\/v4\/accounts\/acct\/storage\/kv\/namespaces/);
+    return Response.json({ success:true, result:[] });
+  };
+  try {
+    const env = {
+      ERGASTERION_HUB_SHARED_SECRET:'shared-secret',
+      CLOUDFLARE_API_TOKEN:'super-secret-token',
+      CLOUDFLARE_ACCOUNT_ID:'acct',
+    };
+    const response = await worker.fetch(await adminRequest({ operation:'verify_auth' }), env);
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.ok, true);
+    assert.equal(body.status, 'PASS');
+    assert.equal(body.secretsExposed, false);
+    assert.equal(JSON.stringify(body).includes('super-secret-token'), false);
+
+    const health = await worker.fetch(new Request('https://factory.example/api/hub-factory/health'), env);
+    const healthBody = await health.json();
+    assert.equal(healthBody.cloudflareAdmin.configured, true);
+    assert.equal(healthBody.cloudflareAdmin.mutationMode, 'FACTORY_ONLY');
+    assert.equal(healthBody.cloudflareAdmin.secretsExposed, false);
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('Factory creates OLYMPUS_STATE idempotently through authenticated Cloudflare admin route', async () => {
+  const originalFetch = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url, init = {}) => {
+    calls.push({ url:String(url), method:init.method || 'GET', body:init.body || null });
+    if ((init.method || 'GET') === 'GET') return Response.json({ success:true, result:[] });
+    assert.equal(init.method, 'POST');
+    assert.equal(init.body, JSON.stringify({ title:'OLYMPUS_STATE' }));
+    return Response.json({ success:true, result:{ id:'kv-olympus-001', title:'OLYMPUS_STATE' } });
+  };
+  try {
+    const env = {
+      ERGASTERION_HUB_SHARED_SECRET:'shared-secret',
+      CLOUDFLARE_API_TOKEN:'token',
+      CLOUDFLARE_ACCOUNT_ID:'acct',
+    };
+    const response = await worker.fetch(await adminRequest({ operation:'create_kv_namespace', title:'OLYMPUS_STATE' }), env);
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.ok, true);
+    assert.equal(body.status, 'CREATED');
+    assert.deepEqual(body.namespace, { id:'kv-olympus-001', title:'OLYMPUS_STATE' });
+    assert.equal(calls.length, 2);
+
+    globalThis.fetch = async () => Response.json({ success:true, result:[{ id:'kv-olympus-001', title:'OLYMPUS_STATE' }] });
+    const retry = await worker.fetch(await adminRequest({ operation:'create_kv_namespace', title:'OLYMPUS_STATE' }), env);
+    const retryBody = await retry.json();
+    assert.equal(retryBody.status, 'EXISTS');
+    assert.equal(retryBody.created, false);
+    assert.equal(retryBody.namespace.id, 'kv-olympus-001');
+  } finally { globalThis.fetch = originalFetch; }
+});
+
+test('Cloudflare admin route rejects unsigned mutation', async () => {
+  const env = {
+    ERGASTERION_HUB_SHARED_SECRET:'shared-secret',
+    CLOUDFLARE_API_TOKEN:'token',
+    CLOUDFLARE_ACCOUNT_ID:'acct',
+  };
+  const response = await worker.fetch(new Request('https://factory.example/api/cloudflare/admin', {
+    method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({operation:'create_kv_namespace',title:'OLYMPUS_STATE'}),
+  }), env);
+  assert.equal(response.status, 400);
+  assert.equal((await response.json()).error, 'HUB_FACTORY_PROTOCOL_HEADER_INVALID');
+});
