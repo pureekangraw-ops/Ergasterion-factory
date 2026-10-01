@@ -49,7 +49,16 @@ export function createVisualDraft({
   spec = {},
   now = nowIso,
 } = {}) {
-  const originalSpec = clone(spec ?? {});
+  const inputSpec = clone(spec ?? {});
+  const inputSpatial = inputSpec.spatial && typeof inputSpec.spatial === 'object' ? inputSpec.spatial : {};
+  const normalizedSpatial = {
+    focusFrames: Array.isArray(inputSpatial.focusFrames) ? clone(inputSpatial.focusFrames) : [],
+    activeFocusFrameId: text(inputSpatial.activeFocusFrameId) || null,
+    intentLinks: Array.isArray(inputSpatial.intentLinks) ? clone(inputSpatial.intentLinks) : [],
+    freezeSet: unique(inputSpatial.freezeSet),
+    exploreSet: unique(inputSpatial.exploreSet),
+  };
+  const originalSpec = { ...inputSpec, spatial: normalizedSpatial };
   return freeze({
     visualDraftId: required(visualDraftId, 'visualDraftId'),
     experimentId: text(experimentId) || null,
@@ -183,11 +192,22 @@ export function createVisualRenderPacket(draft, {
   constraints = [],
   evidenceRefs = [],
   unknowns = [],
+  focusFrame = undefined,
+  intentLinks = undefined,
+  freezeSet = undefined,
+  exploreSet = undefined,
   now = nowIso,
 } = {}) {
   requireDraft(draft);
   const scanEvidence = (draft.scans || []).flatMap((item) => item.evidenceRefs || []);
   const scanUnknowns = (draft.scans || []).flatMap((item) => item.unknowns || []);
+  const spatial = draft.workingSpec?.spatial || {};
+  const packetFocusFrame = focusFrame === undefined
+    ? (spatial.focusFrames || []).find((item) => item.id === spatial.activeFocusFrameId) || null
+    : clone(focusFrame);
+  const packetIntentLinks = intentLinks === undefined ? spatial.intentLinks || [] : intentLinks;
+  const packetFreezeSet = freezeSet === undefined ? spatial.freezeSet || [] : freezeSet;
+  const packetExploreSet = exploreSet === undefined ? spatial.exploreSet || [] : exploreSet;
   return freeze({
     packetId: required(packetId, 'packetId'),
     visualDraftId: draft.visualDraftId,
@@ -197,6 +217,10 @@ export function createVisualRenderPacket(draft, {
     sourceVersion: draft.sourceVersion,
     sourceHash: draft.sourceHash,
     workingSpec: clone(draft.workingSpec),
+    focusFrame: packetFocusFrame,
+    intentLinks: clone(packetIntentLinks),
+    freezeSet: unique(packetFreezeSet),
+    exploreSet: unique(packetExploreSet),
     intent: required(intent, 'intent'),
     requestedResult: required(requestedResult, 'requestedResult'),
     mustKeep: unique(mustKeep),
