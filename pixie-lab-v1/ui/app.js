@@ -385,11 +385,11 @@ async function renderVisual(view) {
   });
   $('#visual-add-freeze').addEventListener('click', async () => {
     const item = $('#visual-freeze-item').value.trim();
-    if (item) await patchSpatialFields({ freezeSet: [...new Set([...freezeSet, item])], exploreSet: exploreSet.filter((value) => value !== item) });
+    if (item) await patchSpatialFields({ exploreSet: exploreSet.filter((value) => value !== item), freezeSet: [...new Set([...freezeSet, item])] });
   });
   $('#visual-add-explore').addEventListener('click', async () => {
     const item = $('#visual-explore-item').value.trim();
-    if (item) await patchSpatialFields({ exploreSet: [...new Set([...exploreSet, item])], freezeSet: freezeSet.filter((value) => value !== item) });
+    if (item) await patchSpatialFields({ freezeSet: freezeSet.filter((value) => value !== item), exploreSet: [...new Set([...exploreSet, item])] });
   });
   $$('[data-remove-intent]').forEach((button) => button.addEventListener('click', async () => {
     await patchSpatial('intentLinks', intentLinks.filter((link) => link.id !== button.dataset.removeIntent));
