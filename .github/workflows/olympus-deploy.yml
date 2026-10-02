@@ -80,10 +80,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          health="$(curl -fsS "$OLYMPUS_URL/health")"
-          printf '%s' "$health" | jq -e '.ok == true and .runtime == "CLOUDFLARE_WORKER" and .storage == true and .aion == true' >/dev/null
-          curl -fsS "$OLYMPUS_URL/registry/current" | jq -e '.authority == "CURRENT_VERSION_REGISTRY"' >/dev/null
-          curl -fsS "$OLYMPUS_URL/aion/registry" | jq -e '.schema == "AION_TRUST_PROOF_V1"' >/dev/null
+          ready=0
+          for attempt in $(seq 1 12); do
+            if health="$(curl -fsS "$OLYMPUS_URL/health" 2>/dev/null)" &&
+               printf '%s' "$health" | jq -e '.ok == true and .runtime == "CLOUDFLARE_WORKER" and .storage == true and .aion == true' >/dev/null &&
+               curl -fsS "$OLYMPUS_URL/registry/current" | jq -e '.authority == "CURRENT_VERSION_REGISTRY"' >/dev/null &&
+               curl -fsS "$OLYMPUS_URL/aion/registry" | jq -e '.schema == "AION_TRUST_PROOF_V1"' >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 5
+          done
+          test "$ready" = "1"
 
       - name: Create isolated E2E KV
         id: e2e
@@ -125,6 +133,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          ready=0
+          for attempt in $(seq 1 12); do
+            if curl -fsS "$E2E_URL/health" | jq -e '.ok == true and .aion == true' >/dev/null 2>&1; then
+              ready=1
+              break
+            fi
+            sleep 5
+          done
+          test "$ready" = "1"
           post() { curl -fsS -X POST -H 'Content-Type: application/json' --data "$2" "$E2E_URL$1"; }
 
           post /apps '{"appId":"prism","destination":"PRISM_NATIVE","integration":{"mode":"DIRECT","connectionPoint":{"appId":"prism","target":"app://prism-owner","releaseTruthRef":"truth://prism","direct":true}}}' >/dev/null
