@@ -53,6 +53,7 @@ import {
   createVisualDraft, scanVisualDraft, editVisualDraft, compareVisualDraft,
   createVisualRenderPacket, verifyVisualRender,
 } from './visual-workbench.mjs';
+import { createLivingScene, editLivingScene, validateLivingScene, createWebExportManifest } from './living-scene.mjs';
 import {
   createVisualDispatchContract, updateVisualDispatchStatus, createVisualReceipt, importVisualReceipt, isUsableVisualReceipt, buildVisualRecovery,
 } from './visual-transport.mjs';
@@ -96,6 +97,7 @@ export class PixieLab {
       visualDrafts: [], visualRenderPackets: [], visualVerifications: [],
       imageActions: [], imageReceipts: [],
       visualDispatches: [], visualReceipts: [],
+      livingScenes: [], webExportManifests: [],
       runtimeObservations: [], runtimeInteractions: [],
       archives: [], cleanRuns: [],
     };
@@ -540,6 +542,33 @@ export class PixieLab {
     if (this.state.visualVerifications.some((item) => item.verificationId === result.verificationId)) throw new Error('DUPLICATE_VISUAL_VERIFICATION_ID');
     this.state.visualVerifications.push(result);
     return clone(result);
+  }
+
+  createLivingScene(input = {}) {
+    if (this.state.livingScenes.some((item) => item.sceneId === input.sceneId)) throw new Error('DUPLICATE_LIVING_SCENE_ID');
+    const scene = createLivingScene({ ...input, now: this.now });
+    this.state.livingScenes.push(scene);
+    return clone(scene);
+  }
+  editLivingScene(sceneId, patch = {}) {
+    const index = this.state.livingScenes.findIndex((item) => item.sceneId === sceneId);
+    if (index < 0) throw new Error('LIVING_SCENE_NOT_FOUND');
+    this.state.livingScenes[index] = editLivingScene(this.state.livingScenes[index], patch, { now: this.now });
+    return clone(this.state.livingScenes[index]);
+  }
+  validateLivingScene(sceneId) {
+    const index = this.state.livingScenes.findIndex((item) => item.sceneId === sceneId);
+    if (index < 0) throw new Error('LIVING_SCENE_NOT_FOUND');
+    this.state.livingScenes[index] = validateLivingScene(this.state.livingScenes[index], { now: this.now });
+    return clone(this.state.livingScenes[index]);
+  }
+  createWebExportManifest(sceneId, input = {}) {
+    const scene = this.state.livingScenes.find((item) => item.sceneId === sceneId);
+    if (!scene) throw new Error('LIVING_SCENE_NOT_FOUND');
+    const manifest = createWebExportManifest(scene, { ...input, now: this.now });
+    if (this.state.webExportManifests.some((item) => item.sceneId === sceneId && JSON.stringify(item.profiles) === JSON.stringify(manifest.profiles))) return clone(manifest);
+    this.state.webExportManifests.push(manifest);
+    return clone(manifest);
   }
 
   createImageAction(packetId, input = {}) {
