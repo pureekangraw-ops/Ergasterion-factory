@@ -24,6 +24,7 @@ export const PIXIE_COMMANDS = Object.freeze([
   'examples', 'run_example',
   'logic_create', 'logic_edit', 'logic_compare',
   'visual_create', 'visual_scan', 'visual_edit', 'visual_compare', 'visual_render_packet', 'visual_verify',
+  'living_scene_create', 'living_scene_edit', 'living_scene_validate', 'web_export_manifest',
   'image_request', 'image_result', 'visual_dispatch', 'visual_dispatch_update', 'visual_receipt', 'visual_result_import', 'visual_retry', 'visual_recover', 'visual_lineage',
   'production_handoff_prepare',
   'candidate_passport', 'door_guard',
@@ -43,6 +44,7 @@ const MUTATING = new Set([
   'self_test', 'cross_room', 'run_example',
   'logic_create', 'logic_edit',
   'visual_create', 'visual_scan', 'visual_edit', 'visual_render_packet', 'visual_verify',
+  'living_scene_create', 'living_scene_edit', 'living_scene_validate', 'web_export_manifest',
   'image_request', 'image_result', 'visual_dispatch', 'visual_dispatch_update', 'visual_receipt', 'visual_result_import', 'visual_retry',
   'production_handoff_prepare',
   'runtime_record', 'runtime_interaction_record',
@@ -259,6 +261,18 @@ export function createPixieCommander({ persistence, evidenceVerifier = null, cod
         break;
       case 'visual_verify':
         result = lab.verifyVisualRender(args.packetId, requireObject(args.verification, 'args.verification'));
+        break;
+      case 'living_scene_create':
+        result = lab.createLivingScene(args);
+        break;
+      case 'living_scene_edit':
+        result = lab.editLivingScene(args.sceneId, requireObject(args.patch, 'args.patch'));
+        break;
+      case 'living_scene_validate':
+        result = lab.validateLivingScene(args.sceneId);
+        break;
+      case 'web_export_manifest':
+        result = lab.createWebExportManifest(args.sceneId, requireObject(args.options, 'args.options'));
         break;
       case 'image_request':
         result = lab.createImageAction(args.packetId, requireObject(args.request, 'args.request'));
