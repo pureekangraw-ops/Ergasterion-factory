@@ -142,7 +142,7 @@ jobs:
             sleep 5
           done
           test "$ready" = "1"
-          post() { curl -fsS -X POST -H 'Content-Type: application/json' --data "$2" "$E2E_URL$1"; }
+          post() { curl --retry 12 --retry-delay 5 --retry-all-errors -fsS -X POST -H 'Content-Type: application/json' --data "$2" "$E2E_URL$1"; }
 
           post /apps '{"appId":"prism","destination":"PRISM_NATIVE","integration":{"mode":"DIRECT","connectionPoint":{"appId":"prism","target":"app://prism-owner","releaseTruthRef":"truth://prism","direct":true}}}' >/dev/null
           missing_profile='{"appId":"missing","destination":"MISSING_NATIVE","integration":{"mode":"DIRECT","connectionPoint":{"appId":"missing","target":"app://missing-owner","releaseTruthRef":"truth://missing","direct":true}}}'
@@ -166,7 +166,7 @@ jobs:
           rolled="$(post /aion/resolve '{"appId":"prism","version":"1.0.0","sourceRevision":"rev-1","artifactSha":"sha-1","destination":"PRISM_NATIVE"}')"
           printf '%s' "$rolled" | jq -e '.status=="VERIFIED" and .target=="app://prism-owner"' >/dev/null
 
-          registry="$(curl -fsS "$E2E_URL/aion/registry")"
+          registry="$(curl --retry 12 --retry-delay 5 --retry-all-errors -fsS "$E2E_URL/aion/registry")"
           printf '%s' "$registry" | jq -e '.entries[] | select(.systemId=="prism") | .currentStatus=="CURRENT" and .target=="app://prism-owner"' >/dev/null
           printf '%s' "$registry" | jq -e '.entries[] | select(.systemId=="missing") | .currentStatus=="UNKNOWN" and .target==null and .releaseTruthRef==null' >/dev/null
 
