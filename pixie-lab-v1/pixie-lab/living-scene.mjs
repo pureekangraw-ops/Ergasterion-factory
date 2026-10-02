@@ -73,7 +73,8 @@ export function validateLivingScene(scene, { now = nowIso } = {}) {
   const liveRegions = scene.regions.filter((region) => region.mode === 'LIVE');
   checks.push({ checkId: 'LOCK_ZONE', status: lockRegions.length ? 'PASS' : 'FAIL', detail: lockRegions.length ? `${lockRegions.length} LOCK region(s)` : 'At least one LOCK region is required' });
   checks.push({ checkId: 'LIVE_ZONE', status: liveRegions.length ? 'PASS' : 'UNKNOWN', detail: liveRegions.length ? `${liveRegions.length} LIVE region(s)` : 'No LIVE region configured' });
-  checks.push({ checkId: 'DEFAULT_MOTION', status: scene.motion.preset === 'SUBTLE' ? 'PASS' : 'WARNING', detail: scene.motion.preset === 'SUBTLE' ? 'Subtle is the default profile' : 'Motion is stronger than the default profile' });
+  const strongRegionMotion = liveRegions.some((region) => !['STILL', 'SUBTLE'].includes(region.motion?.preset));
+  checks.push({ checkId: 'DEFAULT_MOTION', status: scene.motion.preset === 'SUBTLE' && !strongRegionMotion ? 'PASS' : 'WARNING', detail: scene.motion.preset === 'SUBTLE' && !strongRegionMotion ? 'Subtle is the default profile' : 'One or more live regions use stronger motion by choice' });
   checks.push({ checkId: 'REDUCED_MOTION', status: scene.motion.reducedMotion ? 'PASS' : 'FAIL', detail: scene.motion.reducedMotion || 'Reduced-motion fallback missing' });
   const status = checks.some((check) => check.status === 'FAIL') ? 'BLOCKED' : checks.some((check) => check.status === 'WARNING' || check.status === 'UNKNOWN') ? 'WARNING' : 'PASS';
   return Object.freeze({ ...clone(scene), quality: { status, checks, checkedAt: now() }, status: status === 'PASS' ? 'READY' : 'DRAFT', updatedAt: now() });
