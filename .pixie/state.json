@@ -853,6 +853,43 @@
       "rerunOf": null,
       "immutable": true,
       "createdAt": "2026-10-03T04:42:24.051Z"
+    },
+    {
+      "runId": "RUN-SPECTRUM-RECOVERY-SAFETY-001",
+      "runClass": "ROOM_TEST_RUN",
+      "initiatedBy": "PIXIE-01",
+      "executedBy": "PIXIE-01",
+      "scope": "LOGIC_DRAFT",
+      "purpose": "Validate customer-safe failure isolation when GO HUB is unavailable",
+      "roomId": null,
+      "sourceRoomRefs": [],
+      "matrixRef": "MATRIX-SPECTRUM-CONTRACT-004",
+      "testTypeId": "recovery",
+      "caseRef": "GOLDEN-SPECTRUM-CUSTOMER-SAFETY-001",
+      "fixtureRef": null,
+      "snapshotRef": null,
+      "logicVersion": "v0.2-lab",
+      "expected": {
+        "stackTraceExposed": false,
+        "internalStateExposed": false,
+        "personalContextExposed": false,
+        "status": "GOLDEN_ACTIVE"
+      },
+      "observed": {
+        "stackTraceExposed": false,
+        "internalStateExposed": false,
+        "personalContextExposed": false,
+        "status": "GOLDEN_ACTIVE"
+      },
+      "status": "PASS",
+      "evidenceRefs": [
+        "github://pureekangraw-ops/Go-Calalog-@pixie-runtime-state#079e5d14dfb04cf6d3842b217e506ab997340496"
+      ],
+      "bugCapsuleRef": null,
+      "unknowns": [],
+      "rerunOf": null,
+      "immutable": true,
+      "createdAt": "2026-10-03T04:43:09.383Z"
     }
   ],
   "proposals": [],
