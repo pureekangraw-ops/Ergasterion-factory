@@ -2493,6 +2493,143 @@
             "hubToSurfaces": "GO_HUB -> each surface through audience-filtered response",
             "relationship": "Both SPECTRUM instances coordinate with GO HUB as peers; neither is a dependency of the other"
           }
+        },
+        "contractImplementation": {
+          "version": "v0.1-lab",
+          "mode": "CONTRACT_FIRST",
+          "runtimeDependency": "NONE_BETWEEN_SPECTRUMSALE_AND_PRISM_SPECTRUM",
+          "hubDependency": "GOVERNED_CONTRACT_ENDPOINT",
+          "commonLanguage": "SPECTRUM_COMMON_LANGUAGE",
+          "sessionIsolation": {
+            "sales": "sales-session-id",
+            "personal": "big-personal-session-id",
+            "rule": "Never reuse or merge session IDs across audiences"
+          },
+          "contextIsolation": {
+            "sales": [
+              "customerContext",
+              "shopSafeRefs",
+              "salesIntent"
+            ],
+            "personal": [
+              "bigContext",
+              "permittedShopRefs",
+              "officeRefs",
+              "appRefs",
+              "personalIntent"
+            ],
+            "hub": [
+              "requestContext",
+              "audience",
+              "authorityScope",
+              "sourceRefs",
+              "workRef"
+            ],
+            "rule": "Context is selected by contract and audience, not by shared model memory"
+          },
+          "contracts": {
+            "salesBrief": {
+              "direction": "SPECTRUMSALE_TO_GO_HUB",
+              "required": [
+                "contractVersion",
+                "sessionId",
+                "audience",
+                "intent",
+                "customerSafeEntities",
+                "requestedResult"
+              ],
+              "forbidden": [
+                "personalContext",
+                "stackTrace",
+                "internalState",
+                "privateWorkDetails",
+                "hiddenAuthority"
+              ],
+              "response": [
+                "statusClass",
+                "customerSafeMessage",
+                "safeNextAction",
+                "requestRef"
+              ]
+            },
+            "personalCopilot": {
+              "direction": "PRISM_SPECTRUM_TO_GO_HUB",
+              "required": [
+                "contractVersion",
+                "sessionId",
+                "audience",
+                "bigAuthorityScope",
+                "intent",
+                "selectedReferences",
+                "requestedResult"
+              ],
+              "allowed": [
+                "permittedShopContext",
+                "permittedOfficeContext",
+                "permittedAppContext",
+                "workRef"
+              ],
+              "response": [
+                "statusClass",
+                "summary",
+                "plan",
+                "questions",
+                "evidenceRefs",
+                "receiptRef",
+                "readback",
+                "unknowns"
+              ]
+            },
+            "hubResponse": {
+              "direction": "GO_HUB_TO_SURFACE",
+              "required": [
+                "contractVersion",
+                "requestRef",
+                "audience",
+                "statusClass"
+              ],
+              "rule": "Response fields are audience-filtered; internal diagnostics never cross into SPECTRUMSALE"
+            }
+          },
+          "statusClasses": {
+            "customerSafe": [
+              "AVAILABLE",
+              "PROCESSING",
+              "READY_FOR_REVIEW",
+              "ACTION_REQUIRED",
+              "TEMPORARILY_UNAVAILABLE",
+              "SAFE_RETRY"
+            ],
+            "internalOnly": [
+              "UNKNOWN_INTERNAL",
+              "STACK_TRACE",
+              "AUTHORITY_DENIED_DETAIL",
+              "RAW_SOURCE_ERROR",
+              "PRIVATE_CONTEXT"
+            ]
+          },
+          "failureIsolation": {
+            "prismDown": {
+              "salesMode": "CONTINUE_BOUNDED",
+              "salesOutput": "customer-safe status only"
+            },
+            "hubDown": {
+              "salesMode": "SAFE_RETRY_OR_QUEUE",
+              "salesOutput": "customer-safe status only"
+            },
+            "internalError": {
+              "observability": "GO_HUB_OFFICE_ONLY",
+              "surfaceOutput": "stable status class only"
+            }
+          },
+          "acceptanceRules": [
+            "SPECTRUMSALE can process a customer request without a PRISM SPECTRUM session",
+            "PRISM SPECTRUM can process a BIG request without a SPECTRUMSALE session",
+            "GO HUB can accept both contracts without merging audience contexts",
+            "shared schema does not imply shared context or authority",
+            "customer-facing responses never contain internal diagnostics",
+            "contract mismatch fails closed with a safe status"
+          ]
         }
       },
       "edits": [
@@ -2523,10 +2660,17 @@
             "clientSplit"
           ],
           "at": "2026-10-03T04:15:56.024Z"
+        },
+        {
+          "op": "SET",
+          "path": [
+            "contractImplementation"
+          ],
+          "at": "2026-10-03T04:31:36.806Z"
         }
       ],
       "createdAt": "2026-10-03T03:19:29.386Z",
-      "updatedAt": "2026-10-03T04:15:56.024Z"
+      "updatedAt": "2026-10-03T04:31:36.806Z"
     }
   ],
   "factoryHandoffs": [],
