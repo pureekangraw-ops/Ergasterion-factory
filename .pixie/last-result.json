@@ -1,9 +1,49 @@
 {
-  "requestId": "REQ-SPECTRUM-RUN-CONTRACT-20261003-001",
+  "requestId": "REQ-SPECTRUM-RUN-CONTRACT-20261003-002",
   "command": "add_test_run",
-  "exitCode": 1,
-  "ok": false,
-  "output": null,
-  "error": "{\n  \"ok\": false,\n  \"error\": \"Unknown runClass: MATRIX_TEST_RUN\"\n}",
-  "completedAt": "2026-10-03T03:45:38.566Z"
+  "exitCode": 0,
+  "ok": true,
+  "output": {
+    "ok": true,
+    "pixieId": "PIXIE-01",
+    "labId": "PIXIE-LAB",
+    "command": "add_test_run",
+    "mutated": true,
+    "externalEffect": false,
+    "result": {
+      "runId": "RUN-SPECTRUM-CONTRACT-001",
+      "runClass": "ROOM_TEST_RUN",
+      "initiatedBy": "PIXIE-01",
+      "executedBy": "PIXIE-01",
+      "scope": "LOGIC_DRAFT",
+      "purpose": "Validate SPECTRUM pipeline contract",
+      "roomId": null,
+      "sourceRoomRefs": [],
+      "matrixRef": "MATRIX-PRISM-SPECTRUM-002",
+      "testTypeId": "contract",
+      "caseRef": "SPECTRUM-INTENT-PARSE",
+      "fixtureRef": null,
+      "snapshotRef": null,
+      "logicVersion": "v0.2-lab",
+      "expected": {
+        "status": "PASS",
+        "pipelineDefined": true
+      },
+      "observed": {
+        "status": "PASS",
+        "pipelineDefined": true
+      },
+      "status": "PASS",
+      "evidenceRefs": [
+        "github://pureekangraw-ops/Go-Calalog-@pixie-runtime-state#cff770467827428a9af4c44bb37c5a7dfde02eba"
+      ],
+      "bugCapsuleRef": null,
+      "unknowns": [],
+      "rerunOf": null,
+      "immutable": true,
+      "createdAt": "2026-10-03T03:46:35.098Z"
+    }
+  },
+  "error": null,
+  "completedAt": "2026-10-03T03:46:35.130Z"
 }
