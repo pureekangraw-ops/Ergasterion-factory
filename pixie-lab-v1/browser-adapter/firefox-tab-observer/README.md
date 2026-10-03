@@ -9,7 +9,7 @@ Neutral Firefox WebExtension for the Runtime Workbench.
 - observes HTTP/HTTPS page structure through a neutral content observer
 - captures the currently visible active-tab screenshot when Firefox allows it
 - sends observations over HTTPS to the owner-paired GO Hub Factory Eye bridge
-- keeps the remote bridge **eyes-only** in v0.3.0
+- keeps the remote bridge **eyes-only** in v0.3.1
 - stores only the issued Factory Eye session id/token/expiry; the owner passcode is never stored
 - reports stale/disconnected reality instead of pretending the eye is live
 
@@ -43,7 +43,7 @@ All collection limits are fixed in the content observer. Section and item IDs ar
 
 ## Remote Hub bridge — Firefox Android
 
-v0.3.0 uses the dedicated neutral Factory Eye ingress:
+v0.3.1 uses the dedicated neutral Factory Eye ingress:
 
 ```text
 https://go-hub.pureekangraw.workers.dev/hub/api/factory-eye/*
@@ -61,13 +61,15 @@ After install or update, Factory Eye opens its options page when no valid sessio
 4. Hub issues a random Factory Eye session id/token with an expiry.
 5. The add-on stores only that session id/token/expiry and begins heartbeat + observation.
 
-The bridge is currently **eyes-only**:
+The bridge remains **eyes-only**. The owner Office may enqueue a bounded `OBSERVE_NOW` command that only asks the add-on to re-observe the current active tab; it does not navigate, activate tabs, click, type, or scroll.
+
+Eyes-only capabilities:
 - tab inventory
 - active tab URL/title/state
 - neutral page summary
 - active visible-tab screenshot when Firefox allows capture
 
-Remote navigate/click/type/scroll are not declared available in v0.3.0.
+Remote navigate/click/type/scroll are not declared available in v0.3.1.
 
 ### Readback
 
@@ -125,7 +127,7 @@ Factory Eye is accepted as the real Runtime eye only after physical Firefox test
 
 ## Firefox Android foreground wake
 
-Firefox for Android can suspend or kill idle extension background/event processes. Factory Eye v0.3.0 therefore does not treat background timers as the only liveness source.
+Firefox for Android can suspend or kill idle extension background/event processes. Factory Eye v0.3.1 therefore does not treat background timers as the only liveness source.
 
 When an ordinary HTTP/HTTPS page is visible, the content observer sends a sanitized foreground pulse every 8 seconds and immediately on `pageshow` / returning to `visible`. That message wakes the extension event page, which validates the sender tab and same-origin page summary before forwarding a fresh observation to GO Hub.
 
@@ -138,7 +140,7 @@ This pulse:
 
 ## Fresh observation contract
 
-Factory Eye v0.3.0 treats a visible-page heartbeat as a candidate observation, not proof by itself.
+Factory Eye v0.3.1 treats a visible-page heartbeat as a candidate observation, not proof by itself.
 
 A web observation is accepted as current only when:
 - the content script reports the same generation as the installed add-on
