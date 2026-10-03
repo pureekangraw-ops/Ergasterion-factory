@@ -1,19 +1,21 @@
 {
-  "requestId": "REQ-SPECTRUM-GOLDEN-20261003-001",
-  "command": "add_golden_case",
+  "requestId": "REQ-SPECTRUM-REPLAY-20261003-001",
+  "command": "replay_golden",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "add_golden_case",
+    "command": "replay_golden",
     "mutated": true,
     "externalEffect": false,
     "result": {
       "goldenCaseId": "GOLDEN-SPECTRUM-AMBIGUOUS-WORK-001",
       "lifecycle": [
-        "GOLDEN_CANDIDATE"
+        "GOLDEN_CANDIDATE",
+        "VERIFY_REPLAY",
+        "GOLDEN_ACTIVE"
       ],
       "sourceBugId": "BUG-SPECTRUM-FAIL-CLOSED-001",
       "sourceRunId": "RUN-SPECTRUM-FAIL-CLOSED-001",
@@ -33,12 +35,25 @@
         "v0.2-lab"
       ],
       "evidenceRefs": [],
-      "status": "GOLDEN_CANDIDATE",
-      "replayCount": 0,
-      "lastReplay": null,
+      "status": "GOLDEN_ACTIVE",
+      "replayCount": 1,
+      "lastReplay": {
+        "runId": "RUN-SPECTRUM-REPLAY-001",
+        "logicVersion": "v0.2-lab",
+        "observed": {
+          "status": "ASK",
+          "dispatchAllowed": false,
+          "reason": "CURRENT_WORK_AMBIGUOUS"
+        },
+        "evidenceRefs": [
+          "fixture://spectrum/ambiguous-work"
+        ],
+        "status": "GOLDEN_ACTIVE",
+        "at": "2026-10-03T03:25:55.041Z"
+      },
       "createdAt": "2026-10-03T03:24:52.676Z"
     }
   },
   "error": null,
-  "completedAt": "2026-10-03T03:24:52.716Z"
+  "completedAt": "2026-10-03T03:25:55.080Z"
 }
