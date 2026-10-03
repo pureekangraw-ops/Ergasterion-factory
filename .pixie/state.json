@@ -2639,7 +2639,6 @@
         },
         "contractImplementation": {
           "version": "v0.1-lab",
-          "mode": "CONTRACT_FIRST",
           "runtimeDependency": "NONE_BETWEEN_SPECTRUMSALE_AND_PRISM_SPECTRUM",
           "hubDependency": "GOVERNED_CONTRACT_ENDPOINT",
           "commonLanguage": "SPECTRUM_COMMON_LANGUAGE",
@@ -2810,10 +2809,17 @@
             "contractImplementation"
           ],
           "at": "2026-10-03T04:31:36.806Z"
+        },
+        {
+          "op": "SET",
+          "path": [
+            "contractImplementation"
+          ],
+          "at": "2026-10-03T04:38:14.884Z"
         }
       ],
       "createdAt": "2026-10-03T03:19:29.386Z",
-      "updatedAt": "2026-10-03T04:31:36.806Z"
+      "updatedAt": "2026-10-03T04:38:14.884Z"
     }
   ],
   "factoryHandoffs": [],
