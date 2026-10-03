@@ -86,4 +86,8 @@ test('PixieLab migrates pre-visual-crew durable state before accepting Hub comma
 
   await lab.persist();
   assert.equal(saved.visualCrewTasks.length, 1);
+  const board = lab.board();
+  assert.equal(board.zones.visualCrew, 'ACTIVE');
+  assert.equal(board.counts.visualCrewTasks, 1);
+  assert.equal(board.visualCrewTasks[0].taskId, 'CREW-MIGRATION');
 });
