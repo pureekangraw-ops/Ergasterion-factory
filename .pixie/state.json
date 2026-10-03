@@ -4503,7 +4503,97 @@
   "variants": [],
   "appPrototypes": [],
   "productionHandoffs": [],
-  "imageActions": [],
+  "imageActions": [
+    {
+      "actionId": "IMG-PRISM-THEME-TEST-002",
+      "packetId": "PACK-PRISM-THEME-TEST-002",
+      "visualDraftId": "VISUAL-PRISM-THEME-TEST-001",
+      "targetTool": "GO_IMAGE_TOOL",
+      "workId": "WORK-PRISM-FULL-SPEC-20261002-001-20261002-001",
+      "checkpointId": "CP-WORK-PRISM-FULL-SPEC-20261002-001-20261002-001",
+      "requestedBy": "GO",
+      "status": "REQUEST_READY",
+      "payload": {
+        "sourceRef": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+        "sourceVersion": "user-upload-20261003",
+        "sourceHash": null,
+        "workingSpec": {
+          "subject": "PRISM mobile theme asset",
+          "style": "crystalline prism glassmorphism",
+          "palette": [
+            "midnight navy",
+            "electric blue",
+            "violet",
+            "magenta",
+            "cyan"
+          ],
+          "spatial": {
+            "references": [
+              {
+                "id": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+                "ref": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+                "label": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+                "kind": "SOURCE",
+                "bounds": {
+                  "x": 0.04,
+                  "y": 0.04,
+                  "width": 0.22,
+                  "height": 0.22
+                },
+                "zIndex": 0
+              }
+            ],
+            "focusFrames": [],
+            "activeFocusFrameId": null,
+            "intentLinks": [],
+            "freezeSet": [
+              "PRISM_IDENTITY",
+              "CRYSTALLINE_PRISM"
+            ],
+            "exploreSet": [
+              "BACKGROUND_GLOW",
+              "GLASS_DEPTH",
+              "LIGHT_STREAKS"
+            ],
+            "compareNotes": [],
+            "resultRefs": [],
+            "resultProvenance": [],
+            "compareSessions": [],
+            "activeCompareSessionId": null,
+            "winnerRef": null,
+            "promotedParts": [],
+            "branch": null,
+            "nextIntents": [],
+            "activeNextIntentId": null,
+            "nextIntent": null
+          }
+        },
+        "intent": "Create a polished PRISM mobile theme asset from the supplied crystalline prism reference.",
+        "requestedResult": "One production-usable PRISM theme visual candidate, preserving crystalline prism identity and dark glassmorphism language.",
+        "mustKeep": [
+          "PRISM crystalline identity",
+          "midnight navy base",
+          "electric blue/violet/magenta/cyan glow"
+        ],
+        "mustRemove": [],
+        "copy": [],
+        "constraints": [
+          "Do not change product logic",
+          "Do not overwrite source",
+          "No authority change"
+        ],
+        "evidenceRefs": [
+          "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003"
+        ],
+        "unknowns": []
+      },
+      "externalExecutionRequired": true,
+      "providerAuthorityGranted": false,
+      "productionAuthority": false,
+      "createdAt": "2026-10-03T11:20:39.687Z",
+      "approval": "NOT_AN_APPROVAL"
+    }
+  ],
   "imageReceipts": [],
   "visualDispatches": [],
   "visualReceipts": [],
