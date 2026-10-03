@@ -3883,6 +3883,139 @@
       ],
       "createdAt": "2026-10-03T11:18:11.311Z",
       "updatedAt": "2026-10-03T11:19:55.782Z"
+    },
+    {
+      "visualDraftId": "VISUAL-PRISM-GO-EXEC-001",
+      "experimentId": null,
+      "variantId": null,
+      "sourceRef": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+      "sourceVersion": "user-upload-20261003",
+      "sourceHash": null,
+      "parentVisualDraftId": null,
+      "lineage": null,
+      "workId": "WORK-PRISM-FULL-SPEC-20261002-001-20261002-001",
+      "checkpointId": "CP-WORK-PRISM-FULL-SPEC-20261002-001-20261002-001",
+      "sourceLocked": true,
+      "labOwned": true,
+      "table": {
+        "referencePin": "IDEA_REFERENCE",
+        "briefPin": "BRIEF_PROMPT",
+        "main": "VISUAL_WORKSPACE",
+        "history": "V1_V2_V3_PLUS"
+      },
+      "assistant": {
+        "name": "PIXIE",
+        "role": "PIXIE_LAB_ASSISTANT",
+        "stationedAt": "PIXIE_LAB",
+        "independentImageGenerator": false,
+        "operator": "GO_IMAGE_TOOL",
+        "responsibilities": [
+          "KEEP_REFERENCE_SEPARATE_FROM_BRIEF",
+          "PRESERVE_INTENT_AND_CONSTRAINTS",
+          "CHECK_ITERATION_DRIFT",
+          "COMPARE_MEANINGFUL_DELTAS",
+          "KEEP_OWNER_SELECTION_CANONICAL",
+          "CARRY_SELECTED_VISUAL_CONTEXT_FORWARD"
+        ]
+      },
+      "variants": [],
+      "selectedVariantId": null,
+      "status": "DRAFT",
+      "originalSpec": {
+        "subject": "PRISM mobile theme asset",
+        "style": "crystalline prism glassmorphism",
+        "palette": [
+          "midnight navy",
+          "electric blue",
+          "violet",
+          "magenta",
+          "cyan"
+        ],
+        "spatial": {
+          "references": [
+            {
+              "id": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+              "ref": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+              "label": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+              "kind": "SOURCE",
+              "bounds": {
+                "x": 0.04,
+                "y": 0.04,
+                "width": 0.22,
+                "height": 0.22
+              },
+              "zIndex": 0
+            }
+          ],
+          "focusFrames": [],
+          "activeFocusFrameId": null,
+          "intentLinks": [],
+          "freezeSet": [],
+          "exploreSet": [],
+          "compareNotes": [],
+          "resultRefs": [],
+          "resultProvenance": [],
+          "compareSessions": [],
+          "activeCompareSessionId": null,
+          "winnerRef": null,
+          "promotedParts": [],
+          "branch": null,
+          "nextIntents": [],
+          "activeNextIntentId": null,
+          "nextIntent": null
+        }
+      },
+      "workingSpec": {
+        "subject": "PRISM mobile theme asset",
+        "style": "crystalline prism glassmorphism",
+        "palette": [
+          "midnight navy",
+          "electric blue",
+          "violet",
+          "magenta",
+          "cyan"
+        ],
+        "spatial": {
+          "references": [
+            {
+              "id": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+              "ref": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+              "label": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+              "kind": "SOURCE",
+              "bounds": {
+                "x": 0.04,
+                "y": 0.04,
+                "width": 0.22,
+                "height": 0.22
+              },
+              "zIndex": 0
+            }
+          ],
+          "focusFrames": [],
+          "activeFocusFrameId": null,
+          "intentLinks": [],
+          "freezeSet": [],
+          "exploreSet": [],
+          "compareNotes": [],
+          "resultRefs": [],
+          "resultProvenance": [],
+          "compareSessions": [],
+          "activeCompareSessionId": null,
+          "winnerRef": null,
+          "promotedParts": [],
+          "branch": null,
+          "nextIntents": [],
+          "activeNextIntentId": null,
+          "nextIntent": null
+        }
+      },
+      "scans": [],
+      "edits": [],
+      "renderPacketRefs": [
+        "PACK-PRISM-GO-EXEC-001"
+      ],
+      "createdAt": "2026-10-03T12:18:36.443Z",
+      "updatedAt": "2026-10-03T12:18:36.444Z"
     }
   ],
   "visualRenderPackets": [
@@ -4289,6 +4422,137 @@
       "productionAuthority": false,
       "approval": "NOT_AN_APPROVAL",
       "createdAt": "2026-10-03T11:19:55.782Z"
+    },
+    {
+      "packetId": "PACK-PRISM-GO-EXEC-001",
+      "visualDraftId": "VISUAL-PRISM-GO-EXEC-001",
+      "experimentId": null,
+      "variantId": null,
+      "sourceRef": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+      "sourceVersion": "user-upload-20261003",
+      "sourceHash": null,
+      "parentVisualDraftId": null,
+      "workId": "WORK-PRISM-FULL-SPEC-20261002-001-20261002-001",
+      "checkpointId": "CP-WORK-PRISM-FULL-SPEC-20261002-001-20261002-001",
+      "workingSpec": {
+        "subject": "PRISM mobile theme asset",
+        "style": "crystalline prism glassmorphism",
+        "palette": [
+          "midnight navy",
+          "electric blue",
+          "violet",
+          "magenta",
+          "cyan"
+        ],
+        "spatial": {
+          "references": [
+            {
+              "id": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+              "ref": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+              "label": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+              "kind": "SOURCE",
+              "bounds": {
+                "x": 0.04,
+                "y": 0.04,
+                "width": 0.22,
+                "height": 0.22
+              },
+              "zIndex": 0
+            }
+          ],
+          "focusFrames": [],
+          "activeFocusFrameId": null,
+          "intentLinks": [],
+          "freezeSet": [],
+          "exploreSet": [],
+          "compareNotes": [],
+          "resultRefs": [],
+          "resultProvenance": [],
+          "compareSessions": [],
+          "activeCompareSessionId": null,
+          "winnerRef": null,
+          "promotedParts": [],
+          "branch": null,
+          "nextIntents": [],
+          "activeNextIntentId": null,
+          "nextIntent": null
+        }
+      },
+      "references": [
+        {
+          "id": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+          "ref": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+          "label": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+          "kind": "SOURCE",
+          "bounds": {
+            "x": 0.04,
+            "y": 0.04,
+            "width": 0.22,
+            "height": 0.22
+          },
+          "zIndex": 0
+        }
+      ],
+      "focusFrame": null,
+      "intentLinks": [],
+      "freezeSet": [],
+      "exploreSet": [],
+      "compareNotes": [],
+      "resultProvenance": [],
+      "packetVersion": "V2",
+      "compareSession": null,
+      "compareSessionId": null,
+      "selectedResultRefs": [],
+      "winnerRef": null,
+      "promotedParts": [],
+      "branchId": null,
+      "parentLineage": null,
+      "nextIntent": null,
+      "inheritedFreezeSet": [],
+      "inheritedExploreSet": [],
+      "intent": "Prepare one PRISM theme candidate for GO-operated image execution.",
+      "requestedResult": "One polished PRISM mobile theme visual candidate.",
+      "mustKeep": [
+        "PRISM crystalline identity",
+        "dark glassmorphism",
+        "cyan/violet/magenta refraction"
+      ],
+      "mustRemove": [],
+      "copy": [],
+      "constraints": [
+        "Do not overwrite source",
+        "No production authority"
+      ],
+      "evidenceRefs": [],
+      "unknowns": [],
+      "workbenchAssistant": {
+        "name": "PIXIE",
+        "role": "PIXIE_LAB_ASSISTANT",
+        "stationedAt": "PIXIE_LAB",
+        "independentImageGenerator": false,
+        "operator": "GO_IMAGE_TOOL",
+        "responsibilities": [
+          "KEEP_REFERENCE_SEPARATE_FROM_BRIEF",
+          "PRESERVE_INTENT_AND_CONSTRAINTS",
+          "CHECK_ITERATION_DRIFT",
+          "COMPARE_MEANINGFUL_DELTAS",
+          "KEEP_OWNER_SELECTION_CANONICAL",
+          "CARRY_SELECTED_VISUAL_CONTEXT_FORWARD"
+        ]
+      },
+      "table": {
+        "referencePin": "IDEA_REFERENCE",
+        "briefPin": "BRIEF_PROMPT",
+        "main": "VISUAL_WORKSPACE",
+        "history": "V1_V2_V3_PLUS"
+      },
+      "selectedVariantId": null,
+      "targetTool": "GO_IMAGE_TOOL",
+      "externalExecutionRequired": true,
+      "imageGenerationAuthority": false,
+      "productionAuthority": false,
+      "approval": "NOT_AN_APPROVAL",
+      "createdAt": "2026-10-03T12:18:36.444Z"
     }
   ],
   "visualVerifications": [],
@@ -4592,6 +4856,85 @@
       "productionAuthority": false,
       "createdAt": "2026-10-03T11:20:39.687Z",
       "approval": "NOT_AN_APPROVAL"
+    },
+    {
+      "actionId": "DISPATCH-PRISM-GO-EXEC-001",
+      "packetId": "PACK-PRISM-GO-EXEC-001",
+      "visualDraftId": "VISUAL-PRISM-GO-EXEC-001",
+      "targetTool": "GO_IMAGE_TOOL",
+      "workId": "WORK-PRISM-FULL-SPEC-20261002-001-20261002-001",
+      "checkpointId": "CP-WORK-PRISM-FULL-SPEC-20261002-001-20261002-001",
+      "requestedBy": "GO",
+      "status": "REQUEST_READY",
+      "payload": {
+        "sourceRef": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+        "sourceVersion": "user-upload-20261003",
+        "sourceHash": null,
+        "workingSpec": {
+          "subject": "PRISM mobile theme asset",
+          "style": "crystalline prism glassmorphism",
+          "palette": [
+            "midnight navy",
+            "electric blue",
+            "violet",
+            "magenta",
+            "cyan"
+          ],
+          "spatial": {
+            "references": [
+              {
+                "id": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+                "ref": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+                "label": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+                "kind": "SOURCE",
+                "bounds": {
+                  "x": 0.04,
+                  "y": 0.04,
+                  "width": 0.22,
+                  "height": 0.22
+                },
+                "zIndex": 0
+              }
+            ],
+            "focusFrames": [],
+            "activeFocusFrameId": null,
+            "intentLinks": [],
+            "freezeSet": [],
+            "exploreSet": [],
+            "compareNotes": [],
+            "resultRefs": [],
+            "resultProvenance": [],
+            "compareSessions": [],
+            "activeCompareSessionId": null,
+            "winnerRef": null,
+            "promotedParts": [],
+            "branch": null,
+            "nextIntents": [],
+            "activeNextIntentId": null,
+            "nextIntent": null
+          }
+        },
+        "intent": "Prepare one PRISM theme candidate for GO-operated image execution.",
+        "requestedResult": "One polished PRISM mobile theme visual candidate.",
+        "mustKeep": [
+          "PRISM crystalline identity",
+          "dark glassmorphism",
+          "cyan/violet/magenta refraction"
+        ],
+        "mustRemove": [],
+        "copy": [],
+        "constraints": [
+          "Do not overwrite source",
+          "No production authority"
+        ],
+        "evidenceRefs": [],
+        "unknowns": []
+      },
+      "externalExecutionRequired": true,
+      "providerAuthorityGranted": false,
+      "productionAuthority": false,
+      "createdAt": "2026-10-03T12:18:36.445Z",
+      "approval": "NOT_AN_APPROVAL"
     }
   ],
   "imageReceipts": [
@@ -4613,7 +4956,74 @@
       "approval": "NOT_AN_APPROVAL"
     }
   ],
-  "visualDispatches": [],
+  "visualDispatches": [
+    {
+      "dispatchId": "DISPATCH-PRISM-GO-EXEC-001",
+      "packetId": "PACK-PRISM-GO-EXEC-001",
+      "visualDraftId": "VISUAL-PRISM-GO-EXEC-001",
+      "branchId": null,
+      "workId": "WORK-PRISM-FULL-SPEC-20261002-001-20261002-001",
+      "checkpointId": "CP-WORK-PRISM-FULL-SPEC-20261002-001-20261002-001",
+      "actionType": "GENERATE",
+      "sourceResultRefs": [],
+      "targetResultRef": null,
+      "sourceRefs": [
+        {
+          "id": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+          "ref": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+          "label": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+          "kind": "SOURCE",
+          "bounds": {
+            "x": 0.04,
+            "y": 0.04,
+            "width": 0.22,
+            "height": 0.22
+          },
+          "zIndex": 0
+        }
+      ],
+      "focusFrame": null,
+      "references": [
+        {
+          "id": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+          "ref": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+          "label": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+          "kind": "SOURCE",
+          "bounds": {
+            "x": 0.04,
+            "y": 0.04,
+            "width": 0.22,
+            "height": 0.22
+          },
+          "zIndex": 0
+        }
+      ],
+      "intentLinks": [],
+      "freezeSet": [],
+      "exploreSet": [],
+      "promotedParts": [],
+      "nextIntent": null,
+      "requestedResult": "One polished PRISM mobile theme visual candidate.",
+      "selectedResultRefs": [],
+      "winnerRef": null,
+      "compareNotes": [],
+      "attempt": 1,
+      "retryOfDispatchId": null,
+      "status": "SENT",
+      "requestedBy": "GO",
+      "createdAt": "2026-10-03T12:18:36.444Z",
+      "externalExecutionRequired": true,
+      "targetTool": "GO_IMAGE_TOOL",
+      "imageGenerationAuthority": false,
+      "productionAuthority": false,
+      "approval": "NOT_AN_APPROVAL",
+      "providerJobId": "DISPATCH-PRISM-GO-EXEC-001",
+      "error": null,
+      "evidenceRefs": [],
+      "updatedAt": "2026-10-03T12:18:36.445Z",
+      "imageActionId": "DISPATCH-PRISM-GO-EXEC-001"
+    }
+  ],
   "visualReceipts": [],
   "runtimeObservations": [],
   "runtimeInteractions": [],
