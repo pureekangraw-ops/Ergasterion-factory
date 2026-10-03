@@ -1,65 +1,9 @@
 {
-  "requestId": "REQ-SPECTRUM-REPLAY-SAFETY-20261003-001",
-  "command": "replay_golden",
-  "exitCode": 0,
-  "ok": true,
-  "output": {
-    "ok": true,
-    "pixieId": "PIXIE-01",
-    "labId": "PIXIE-LAB",
-    "command": "replay_golden",
-    "mutated": true,
-    "externalEffect": false,
-    "result": {
-      "goldenCaseId": "GOLDEN-SPECTRUM-CUSTOMER-SAFETY-001",
-      "lifecycle": [
-        "GOLDEN_CANDIDATE",
-        "VERIFY_REPLAY",
-        "GOLDEN_ACTIVE"
-      ],
-      "sourceBugId": "BUG-SPECTRUM-INTERNAL-LEAK-001",
-      "sourceRunId": "RUN-SPECTRUM-CONTRACT-SAFETY-001",
-      "inputRef": "fixture://spectrum/hub-failure-customer-safety",
-      "expected": {
-        "statusClass": "TEMPORARILY_UNAVAILABLE",
-        "customerSafeMessage": true,
-        "stackTraceExposed": false,
-        "internalStateExposed": false,
-        "personalContextExposed": false
-      },
-      "fixedObserved": {
-        "statusClass": "TEMPORARILY_UNAVAILABLE",
-        "customerSafeMessage": true,
-        "stackTraceExposed": false,
-        "internalStateExposed": false,
-        "personalContextExposed": false
-      },
-      "replayRecipe": "Simulate GO HUB failure for a storefront request; verify only stable customer-safe status crosses the Sales Contract.",
-      "logicVersions": [
-        "v0.2-lab"
-      ],
-      "evidenceRefs": [],
-      "status": "GOLDEN_ACTIVE",
-      "replayCount": 1,
-      "lastReplay": {
-        "runId": "RUN-SPECTRUM-REPLAY-SAFETY-001",
-        "logicVersion": "v0.2-lab",
-        "observed": {
-          "statusClass": "TEMPORARILY_UNAVAILABLE",
-          "customerSafeMessage": true,
-          "stackTraceExposed": false,
-          "internalStateExposed": false,
-          "personalContextExposed": false
-        },
-        "evidenceRefs": [
-          "fixture://spectrum/hub-failure-customer-safety"
-        ],
-        "status": "GOLDEN_ACTIVE",
-        "at": "2026-10-03T04:36:02.790Z"
-      },
-      "createdAt": "2026-10-03T04:34:21.296Z"
-    }
-  },
-  "error": null,
-  "completedAt": "2026-10-03T04:36:02.827Z"
+  "requestId": "REQ-SPECTRUM-MATRIX-CONTRACT-20261003-001",
+  "command": "add_matrix",
+  "exitCode": 1,
+  "ok": false,
+  "output": null,
+  "error": "{\n  \"ok\": false,\n  \"error\": \"MODE_FIELD_FORBIDDEN:$.logicDrafts.8.workingCopy.contractImplementation.mode\"\n}",
+  "completedAt": "2026-10-03T04:36:58.680Z"
 }
