@@ -24,7 +24,7 @@ const SHELL_COMMANDS = [
   'status','capabilities','workbench_floor','workbench_open','checkpoint_dock','reality_screen','big_view','intent_review',
   'idea_create','experiment_create','variant_create','variant_evaluate','experiment_select',
   'logic_create','logic_edit','logic_compare',
-  'visual_create','visual_scan','visual_edit','visual_compare','visual_render_packet','visual_verify','image_request','image_result','visual_dispatch','visual_dispatch_update','visual_receipt','visual_result_import','visual_retry','visual_recover','visual_lineage',
+  'visual_create','visual_scan','visual_edit','visual_compare','visual_render_packet','visual_verify','visual_crew_create','visual_crew_step','visual_crew_compare','visual_crew_verify','visual_crew_result','image_request','image_result','visual_dispatch','visual_dispatch_update','visual_receipt','visual_result_import','visual_retry','visual_recover','visual_lineage',
   'add_matrix','start_matrix','update_matrix','add_test_run','rerun_test_run','add_golden_case','replay_golden',
   'add_bug','add_attention','update_attention','debug_start','debug_step','debug_complete',
   'production_handoff_prepare',
@@ -187,10 +187,32 @@ async function renderVisual(view) {
   const freezeSet = Array.isArray(spatial.freezeSet) ? spatial.freezeSet : [];
   const exploreSet = Array.isArray(spatial.exploreSet) ? spatial.exploreSet : [];
   const compareNotes = Array.isArray(spatial.compareNotes) ? spatial.compareNotes : [];
+  const crewResponse = await command('visual_crew_result', contextSelector()).catch(() => ({ result: null }));
+  const crewProjection = crewResponse.result || null;
 
   $('#visual-work-id').textContent = contextSelector().workId || 'UNKNOWN';
   $('#visual-checkpoint-id').textContent = contextSelector().checkpointId || 'UNKNOWN';
   $('#visual-source').textContent = draft?.sourceRef || 'No source yet';
+  const crewTask = crewProjection?.task || null;
+  const crewStatus = $('#visual-crew-status');
+  const crewWorkers = $('#visual-crew-workers');
+  const crewResult = $('#visual-crew-result');
+  if (crewStatus && crewWorkers && crewResult) {
+    crewStatus.textContent = crewTask?.status || 'No crew task';
+    crewStatus.className = `muted ${crewTask?.status === 'VERIFIED' ? 'crew-ok' : ''}`;
+    const workers = crewProjection?.workers || [];
+    crewWorkers.innerHTML = workers.map((worker) => {
+      const step = crewTask?.steps?.find((item) => item.workerId === worker.workerId);
+      return `<div class="crew-worker"><strong>${esc(worker.label)}</strong><span>${esc(step?.status || 'IDLE')}</span><small>${esc(worker.responsibility)}</small></div>`;
+    }).join('');
+    crewResult.textContent = crewProjection ? pretty({
+      phase: crewTask?.phase,
+      selectedCandidateRef: crewTask?.selectedCandidateRef,
+      resultRef: crewProjection.resultRef,
+      ready: crewProjection.ready,
+      unknowns: crewTask?.unknowns || [],
+    }) : 'No crew result yet.';
+  }
   $('#visual-reference-list').innerHTML = references.length
     ? references.map((reference) => `<div class="reference-list-item"><strong>${esc(reference.kind)}</strong><span title="${esc(reference.ref)}">${esc(reference.label)}</span><span class="muted">z${esc(reference.zIndex)}</span></div>`).join('')
     : '<span class="muted">No references placed yet.</span>';
@@ -583,6 +605,29 @@ async function renderVisual(view) {
     const receipt = (view.visualReceipts || []).filter((item) => item.status === 'LINKED').at(-1);
     if (!receipt || !receipt.receiptId) { window.alert('No linked Phase 3 result is available.'); return; }
     await command('visual_result_import', { receiptId: receipt.receiptId, options: { placeOnTable: true } });
+    await refreshBootstrap();
+    await openWorkbench('VISUAL_WORKBENCH');
+  });
+
+  $('#visual-crew-plan')?.addEventListener('click', async () => {
+    const { workId, checkpointId } = contextSelector();
+    if (!workId || !checkpointId) { window.alert('Work ID and Checkpoint ID are required for GO Crew.'); return; }
+    const brief = $('#visual-prompt').value.trim() || $('#visual-requested').value.trim();
+    const requestedOutput = $('#visual-requested').value.trim();
+    if (!brief || !requestedOutput) { window.alert('Intent and Requested Result are required before planning helpers.'); return; }
+    const assetRefs = [draft?.sourceRef, ...references.map((item) => item.ref)].filter(Boolean);
+    await command('visual_crew_create', {
+      taskId: `CREW-${Date.now()}`,
+      workId,
+      checkpointId,
+      brief,
+      requestedOutput,
+      assetRefs,
+      constraints: [
+        ...lineList($('#visual-keep').value).map((item) => `KEEP:${item}`),
+        ...lineList($('#visual-remove').value).map((item) => `REMOVE:${item}`),
+      ],
+    });
     await refreshBootstrap();
     await openWorkbench('VISUAL_WORKBENCH');
   });
