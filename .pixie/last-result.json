@@ -1,140 +1,161 @@
 {
-  "requestId": "PIXIE-PRISM-THEME-RESULT-20261003-001",
-  "command": "visual_crew_result",
+  "requestId": "PIXIE-PRISM-VISUAL-CREATE-20261003-001",
+  "command": "visual_create",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "visual_crew_result",
-    "mutated": false,
+    "command": "visual_create",
+    "mutated": true,
     "externalEffect": false,
     "result": {
-      "task": {
-        "schema": "PIXIE_VISUAL_CREW_TASK_V1",
-        "taskId": "VISUAL-CREW-PRISM-THEME-002",
-        "workId": "WORK-PRISM-FULL-SPEC-20261002-001-20261002-001",
-        "checkpointId": "CP-WORK-PRISM-FULL-SPEC-20261002-001-20261002-001",
-        "brief": "Create one PRISM mobile theme asset using the crystalline prism/glassmorphism reference: midnight navy base, electric blue/violet/magenta/cyan iridescent glow, premium luminous glass UI language. Preserve PRISM identity and prepare a production-usable candidate.",
-        "requestedOutput": "One PRISM theme visual candidate suitable as a UI/theme asset for the PRISM mobile app, with traceable artifact/evidence references.",
-        "sourceAssetRefs": [
-          "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003"
-        ],
-        "constraints": [
-          "Do not change PRISM product logic",
-          "Do not grant production authority",
-          "Preserve crystalline prism identity",
-          "Keep source reference immutable"
-        ],
-        "sourceMutationAllowed": false,
-        "phase": "PLAN",
-        "status": "PLANNED",
-        "steps": [
-          {
-            "stepId": "VISUAL-CREW-PRISM-THEME-002::01::ASSET_SCOUT",
-            "workerId": "ASSET_SCOUT",
-            "workerLabel": "Asset Scout",
-            "responsibility": "resolve source and reference assets",
-            "status": "QUEUED",
-            "resultRefs": [],
-            "evidenceRefs": [],
-            "unknowns": [],
-            "note": null,
-            "updatedAt": "2026-10-03T11:03:31.476Z"
-          },
-          {
-            "stepId": "VISUAL-CREW-PRISM-THEME-002::02::IMAGE_PREP",
-            "workerId": "IMAGE_PREP",
-            "workerLabel": "Image Prep",
-            "responsibility": "prepare dimensions, crop, transparency and safe source copies",
-            "status": "QUEUED",
-            "resultRefs": [],
-            "evidenceRefs": [],
-            "unknowns": [],
-            "note": null,
-            "updatedAt": "2026-10-03T11:03:31.476Z"
-          },
-          {
-            "stepId": "VISUAL-CREW-PRISM-THEME-002::03::VISUAL_EDITOR",
-            "workerId": "VISUAL_EDITOR",
-            "workerLabel": "Visual Editor",
-            "responsibility": "apply the requested visual change without overwriting source",
-            "status": "QUEUED",
-            "resultRefs": [],
-            "evidenceRefs": [],
-            "unknowns": [],
-            "note": null,
-            "updatedAt": "2026-10-03T11:03:31.476Z"
-          },
-          {
-            "stepId": "VISUAL-CREW-PRISM-THEME-002::04::RENDERER",
-            "workerId": "RENDERER",
-            "workerLabel": "Renderer",
-            "responsibility": "emit requested output profiles and candidate artifacts",
-            "status": "QUEUED",
-            "resultRefs": [],
-            "evidenceRefs": [],
-            "unknowns": [],
-            "note": null,
-            "updatedAt": "2026-10-03T11:03:31.476Z"
-          },
-          {
-            "stepId": "VISUAL-CREW-PRISM-THEME-002::05::INSPECTOR",
-            "workerId": "INSPECTOR",
-            "workerLabel": "Inspector",
-            "responsibility": "check brief, dimensions, safe area, artifacts and evidence",
-            "status": "QUEUED",
-            "resultRefs": [],
-            "evidenceRefs": [],
-            "unknowns": [],
-            "note": null,
-            "updatedAt": "2026-10-03T11:03:31.476Z"
-          }
-        ],
-        "candidateRefs": [],
-        "selectedCandidateRef": null,
-        "compareRefs": [],
-        "verificationRefs": [],
-        "resultRef": null,
-        "unknowns": [],
-        "createdAt": "2026-10-03T11:03:31.476Z",
-        "updatedAt": "2026-10-03T11:03:31.476Z"
+      "visualDraftId": "VISUAL-PRISM-THEME-TEST-001",
+      "experimentId": null,
+      "variantId": null,
+      "sourceRef": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+      "sourceVersion": "user-upload-20261003",
+      "sourceHash": null,
+      "parentVisualDraftId": null,
+      "lineage": null,
+      "workId": "WORK-PRISM-FULL-SPEC-20261002-001-20261002-001",
+      "checkpointId": "CP-WORK-PRISM-FULL-SPEC-20261002-001-20261002-001",
+      "sourceLocked": true,
+      "labOwned": true,
+      "table": {
+        "referencePin": "IDEA_REFERENCE",
+        "briefPin": "BRIEF_PROMPT",
+        "main": "VISUAL_WORKSPACE",
+        "history": "V1_V2_V3_PLUS"
       },
-      "workers": [
-        {
-          "workerId": "ASSET_SCOUT",
-          "label": "Asset Scout",
-          "responsibility": "resolve source and reference assets"
-        },
-        {
-          "workerId": "IMAGE_PREP",
-          "label": "Image Prep",
-          "responsibility": "prepare dimensions, crop, transparency and safe source copies"
-        },
-        {
-          "workerId": "VISUAL_EDITOR",
-          "label": "Visual Editor",
-          "responsibility": "apply the requested visual change without overwriting source"
-        },
-        {
-          "workerId": "RENDERER",
-          "label": "Renderer",
-          "responsibility": "emit requested output profiles and candidate artifacts"
-        },
-        {
-          "workerId": "INSPECTOR",
-          "label": "Inspector",
-          "responsibility": "check brief, dimensions, safe area, artifacts and evidence"
+      "assistant": {
+        "name": "PIXIE",
+        "role": "PIXIE_LAB_ASSISTANT",
+        "stationedAt": "PIXIE_LAB",
+        "independentImageGenerator": false,
+        "operator": "GO_IMAGE_TOOL",
+        "responsibilities": [
+          "KEEP_REFERENCE_SEPARATE_FROM_BRIEF",
+          "PRESERVE_INTENT_AND_CONSTRAINTS",
+          "CHECK_ITERATION_DRIFT",
+          "COMPARE_MEANINGFUL_DELTAS",
+          "KEEP_OWNER_SELECTION_CANONICAL",
+          "CARRY_SELECTED_VISUAL_CONTEXT_FORWARD"
+        ]
+      },
+      "variants": [],
+      "selectedVariantId": null,
+      "status": "DRAFT",
+      "originalSpec": {
+        "subject": "PRISM mobile theme asset",
+        "style": "crystalline prism glassmorphism",
+        "palette": [
+          "midnight navy",
+          "electric blue",
+          "violet",
+          "magenta",
+          "cyan"
+        ],
+        "spatial": {
+          "references": [
+            {
+              "id": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+              "ref": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+              "label": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+              "kind": "SOURCE",
+              "bounds": {
+                "x": 0.04,
+                "y": 0.04,
+                "width": 0.22,
+                "height": 0.22
+              },
+              "zIndex": 0
+            }
+          ],
+          "focusFrames": [],
+          "activeFocusFrameId": null,
+          "intentLinks": [],
+          "freezeSet": [
+            "PRISM_IDENTITY",
+            "CRYSTALLINE_PRISM"
+          ],
+          "exploreSet": [
+            "BACKGROUND_GLOW",
+            "GLASS_DEPTH",
+            "LIGHT_STREAKS"
+          ],
+          "compareNotes": [],
+          "resultRefs": [],
+          "resultProvenance": [],
+          "compareSessions": [],
+          "activeCompareSessionId": null,
+          "winnerRef": null,
+          "promotedParts": [],
+          "branch": null,
+          "nextIntents": [],
+          "activeNextIntentId": null,
+          "nextIntent": null
         }
-      ],
-      "compares": [],
-      "verifications": [],
-      "ready": false,
-      "resultRef": null,
-      "sourceMutationAllowed": false
+      },
+      "workingSpec": {
+        "subject": "PRISM mobile theme asset",
+        "style": "crystalline prism glassmorphism",
+        "palette": [
+          "midnight navy",
+          "electric blue",
+          "violet",
+          "magenta",
+          "cyan"
+        ],
+        "spatial": {
+          "references": [
+            {
+              "id": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+              "ref": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+              "label": "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+              "kind": "SOURCE",
+              "bounds": {
+                "x": 0.04,
+                "y": 0.04,
+                "width": 0.22,
+                "height": 0.22
+              },
+              "zIndex": 0
+            }
+          ],
+          "focusFrames": [],
+          "activeFocusFrameId": null,
+          "intentLinks": [],
+          "freezeSet": [
+            "PRISM_IDENTITY",
+            "CRYSTALLINE_PRISM"
+          ],
+          "exploreSet": [
+            "BACKGROUND_GLOW",
+            "GLASS_DEPTH",
+            "LIGHT_STREAKS"
+          ],
+          "compareNotes": [],
+          "resultRefs": [],
+          "resultProvenance": [],
+          "compareSessions": [],
+          "activeCompareSessionId": null,
+          "winnerRef": null,
+          "promotedParts": [],
+          "branch": null,
+          "nextIntents": [],
+          "activeNextIntentId": null,
+          "nextIntent": null
+        }
+      },
+      "scans": [],
+      "edits": [],
+      "renderPacketRefs": [],
+      "createdAt": "2026-10-03T11:18:11.311Z",
+      "updatedAt": "2026-10-03T11:18:11.311Z"
     }
   },
   "error": null,
-  "completedAt": "2026-10-03T11:04:21.116Z"
+  "completedAt": "2026-10-03T11:18:11.351Z"
 }
