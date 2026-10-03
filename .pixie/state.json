@@ -810,7 +810,9 @@
     {
       "goldenCaseId": "GOLDEN-SPECTRUM-SALES-PRISM-INDEPENDENCE-001",
       "lifecycle": [
-        "GOLDEN_CANDIDATE"
+        "GOLDEN_CANDIDATE",
+        "VERIFY_REPLAY",
+        "GOLDEN_ACTIVE"
       ],
       "sourceBugId": "BUG-SPECTRUM-CUSTOMER-DEPENDENCY-001",
       "sourceRunId": "RUN-SPECTRUM-CONTRACT-ISOLATION-001",
@@ -832,9 +834,23 @@
         "v0.2-lab"
       ],
       "evidenceRefs": [],
-      "status": "GOLDEN_CANDIDATE",
-      "replayCount": 0,
-      "lastReplay": null,
+      "status": "GOLDEN_ACTIVE",
+      "replayCount": 1,
+      "lastReplay": {
+        "runId": "RUN-SPECTRUM-REPLAY-ISOLATION-001",
+        "logicVersion": "v0.2-lab",
+        "observed": {
+          "salesRequestAccepted": true,
+          "prismSessionRequired": false,
+          "salesContextContainsPersonalContext": false,
+          "status": "CUSTOMER_SAFE"
+        },
+        "evidenceRefs": [
+          "fixture://spectrum/sales-prism-independence"
+        ],
+        "status": "GOLDEN_ACTIVE",
+        "at": "2026-10-03T04:35:19.161Z"
+      },
       "createdAt": "2026-10-03T04:33:32.928Z"
     },
     {
