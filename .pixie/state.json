@@ -478,7 +478,36 @@
   "proposals": [],
   "bugs": [],
   "attentions": [],
-  "goldenCases": [],
+  "goldenCases": [
+    {
+      "goldenCaseId": "GOLDEN-SPECTRUM-AMBIGUOUS-WORK-001",
+      "lifecycle": [
+        "GOLDEN_CANDIDATE"
+      ],
+      "sourceBugId": "BUG-SPECTRUM-FAIL-CLOSED-001",
+      "sourceRunId": "RUN-SPECTRUM-FAIL-CLOSED-001",
+      "inputRef": "fixture://spectrum/ambiguous-work",
+      "expected": {
+        "status": "ASK",
+        "dispatchAllowed": false,
+        "reason": "CURRENT_WORK_AMBIGUOUS"
+      },
+      "fixedObserved": {
+        "status": "ASK",
+        "dispatchAllowed": false,
+        "reason": "CURRENT_WORK_AMBIGUOUS"
+      },
+      "replayRecipe": "[object Object]",
+      "logicVersions": [
+        "v0.2-lab"
+      ],
+      "evidenceRefs": [],
+      "status": "GOLDEN_CANDIDATE",
+      "replayCount": 0,
+      "lastReplay": null,
+      "createdAt": "2026-10-03T03:24:52.676Z"
+    }
+  ],
   "regressionAlerts": [],
   "memory": [],
   "grants": [],

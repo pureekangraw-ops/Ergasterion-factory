@@ -1,44 +1,44 @@
 {
-  "requestId": "REQ-SPECTRUM-SELFTEST-20261003-001",
-  "command": "self_test",
+  "requestId": "REQ-SPECTRUM-GOLDEN-20261003-001",
+  "command": "add_golden_case",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "self_test",
+    "command": "add_golden_case",
     "mutated": true,
     "externalEffect": false,
     "result": {
-      "selfTestId": "SELF-2026-10-03T03:23:21.105Z",
-      "actor": "PIXIE-01",
-      "checks": [
-        {
-          "checkId": "PIPELINE_CONTRACT",
-          "status": "PASS",
-          "evidenceRefs": []
-        },
-        {
-          "checkId": "FAIL_CLOSED_RULES",
-          "status": "PASS",
-          "evidenceRefs": []
-        },
-        {
-          "checkId": "BOUNDARY_CONTRACT",
-          "status": "PASS",
-          "evidenceRefs": []
-        },
-        {
-          "checkId": "RESPONSE_CONTRACT",
-          "status": "PASS",
-          "evidenceRefs": []
-        }
+      "goldenCaseId": "GOLDEN-SPECTRUM-AMBIGUOUS-WORK-001",
+      "lifecycle": [
+        "GOLDEN_CANDIDATE"
       ],
-      "status": "PASS",
-      "createdAt": "2026-10-03T03:23:21.105Z"
+      "sourceBugId": "BUG-SPECTRUM-FAIL-CLOSED-001",
+      "sourceRunId": "RUN-SPECTRUM-FAIL-CLOSED-001",
+      "inputRef": "fixture://spectrum/ambiguous-work",
+      "expected": {
+        "status": "ASK",
+        "dispatchAllowed": false,
+        "reason": "CURRENT_WORK_AMBIGUOUS"
+      },
+      "fixedObserved": {
+        "status": "ASK",
+        "dispatchAllowed": false,
+        "reason": "CURRENT_WORK_AMBIGUOUS"
+      },
+      "replayRecipe": "[object Object]",
+      "logicVersions": [
+        "v0.2-lab"
+      ],
+      "evidenceRefs": [],
+      "status": "GOLDEN_CANDIDATE",
+      "replayCount": 0,
+      "lastReplay": null,
+      "createdAt": "2026-10-03T03:24:52.676Z"
     }
   },
   "error": null,
-  "completedAt": "2026-10-03T03:23:21.142Z"
+  "completedAt": "2026-10-03T03:24:52.716Z"
 }
