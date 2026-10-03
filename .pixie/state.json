@@ -279,7 +279,7 @@
         {
           "testTypeId": "recovery",
           "caseRefs": [],
-          "status": "UNKNOWN",
+          "status": "PASS",
           "required": true
         },
         {
@@ -289,10 +289,10 @@
           "required": true
         }
       ],
-      "overallStatus": "INCONCLUSIVE",
-      "lifecycle": "TRIAGE",
+      "overallStatus": "TEST_PASS",
+      "lifecycle": "READY_CANDIDATE",
       "createdAt": "2026-10-03T03:27:19.322Z",
-      "updatedAt": "2026-10-03T03:50:46.319Z"
+      "updatedAt": "2026-10-03T03:53:34.296Z"
     }
   ],
   "testRuns": [
