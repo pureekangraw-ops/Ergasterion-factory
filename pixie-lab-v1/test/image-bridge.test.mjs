@@ -35,3 +35,52 @@ test('image bridge is exposed but direct generator/deploy commands remain closed
   assert.equal(PIXIE_COMMANDS.includes('image_result'),true);
   for(const name of ['generate_image','image_write','deploy_image']) assert.equal(PIXIE_COMMANDS.includes(name),false);
 });
+
+
+test('GO visual execution seam prepares one provider-ready action and completes with verified readback',()=>{
+  const lab=new PixieLab({now:clock()});
+  const prepared=lab.prepareVisualExecution({
+    visualDraftId:'VIS-GO',
+    sourceRef:'image://reference',
+    sourceVersion:'v1',
+    workId:'WORK-GO',
+    checkpointId:'CP-GO',
+    spec:{subject:'PRISM theme'},
+    packet:{packetId:'PACK-GO',intent:'render PRISM theme',requestedResult:'one candidate'},
+    dispatch:{dispatchId:'DISPATCH-GO',actionType:'GENERATE',requestedBy:'GO'},
+  });
+  assert.equal(prepared.status,'REQUEST_READY');
+  assert.equal(prepared.targetTool,'GO_IMAGE_TOOL');
+  assert.equal(prepared.externalExecutionRequired,true);
+  assert.equal(prepared.imageAction.actionId,'DISPATCH-GO');
+
+  const completed=lab.completeVisualExecution({
+    dispatchId:'DISPATCH-GO',
+    result:{
+      status:'ARTIFACT_RETURNED',
+      providerJobId:'JOB-GO',
+      artifactRef:'image://prism-result',
+      receiptRef:'provider://receipt',
+      evidenceRefs:['evidence://provider'],
+    },
+    receipt:{
+      receiptId:'RECEIPT-GO',
+      readbackStatus:'VERIFIED',
+      artifactUsable:true,
+      evidenceRefs:['evidence://provider','evidence://readback'],
+    },
+    placeOnTable:true,
+  });
+  assert.equal(completed.status,'COMPLETE');
+  assert.equal(completed.visualReceipt.status,'LINKED');
+  assert.equal(completed.imported.resultRef,'image://prism-result');
+  assert.equal(completed.lineage.resultProvenance[0].artifactRef,'image://prism-result');
+  assert.equal(lab.board().counts.imageReceipts,1);
+  assert.equal(lab.board().counts.visualReceipts,1);
+});
+
+test('GO visual execution commands are exposed without granting an in-process image generator',()=>{
+  assert.equal(PIXIE_COMMANDS.includes('visual_execute_prepare'),true);
+  assert.equal(PIXIE_COMMANDS.includes('visual_execute_complete'),true);
+  assert.equal(PIXIE_COMMANDS.includes('generate_image'),false);
+});
