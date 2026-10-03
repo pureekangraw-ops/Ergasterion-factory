@@ -26,7 +26,7 @@ export const PIXIE_COMMANDS = Object.freeze([
   'visual_create', 'visual_scan', 'visual_edit', 'visual_compare', 'visual_render_packet', 'visual_verify',
   'visual_crew_create', 'visual_crew_step', 'visual_crew_compare', 'visual_crew_verify', 'visual_crew_result',
   'living_scene_create', 'living_scene_edit', 'living_scene_validate', 'web_export_manifest',
-  'image_request', 'image_result', 'visual_dispatch', 'visual_dispatch_update', 'visual_receipt', 'visual_result_import', 'visual_retry', 'visual_recover', 'visual_lineage',
+  'image_request', 'image_result', 'visual_execute_prepare', 'visual_execute_complete', 'visual_dispatch', 'visual_dispatch_update', 'visual_receipt', 'visual_result_import', 'visual_retry', 'visual_recover', 'visual_lineage',
   'production_handoff_prepare',
   'candidate_passport', 'door_guard',
   'persist',
@@ -47,7 +47,7 @@ const MUTATING = new Set([
   'visual_create', 'visual_scan', 'visual_edit', 'visual_render_packet', 'visual_verify',
   'visual_crew_create', 'visual_crew_step', 'visual_crew_compare', 'visual_crew_verify',
   'living_scene_create', 'living_scene_edit', 'living_scene_validate', 'web_export_manifest',
-  'image_request', 'image_result', 'visual_dispatch', 'visual_dispatch_update', 'visual_receipt', 'visual_result_import', 'visual_retry',
+  'image_request', 'image_result', 'visual_execute_prepare', 'visual_execute_complete', 'visual_dispatch', 'visual_dispatch_update', 'visual_receipt', 'visual_result_import', 'visual_retry',
   'production_handoff_prepare',
   'runtime_record', 'runtime_interaction_record',
   'candidate_passport',
@@ -296,6 +296,12 @@ export function createPixieCommander({ persistence, evidenceVerifier = null, cod
         break;
       case 'image_result':
         result = lab.acceptImageResult(args.actionId, requireObject(args.result, 'args.result'));
+        break;
+      case 'visual_execute_prepare':
+        result = lab.prepareVisualExecution(args);
+        break;
+      case 'visual_execute_complete':
+        result = lab.completeVisualExecution(args);
         break;
       case 'visual_dispatch':
         result = lab.createVisualDispatch(args.visualDraftId, requireObject(args.dispatch, 'args.dispatch'));
