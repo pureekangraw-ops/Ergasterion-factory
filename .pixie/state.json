@@ -1111,6 +1111,35 @@
       "replayCount": 0,
       "lastReplay": null,
       "createdAt": "2026-10-03T19:25:34.114Z"
+    },
+    {
+      "goldenCaseId": "GOLDEN-HUB-005-NO-EXECUTABLE-LEGACY",
+      "lifecycle": [
+        "GOLDEN_CANDIDATE"
+      ],
+      "sourceBugId": "BUG-HUB-LEGACY-EXECUTION-PATH",
+      "sourceRunId": "BASELINE-HUB-LEGACY-001",
+      "inputRef": "go-hub://current-runtime/routes",
+      "expected": {
+        "legacyAliasExec": false,
+        "legacyFallbackExec": false,
+        "historicalEvidenceMayRemain": true
+      },
+      "fixedObserved": {
+        "legacyAliasExec": false,
+        "legacyFallbackExec": false,
+        "historicalEvidenceMayRemain": true
+      },
+      "replayRecipe": "Enumerate CURRENT executable routes. Historical/legacy records may be readable evidence but must not route, gate, mutate, or override CURRENT behavior.",
+      "logicVersions": [
+        "GO_HUB_SYSTEM/V4",
+        "bc9d1a138773c7884b2eee2d7c40877b2cad52f9"
+      ],
+      "evidenceRefs": [],
+      "status": "GOLDEN_CANDIDATE",
+      "replayCount": 0,
+      "lastReplay": null,
+      "createdAt": "2026-10-03T19:25:49.470Z"
     }
   ],
   "regressionAlerts": [],

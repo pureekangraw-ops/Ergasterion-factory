@@ -1,5 +1,5 @@
 {
-  "requestId": "PIXIE-ADD-GOLDEN-HUB-001-CLAIM-OWNERSHIP-20261004",
+  "requestId": "PIXIE-ADD-GOLDEN-HUB-005-NO-EXECUTABLE-LEGACY-20261004",
   "command": "add_golden_case",
   "exitCode": 0,
   "ok": true,
@@ -11,30 +11,24 @@
     "mutated": true,
     "externalEffect": false,
     "result": {
-      "goldenCaseId": "GOLDEN-HUB-001-CLAIM-OWNERSHIP",
+      "goldenCaseId": "GOLDEN-HUB-005-NO-EXECUTABLE-LEGACY",
       "lifecycle": [
         "GOLDEN_CANDIDATE"
       ],
-      "sourceBugId": "BUG-HUB-CLAIM-OWNER-NULL",
-      "sourceRunId": "BASELINE-HUB-CLAIM-001",
-      "inputRef": "go-hub://centre/v4_claim",
+      "sourceBugId": "BUG-HUB-LEGACY-EXECUTION-PATH",
+      "sourceRunId": "BASELINE-HUB-LEGACY-001",
+      "inputRef": "go-hub://current-runtime/routes",
       "expected": {
-        "workStatus": "ON PROCESS",
-        "holder": "GO",
-        "ownership": {
-          "ownerId": "GO"
-        },
-        "invariant": "holder === ownership.ownerId"
+        "legacyAliasExec": false,
+        "legacyFallbackExec": false,
+        "historicalEvidenceMayRemain": true
       },
       "fixedObserved": {
-        "workStatus": "ON PROCESS",
-        "holder": "GO",
-        "ownership": {
-          "ownerId": "GO"
-        },
-        "invariant": "holder === ownership.ownerId"
+        "legacyAliasExec": false,
+        "legacyFallbackExec": false,
+        "historicalEvidenceMayRemain": true
       },
-      "replayRecipe": "Create CURRENT V4 Work, claim as GO, inspect durable state; holder and ownership.ownerId must both equal GO.",
+      "replayRecipe": "Enumerate CURRENT executable routes. Historical/legacy records may be readable evidence but must not route, gate, mutate, or override CURRENT behavior.",
       "logicVersions": [
         "GO_HUB_SYSTEM/V4",
         "bc9d1a138773c7884b2eee2d7c40877b2cad52f9"
@@ -43,9 +37,9 @@
       "status": "GOLDEN_CANDIDATE",
       "replayCount": 0,
       "lastReplay": null,
-      "createdAt": "2026-10-03T19:25:34.114Z"
+      "createdAt": "2026-10-03T19:25:49.470Z"
     }
   },
   "error": null,
-  "completedAt": "2026-10-03T19:25:34.151Z"
+  "completedAt": "2026-10-03T19:25:49.507Z"
 }
