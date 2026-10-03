@@ -581,6 +581,39 @@
       "rerunOf": null,
       "immutable": true,
       "createdAt": "2026-10-03T03:47:17.216Z"
+    },
+    {
+      "runId": "RUN-SPECTRUM-AUTHORITY-001",
+      "runClass": "ROOM_TEST_RUN",
+      "initiatedBy": "PIXIE-01",
+      "executedBy": "PIXIE-01",
+      "scope": "LOGIC_DRAFT",
+      "purpose": "Validate unresolved authority blocks dispatch",
+      "roomId": null,
+      "sourceRoomRefs": [],
+      "matrixRef": "MATRIX-PRISM-SPECTRUM-002",
+      "testTypeId": "permission_boundary",
+      "caseRef": "SPECTRUM-AUTHORITY",
+      "fixtureRef": null,
+      "snapshotRef": null,
+      "logicVersion": "v0.2-lab",
+      "expected": {
+        "status": "WAIT",
+        "dispatchAllowed": false
+      },
+      "observed": {
+        "status": "WAIT",
+        "dispatchAllowed": false
+      },
+      "status": "PASS",
+      "evidenceRefs": [
+        "github://pureekangraw-ops/Go-Calalog-@pixie-runtime-state#cff770467827428a9af4c44bb37c5a7dfde02eba"
+      ],
+      "bugCapsuleRef": null,
+      "unknowns": [],
+      "rerunOf": null,
+      "immutable": true,
+      "createdAt": "2026-10-03T03:47:56.233Z"
     }
   ],
   "proposals": [],
