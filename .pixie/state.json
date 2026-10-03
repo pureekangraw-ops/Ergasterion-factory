@@ -261,38 +261,38 @@
         {
           "testTypeId": "contract",
           "caseRefs": [],
-          "status": "UNRUN",
+          "status": "PASS",
           "required": true
         },
         {
           "testTypeId": "permission_boundary",
           "caseRefs": [],
-          "status": "UNRUN",
+          "status": "PASS",
           "required": true
         },
         {
           "testTypeId": "permission_boundary",
           "caseRefs": [],
-          "status": "UNRUN",
+          "status": "PASS",
           "required": true
         },
         {
           "testTypeId": "recovery",
           "caseRefs": [],
-          "status": "UNRUN",
+          "status": "UNKNOWN",
           "required": true
         },
         {
           "testTypeId": "golden",
           "caseRefs": [],
-          "status": "UNRUN",
+          "status": "PASS",
           "required": true
         }
       ],
       "overallStatus": "INCONCLUSIVE",
       "lifecycle": "TRIAGE",
       "createdAt": "2026-10-03T03:27:19.322Z",
-      "updatedAt": "2026-10-03T03:50:00.078Z"
+      "updatedAt": "2026-10-03T03:50:46.319Z"
     }
   ],
   "testRuns": [

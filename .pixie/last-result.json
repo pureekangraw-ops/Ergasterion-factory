@@ -1,5 +1,5 @@
 {
-  "requestId": "REQ-SPECTRUM-MATRIX-UPDATE-20261003-001",
+  "requestId": "REQ-SPECTRUM-MATRIX-UPDATE-20261003-002",
   "command": "update_matrix",
   "exitCode": 0,
   "ok": true,
@@ -19,40 +19,40 @@
         {
           "testTypeId": "contract",
           "caseRefs": [],
-          "status": "UNRUN",
+          "status": "PASS",
           "required": true
         },
         {
           "testTypeId": "permission_boundary",
           "caseRefs": [],
-          "status": "UNRUN",
+          "status": "PASS",
           "required": true
         },
         {
           "testTypeId": "permission_boundary",
           "caseRefs": [],
-          "status": "UNRUN",
+          "status": "PASS",
           "required": true
         },
         {
           "testTypeId": "recovery",
           "caseRefs": [],
-          "status": "UNRUN",
+          "status": "UNKNOWN",
           "required": true
         },
         {
           "testTypeId": "golden",
           "caseRefs": [],
-          "status": "UNRUN",
+          "status": "PASS",
           "required": true
         }
       ],
       "overallStatus": "INCONCLUSIVE",
       "lifecycle": "TRIAGE",
       "createdAt": "2026-10-03T03:27:19.322Z",
-      "updatedAt": "2026-10-03T03:50:00.078Z"
+      "updatedAt": "2026-10-03T03:50:46.319Z"
     }
   },
   "error": null,
-  "completedAt": "2026-10-03T03:50:00.103Z"
+  "completedAt": "2026-10-03T03:50:46.358Z"
 }
