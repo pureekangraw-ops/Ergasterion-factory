@@ -1076,6 +1076,41 @@
         "at": "2026-10-03T04:36:02.790Z"
       },
       "createdAt": "2026-10-03T04:34:21.296Z"
+    },
+    {
+      "goldenCaseId": "GOLDEN-HUB-001-CLAIM-OWNERSHIP",
+      "lifecycle": [
+        "GOLDEN_CANDIDATE"
+      ],
+      "sourceBugId": "BUG-HUB-CLAIM-OWNER-NULL",
+      "sourceRunId": "BASELINE-HUB-CLAIM-001",
+      "inputRef": "go-hub://centre/v4_claim",
+      "expected": {
+        "workStatus": "ON PROCESS",
+        "holder": "GO",
+        "ownership": {
+          "ownerId": "GO"
+        },
+        "invariant": "holder === ownership.ownerId"
+      },
+      "fixedObserved": {
+        "workStatus": "ON PROCESS",
+        "holder": "GO",
+        "ownership": {
+          "ownerId": "GO"
+        },
+        "invariant": "holder === ownership.ownerId"
+      },
+      "replayRecipe": "Create CURRENT V4 Work, claim as GO, inspect durable state; holder and ownership.ownerId must both equal GO.",
+      "logicVersions": [
+        "GO_HUB_SYSTEM/V4",
+        "bc9d1a138773c7884b2eee2d7c40877b2cad52f9"
+      ],
+      "evidenceRefs": [],
+      "status": "GOLDEN_CANDIDATE",
+      "replayCount": 0,
+      "lastReplay": null,
+      "createdAt": "2026-10-03T19:25:34.114Z"
     }
   ],
   "regressionAlerts": [],
