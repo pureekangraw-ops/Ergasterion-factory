@@ -1,25 +1,22 @@
 {
-  "requestId": "REQ-SPECTRUM-DRAFT-20261003-001",
-  "command": "logic_create",
+  "requestId": "REQ-SPECTRUM-COMPARE-20261003-001",
+  "command": "logic_compare",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "logic_create",
-    "mutated": true,
+    "command": "logic_compare",
+    "mutated": false,
     "externalEffect": false,
     "result": {
       "draftId": "DRAFT-PRISM-SPECTRUM-002",
       "logicId": "PRISM-SPECTRUM-AI-CORE",
       "experimentId": null,
       "variantId": null,
-      "sourceRef": "work://WORK-f53b698c-6039-4839-899e-40b72294ac3d/CP-WORK-f53b698c-6039-4839-899e-40b72294ac3d",
-      "sourceVersion": "v0.2-lab",
-      "labOwned": true,
       "workbench": "LOGIC_WORKBENCH",
-      "status": "DRAFT",
+      "changed": false,
       "original": {
         "name": "PRISM SPECTRUM AI Core",
         "status": "LAB_ONLY",
@@ -294,11 +291,10 @@
           "mergePolicy": "No PRISM merge or deploy from this lab draft"
         }
       },
-      "edits": [],
-      "createdAt": "2026-10-03T03:19:29.386Z",
-      "updatedAt": "2026-10-03T03:19:29.386Z"
+      "editCount": 0,
+      "approval": "NOT_AN_APPROVAL"
     }
   },
   "error": null,
-  "completedAt": "2026-10-03T03:19:29.424Z"
+  "completedAt": "2026-10-03T03:22:48.315Z"
 }
