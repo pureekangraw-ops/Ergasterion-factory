@@ -1,13 +1,13 @@
 {
-  "requestId": "REQ-SPECTRUM-MATRIX-CONTRACT-20261003-003",
-  "command": "add_matrix",
+  "requestId": "REQ-SPECTRUM-MATRIX-CONTRACT-START-20261003-001",
+  "command": "start_matrix",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "add_matrix",
+    "command": "start_matrix",
     "mutated": true,
     "externalEffect": false,
     "result": {
@@ -36,11 +36,11 @@
         }
       ],
       "overallStatus": "INCONCLUSIVE",
-      "lifecycle": "READY_TO_RUN",
+      "lifecycle": "RUNNING",
       "createdAt": "2026-10-03T04:39:49.285Z",
-      "updatedAt": "2026-10-03T04:39:49.285Z"
+      "updatedAt": "2026-10-03T04:40:30.805Z"
     }
   },
   "error": null,
-  "completedAt": "2026-10-03T04:39:49.318Z"
+  "completedAt": "2026-10-03T04:40:30.847Z"
 }

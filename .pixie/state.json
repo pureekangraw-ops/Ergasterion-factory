@@ -356,9 +356,9 @@
         }
       ],
       "overallStatus": "INCONCLUSIVE",
-      "lifecycle": "READY_TO_RUN",
+      "lifecycle": "RUNNING",
       "createdAt": "2026-10-03T04:39:49.285Z",
-      "updatedAt": "2026-10-03T04:39:49.285Z"
+      "updatedAt": "2026-10-03T04:40:30.805Z"
     }
   ],
   "testRuns": [
