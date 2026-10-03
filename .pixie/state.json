@@ -856,7 +856,9 @@
     {
       "goldenCaseId": "GOLDEN-SPECTRUM-CUSTOMER-SAFETY-001",
       "lifecycle": [
-        "GOLDEN_CANDIDATE"
+        "GOLDEN_CANDIDATE",
+        "VERIFY_REPLAY",
+        "GOLDEN_ACTIVE"
       ],
       "sourceBugId": "BUG-SPECTRUM-INTERNAL-LEAK-001",
       "sourceRunId": "RUN-SPECTRUM-CONTRACT-SAFETY-001",
@@ -880,9 +882,24 @@
         "v0.2-lab"
       ],
       "evidenceRefs": [],
-      "status": "GOLDEN_CANDIDATE",
-      "replayCount": 0,
-      "lastReplay": null,
+      "status": "GOLDEN_ACTIVE",
+      "replayCount": 1,
+      "lastReplay": {
+        "runId": "RUN-SPECTRUM-REPLAY-SAFETY-001",
+        "logicVersion": "v0.2-lab",
+        "observed": {
+          "statusClass": "TEMPORARILY_UNAVAILABLE",
+          "customerSafeMessage": true,
+          "stackTraceExposed": false,
+          "internalStateExposed": false,
+          "personalContextExposed": false
+        },
+        "evidenceRefs": [
+          "fixture://spectrum/hub-failure-customer-safety"
+        ],
+        "status": "GOLDEN_ACTIVE",
+        "at": "2026-10-03T04:36:02.790Z"
+      },
       "createdAt": "2026-10-03T04:34:21.296Z"
     }
   ],

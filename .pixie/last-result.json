@@ -1,5 +1,5 @@
 {
-  "requestId": "REQ-SPECTRUM-REPLAY-ISOLATION-20261003-001",
+  "requestId": "REQ-SPECTRUM-REPLAY-SAFETY-20261003-001",
   "command": "replay_golden",
   "exitCode": 0,
   "ok": true,
@@ -11,28 +11,30 @@
     "mutated": true,
     "externalEffect": false,
     "result": {
-      "goldenCaseId": "GOLDEN-SPECTRUM-SALES-PRISM-INDEPENDENCE-001",
+      "goldenCaseId": "GOLDEN-SPECTRUM-CUSTOMER-SAFETY-001",
       "lifecycle": [
         "GOLDEN_CANDIDATE",
         "VERIFY_REPLAY",
         "GOLDEN_ACTIVE"
       ],
-      "sourceBugId": "BUG-SPECTRUM-CUSTOMER-DEPENDENCY-001",
-      "sourceRunId": "RUN-SPECTRUM-CONTRACT-ISOLATION-001",
-      "inputRef": "fixture://spectrum/sales-prism-independence",
+      "sourceBugId": "BUG-SPECTRUM-INTERNAL-LEAK-001",
+      "sourceRunId": "RUN-SPECTRUM-CONTRACT-SAFETY-001",
+      "inputRef": "fixture://spectrum/hub-failure-customer-safety",
       "expected": {
-        "salesRequestAccepted": true,
-        "prismSessionRequired": false,
-        "salesContextContainsPersonalContext": false,
-        "status": "CUSTOMER_SAFE"
+        "statusClass": "TEMPORARILY_UNAVAILABLE",
+        "customerSafeMessage": true,
+        "stackTraceExposed": false,
+        "internalStateExposed": false,
+        "personalContextExposed": false
       },
       "fixedObserved": {
-        "salesRequestAccepted": true,
-        "prismSessionRequired": false,
-        "salesContextContainsPersonalContext": false,
-        "status": "CUSTOMER_SAFE"
+        "statusClass": "TEMPORARILY_UNAVAILABLE",
+        "customerSafeMessage": true,
+        "stackTraceExposed": false,
+        "internalStateExposed": false,
+        "personalContextExposed": false
       },
-      "replayRecipe": "Run a customer request while PRISM SPECTRUM is unavailable; verify SPECTRUMSALE remains bounded and customer-safe.",
+      "replayRecipe": "Simulate GO HUB failure for a storefront request; verify only stable customer-safe status crosses the Sales Contract.",
       "logicVersions": [
         "v0.2-lab"
       ],
@@ -40,23 +42,24 @@
       "status": "GOLDEN_ACTIVE",
       "replayCount": 1,
       "lastReplay": {
-        "runId": "RUN-SPECTRUM-REPLAY-ISOLATION-001",
+        "runId": "RUN-SPECTRUM-REPLAY-SAFETY-001",
         "logicVersion": "v0.2-lab",
         "observed": {
-          "salesRequestAccepted": true,
-          "prismSessionRequired": false,
-          "salesContextContainsPersonalContext": false,
-          "status": "CUSTOMER_SAFE"
+          "statusClass": "TEMPORARILY_UNAVAILABLE",
+          "customerSafeMessage": true,
+          "stackTraceExposed": false,
+          "internalStateExposed": false,
+          "personalContextExposed": false
         },
         "evidenceRefs": [
-          "fixture://spectrum/sales-prism-independence"
+          "fixture://spectrum/hub-failure-customer-safety"
         ],
         "status": "GOLDEN_ACTIVE",
-        "at": "2026-10-03T04:35:19.161Z"
+        "at": "2026-10-03T04:36:02.790Z"
       },
-      "createdAt": "2026-10-03T04:33:32.928Z"
+      "createdAt": "2026-10-03T04:34:21.296Z"
     }
   },
   "error": null,
-  "completedAt": "2026-10-03T04:35:19.197Z"
+  "completedAt": "2026-10-03T04:36:02.827Z"
 }
