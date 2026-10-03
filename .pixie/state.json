@@ -2400,6 +2400,55 @@
             "spectrumRunsInside": "PRISM",
             "crossClientRule": "Cross-client coordination is allowed only through explicit Work, source references, and governed Hub routes."
           }
+        },
+        "clientSplit": {
+          "office": {
+            "name": "GO_HUB",
+            "role": "สำนักงานและศูนย์ควบคุม",
+            "surface": "OFFICE_CONTROL_PLANE",
+            "does": [
+              "ประสาน Work/Checkpoint ระหว่างร้านค้า ออฟฟิศ และระบบต่าง ๆ",
+              "กำหนด route, authority, handoff, receipt และ readback",
+              "รักษา audit/provenance และ owner boundary"
+            ],
+            "doesNot": [
+              "เป็นหน้าร้าน",
+              "ให้ SPECTRUM ยึด ownership ของ source systems"
+            ]
+          },
+          "boundaryRule": "หน้าร้านแสดงและรับคำขอ; SPECTRUM เข้าใจและประสาน; GO Hub คุมงานและ authority; source owners ถือความจริงของข้อมูล",
+          "dataFlow": "SPECTRUMSALE -> SPECTRUM/PRISM -> GO_HUB -> source owners -> receipt/readback -> SPECTRUM/PRISM -> SPECTRUMSALE หรือ OFFICE",
+          "frontOfHouse": {
+            "name": "SPECTRUMSALE",
+            "role": "หน้าร้าน",
+            "surface": "SHOP_CLIENT",
+            "does": [
+              "รับคำขอขายและบริการ",
+              "แสดงสินค้า ราคา สต็อก และสถานะออเดอร์จาก source owner",
+              "ส่งคำขอและ context เข้า SPECTRUM/GO Hub"
+            ],
+            "doesNot": [
+              "ตัดสิน authority เอง",
+              "แก้ข้อมูลต้นทางเงียบ ๆ",
+              "เป็นศูนย์กลางข้อมูลทั้งหมด"
+            ]
+          },
+          "prism": {
+            "name": "SPECTRUM",
+            "role": "ผู้ช่วยส่วนตัวและ logic ชั้นประสานงาน",
+            "surface": "PRISM_COPILOT",
+            "does": [
+              "เข้าใจคำสั่งของ BIG",
+              "รวม context จาก SpectrumSale และ GO Hub",
+              "เสนอแผน ถามยืนยัน และส่งงานผ่าน governed route",
+              "คืนผลพร้อม source, receipt, readback และ conflict"
+            ],
+            "doesNot": [
+              "แทน GO Hub authority",
+              "แทน source owner",
+              "dispatch นอก route ที่กำกับไว้"
+            ]
+          }
         }
       },
       "edits": [
@@ -2416,10 +2465,17 @@
             "assistantRole"
           ],
           "at": "2026-10-03T04:11:28.530Z"
+        },
+        {
+          "op": "SET",
+          "path": [
+            "clientSplit"
+          ],
+          "at": "2026-10-03T04:12:47.917Z"
         }
       ],
       "createdAt": "2026-10-03T03:19:29.386Z",
-      "updatedAt": "2026-10-03T04:11:28.530Z"
+      "updatedAt": "2026-10-03T04:12:47.917Z"
     }
   ],
   "factoryHandoffs": [],
