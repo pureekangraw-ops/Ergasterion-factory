@@ -1,9 +1,58 @@
 {
-  "requestId": "REQ-SPECTRUM-MATRIX-20261003-002",
+  "requestId": "REQ-SPECTRUM-MATRIX-20261003-003",
   "command": "add_matrix",
-  "exitCode": 1,
-  "ok": false,
-  "output": null,
-  "error": "{\n  \"ok\": false,\n  \"error\": \"row.testTypeId is required\"\n}",
-  "completedAt": "2026-10-03T03:26:40.980Z"
+  "exitCode": 0,
+  "ok": true,
+  "output": {
+    "ok": true,
+    "pixieId": "PIXIE-01",
+    "labId": "PIXIE-LAB",
+    "command": "add_matrix",
+    "mutated": true,
+    "externalEffect": false,
+    "result": {
+      "matrixId": "MATRIX-PRISM-SPECTRUM-002",
+      "subjectRef": "logic://DRAFT-PRISM-SPECTRUM-002",
+      "logicVersion": "v0.2-lab",
+      "roomId": null,
+      "rows": [
+        {
+          "testTypeId": "contract",
+          "caseRefs": [],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "permission_boundary",
+          "caseRefs": [],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "permission_boundary",
+          "caseRefs": [],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "recovery",
+          "caseRefs": [],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "golden",
+          "caseRefs": [],
+          "status": "UNRUN",
+          "required": true
+        }
+      ],
+      "overallStatus": "INCONCLUSIVE",
+      "lifecycle": "READY_TO_RUN",
+      "createdAt": "2026-10-03T03:27:19.322Z",
+      "updatedAt": "2026-10-03T03:27:19.322Z"
+    }
+  },
+  "error": null,
+  "completedAt": "2026-10-03T03:27:19.364Z"
 }

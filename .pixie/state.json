@@ -251,6 +251,48 @@
       "lifecycle": "RUNNING",
       "createdAt": "2026-09-28T09:12:51.540Z",
       "updatedAt": "2026-09-28T09:13:24.501Z"
+    },
+    {
+      "matrixId": "MATRIX-PRISM-SPECTRUM-002",
+      "subjectRef": "logic://DRAFT-PRISM-SPECTRUM-002",
+      "logicVersion": "v0.2-lab",
+      "roomId": null,
+      "rows": [
+        {
+          "testTypeId": "contract",
+          "caseRefs": [],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "permission_boundary",
+          "caseRefs": [],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "permission_boundary",
+          "caseRefs": [],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "recovery",
+          "caseRefs": [],
+          "status": "UNRUN",
+          "required": true
+        },
+        {
+          "testTypeId": "golden",
+          "caseRefs": [],
+          "status": "UNRUN",
+          "required": true
+        }
+      ],
+      "overallStatus": "INCONCLUSIVE",
+      "lifecycle": "READY_TO_RUN",
+      "createdAt": "2026-10-03T03:27:19.322Z",
+      "updatedAt": "2026-10-03T03:27:19.322Z"
     }
   ],
   "testRuns": [
