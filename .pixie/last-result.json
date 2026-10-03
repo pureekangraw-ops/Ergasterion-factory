@@ -1,300 +1,44 @@
 {
-  "requestId": "REQ-SPECTRUM-COMPARE-20261003-001",
-  "command": "logic_compare",
+  "requestId": "REQ-SPECTRUM-SELFTEST-20261003-001",
+  "command": "self_test",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "logic_compare",
-    "mutated": false,
+    "command": "self_test",
+    "mutated": true,
     "externalEffect": false,
     "result": {
-      "draftId": "DRAFT-PRISM-SPECTRUM-002",
-      "logicId": "PRISM-SPECTRUM-AI-CORE",
-      "experimentId": null,
-      "variantId": null,
-      "workbench": "LOGIC_WORKBENCH",
-      "changed": false,
-      "original": {
-        "name": "PRISM SPECTRUM AI Core",
-        "status": "LAB_ONLY",
-        "purpose": "Transform natural-language Copilot requests into bounded, evidence-backed decisions and governed execution plans before PRISM integration.",
-        "boundary": {
-          "owner": "PRISM_COPILOT",
-          "orchestrator": "GO_HUB",
-          "authority": "BIG_AND_OWNER_SYSTEMS",
-          "financeOwner": "LEDGER",
-          "mapOwner": "PRISM_MAP",
-          "optionalRide": "RIDE",
-          "lighthouse": "INTEGRATION_ONLY",
-          "productionAuthority": false
+      "selfTestId": "SELF-2026-10-03T03:23:21.105Z",
+      "actor": "PIXIE-01",
+      "checks": [
+        {
+          "checkId": "PIPELINE_CONTRACT",
+          "status": "PASS",
+          "evidenceRefs": []
         },
-        "pipeline": [
-          "INTENT",
-          "CONTEXT",
-          "CURRENT_WORK",
-          "REQUESTED_RESULT",
-          "PRESERVE_CHANGE",
-          "ROUTE",
-          "AUTHORITY",
-          "PLAN_OR_ASK",
-          "DISPATCH",
-          "RECEIPT",
-          "READBACK",
-          "VERIFY",
-          "RETURN"
-        ],
-        "inputContract": {
-          "message": "string",
-          "conversationContext": "object|null",
-          "selectedReferences": "array",
-          "userConfirmation": "boolean|null"
+        {
+          "checkId": "FAIL_CLOSED_RULES",
+          "status": "PASS",
+          "evidenceRefs": []
         },
-        "decisionRules": [
-          {
-            "id": "exact_first_work_resolution",
-            "rule": "Resolve an existing Work/Checkpoint before creating or dispatching anything."
-          },
-          {
-            "id": "unknown_is_not_false",
-            "rule": "Represent missing, ambiguous, or stale evidence as UNKNOWN; never infer a positive fact."
-          },
-          {
-            "id": "fail_closed",
-            "rule": "If Work, Route, Authority, or requested change is unresolved, ASK or WAIT and do not dispatch."
-          },
-          {
-            "id": "preserve_owner_intent",
-            "rule": "Refinement may clarify intent but cannot rewrite owner intent or expand authority."
-          },
-          {
-            "id": "idempotent_action",
-            "rule": "Derive an idempotency key from Work, Checkpoint, action type, and normalized target; check existing receipt before dispatch."
-          },
-          {
-            "id": "evidence_required",
-            "rule": "COMPLETE requires receipt plus readback/evidence from the responsible owner."
-          },
-          {
-            "id": "bounded_handoff",
-            "rule": "GO/LIGHT handoff uses the same Work/Checkpoint and bounded relay; Counter remains canonical transcript."
-          }
-        ],
-        "states": [
-          "PARSE",
-          "NEEDS_CONTEXT",
-          "WORK_RESOLUTION",
-          "ROUTE_REVIEW",
-          "AUTHORITY_REVIEW",
-          "READY_TO_PLAN",
-          "WAIT_CONFIRMATION",
-          "DISPATCHED",
-          "RECEIPT_PENDING",
-          "VERIFYING",
-          "COMPLETE",
-          "BLOCKED",
-          "UNKNOWN"
-        ],
-        "actions": {
-          "read": "Allowed when source and scope are known; return source references.",
-          "plan": "Allowed without mutation; produce route, authority, risks, and next step.",
-          "ask": "Required when ambiguity materially changes the action.",
-          "dispatch": "Only when Work, Route, Authority, idempotency, and confirmation gates pass.",
-          "verify": "Read owner truth and evidence; never trust model self-report.",
-          "return": "Return result on the same Work/Checkpoint."
+        {
+          "checkId": "BOUNDARY_CONTRACT",
+          "status": "PASS",
+          "evidenceRefs": []
         },
-        "routePolicy": {
-          "go": "Orchestration, Work routing, handoff, readback",
-          "lighthouse": "Only explicit integration intent with separate capability and receipt",
-          "ledger": "Finance truth and numeric claims",
-          "map": "Primary map surface",
-          "deviceBridge": "Last-mile actuation only when capability is verified",
-          "manual": "Fail closed; surface owner action required"
-        },
-        "responseContract": {
-          "status": "READY|ASK|WAIT|BLOCKED|UNKNOWN|COMPLETE",
-          "summary": "string",
-          "questions": "array",
-          "plan": "array",
-          "owner": "string|null",
-          "workId": "string|null",
-          "checkpointId": "string|null",
-          "idempotencyKey": "string|null",
-          "evidenceRefs": "array",
-          "unknowns": "array",
-          "dispatchAllowed": "boolean"
-        },
-        "safety": {
-          "neverDo": [
-            "invent Work IDs",
-            "invent owner truth",
-            "claim completion without evidence",
-            "duplicate dispatch on retry",
-            "expand authority silently",
-            "copy Ledger truth into PRISM"
-          ],
-          "privacy": [
-            "minimize prompt data sent to Ledger",
-            "do not retain passwords or raw private input"
-          ]
-        },
-        "mvpScenarios": [
-          "read current project status",
-          "find and resume an existing Work",
-          "ask a clarification when route is ambiguous",
-          "prepare a GO/LIGHT handoff without dispatch",
-          "reject a duplicate dispatch using an existing receipt",
-          "verify completion from owner readback"
-        ],
-        "integrationGate": {
-          "requiredBeforePrism": "LAB_SELF_TEST_PASS + GOLDEN_CASES_PASS + MATRIX_NO_CRITICAL_UNKNOWN + EXPLICIT_OWNER_REVIEW",
-          "integrationTarget": "PRISM Copilot adapter only; no direct production authority",
-          "mergePolicy": "No PRISM merge or deploy from this lab draft"
+        {
+          "checkId": "RESPONSE_CONTRACT",
+          "status": "PASS",
+          "evidenceRefs": []
         }
-      },
-      "workingCopy": {
-        "name": "PRISM SPECTRUM AI Core",
-        "status": "LAB_ONLY",
-        "purpose": "Transform natural-language Copilot requests into bounded, evidence-backed decisions and governed execution plans before PRISM integration.",
-        "boundary": {
-          "owner": "PRISM_COPILOT",
-          "orchestrator": "GO_HUB",
-          "authority": "BIG_AND_OWNER_SYSTEMS",
-          "financeOwner": "LEDGER",
-          "mapOwner": "PRISM_MAP",
-          "optionalRide": "RIDE",
-          "lighthouse": "INTEGRATION_ONLY",
-          "productionAuthority": false
-        },
-        "pipeline": [
-          "INTENT",
-          "CONTEXT",
-          "CURRENT_WORK",
-          "REQUESTED_RESULT",
-          "PRESERVE_CHANGE",
-          "ROUTE",
-          "AUTHORITY",
-          "PLAN_OR_ASK",
-          "DISPATCH",
-          "RECEIPT",
-          "READBACK",
-          "VERIFY",
-          "RETURN"
-        ],
-        "inputContract": {
-          "message": "string",
-          "conversationContext": "object|null",
-          "selectedReferences": "array",
-          "userConfirmation": "boolean|null"
-        },
-        "decisionRules": [
-          {
-            "id": "exact_first_work_resolution",
-            "rule": "Resolve an existing Work/Checkpoint before creating or dispatching anything."
-          },
-          {
-            "id": "unknown_is_not_false",
-            "rule": "Represent missing, ambiguous, or stale evidence as UNKNOWN; never infer a positive fact."
-          },
-          {
-            "id": "fail_closed",
-            "rule": "If Work, Route, Authority, or requested change is unresolved, ASK or WAIT and do not dispatch."
-          },
-          {
-            "id": "preserve_owner_intent",
-            "rule": "Refinement may clarify intent but cannot rewrite owner intent or expand authority."
-          },
-          {
-            "id": "idempotent_action",
-            "rule": "Derive an idempotency key from Work, Checkpoint, action type, and normalized target; check existing receipt before dispatch."
-          },
-          {
-            "id": "evidence_required",
-            "rule": "COMPLETE requires receipt plus readback/evidence from the responsible owner."
-          },
-          {
-            "id": "bounded_handoff",
-            "rule": "GO/LIGHT handoff uses the same Work/Checkpoint and bounded relay; Counter remains canonical transcript."
-          }
-        ],
-        "states": [
-          "PARSE",
-          "NEEDS_CONTEXT",
-          "WORK_RESOLUTION",
-          "ROUTE_REVIEW",
-          "AUTHORITY_REVIEW",
-          "READY_TO_PLAN",
-          "WAIT_CONFIRMATION",
-          "DISPATCHED",
-          "RECEIPT_PENDING",
-          "VERIFYING",
-          "COMPLETE",
-          "BLOCKED",
-          "UNKNOWN"
-        ],
-        "actions": {
-          "read": "Allowed when source and scope are known; return source references.",
-          "plan": "Allowed without mutation; produce route, authority, risks, and next step.",
-          "ask": "Required when ambiguity materially changes the action.",
-          "dispatch": "Only when Work, Route, Authority, idempotency, and confirmation gates pass.",
-          "verify": "Read owner truth and evidence; never trust model self-report.",
-          "return": "Return result on the same Work/Checkpoint."
-        },
-        "routePolicy": {
-          "go": "Orchestration, Work routing, handoff, readback",
-          "lighthouse": "Only explicit integration intent with separate capability and receipt",
-          "ledger": "Finance truth and numeric claims",
-          "map": "Primary map surface",
-          "deviceBridge": "Last-mile actuation only when capability is verified",
-          "manual": "Fail closed; surface owner action required"
-        },
-        "responseContract": {
-          "status": "READY|ASK|WAIT|BLOCKED|UNKNOWN|COMPLETE",
-          "summary": "string",
-          "questions": "array",
-          "plan": "array",
-          "owner": "string|null",
-          "workId": "string|null",
-          "checkpointId": "string|null",
-          "idempotencyKey": "string|null",
-          "evidenceRefs": "array",
-          "unknowns": "array",
-          "dispatchAllowed": "boolean"
-        },
-        "safety": {
-          "neverDo": [
-            "invent Work IDs",
-            "invent owner truth",
-            "claim completion without evidence",
-            "duplicate dispatch on retry",
-            "expand authority silently",
-            "copy Ledger truth into PRISM"
-          ],
-          "privacy": [
-            "minimize prompt data sent to Ledger",
-            "do not retain passwords or raw private input"
-          ]
-        },
-        "mvpScenarios": [
-          "read current project status",
-          "find and resume an existing Work",
-          "ask a clarification when route is ambiguous",
-          "prepare a GO/LIGHT handoff without dispatch",
-          "reject a duplicate dispatch using an existing receipt",
-          "verify completion from owner readback"
-        ],
-        "integrationGate": {
-          "requiredBeforePrism": "LAB_SELF_TEST_PASS + GOLDEN_CASES_PASS + MATRIX_NO_CRITICAL_UNKNOWN + EXPLICIT_OWNER_REVIEW",
-          "integrationTarget": "PRISM Copilot adapter only; no direct production authority",
-          "mergePolicy": "No PRISM merge or deploy from this lab draft"
-        }
-      },
-      "editCount": 0,
-      "approval": "NOT_AN_APPROVAL"
+      ],
+      "status": "PASS",
+      "createdAt": "2026-10-03T03:23:21.105Z"
     }
   },
   "error": null,
-  "completedAt": "2026-10-03T03:22:48.315Z"
+  "completedAt": "2026-10-03T03:23:21.142Z"
 }
