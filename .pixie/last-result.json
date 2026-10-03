@@ -1,5 +1,5 @@
 {
-  "requestId": "REQ-SPECTRUM-SPLIT-20261003-001",
+  "requestId": "REQ-SPECTRUM-SEPARATION-20261003-001",
   "command": "logic_edit",
   "exitCode": 0,
   "ok": true,
@@ -351,52 +351,96 @@
           }
         },
         "clientSplit": {
+          "diagram": "CUSTOMER -> SPECTRUMSALE -> [Sales Contract / Brief] -> GO_HUB_OFFICE <- [Personal Copilot Contract] <- PRISM_SPECTRUM",
+          "sharedContract": {
+            "name": "SPECTRUM_COMMON_LANGUAGE",
+            "shared": [
+              "intent",
+              "requestType",
+              "entityRefs",
+              "statusClass",
+              "workRef",
+              "receiptRef",
+              "questions",
+              "nextAction"
+            ],
+            "salesContract": "SPECTRUMSALE -> GO_HUB; customer-safe Sales Contract / Brief",
+            "separate": [
+              "sessionId",
+              "conversationContext",
+              "audience",
+              "authorityScope",
+              "dataVisibility",
+              "personalContext",
+              "customerContext"
+            ],
+            "purpose": "ใช้ภาษาและ schema กลางร่วมกันโดยไม่รวม session, context หรือ authority",
+            "personalCopilotContract": "PRISM_SPECTRUM -> GO_HUB; BIG-scoped Personal Copilot Contract"
+          },
           "office": {
             "name": "GO_HUB",
-            "role": "สำนักงานและศูนย์ควบคุม",
+            "role": "หลังบ้านและ authority",
             "surface": "OFFICE_CONTROL_PLANE",
             "does": [
-              "ประสาน Work/Checkpoint ระหว่างร้านค้า ออฟฟิศ และระบบต่าง ๆ",
-              "กำหนด route, authority, handoff, receipt และ readback",
-              "รักษา audit/provenance และ owner boundary"
+              "รับ request จาก SPECTRUMSALE และ PRISM SPECTRUM ผ่านคนละ contract",
+              "ประสาน source owners, Work/Checkpoint, route, receipt และ readback",
+              "บังคับ data minimization และ audience boundary",
+              "ส่งกลับเฉพาะผลลัพธ์ตาม audience ที่ร้องขอ"
             ],
             "doesNot": [
-              "เป็นหน้าร้าน",
-              "ให้ SPECTRUM ยึด ownership ของ source systems"
+              "ส่ง internal state ไปหน้าร้าน",
+              "รวม customer context กับ BIG personal context โดยไม่มี authority",
+              "ทำให้หน้าร้านผูกกับ PRISM availability"
             ]
           },
-          "boundaryRule": "หน้าร้านแสดงและรับคำขอ; SPECTRUM เข้าใจและประสาน; GO Hub คุมงานและ authority; source owners ถือความจริงของข้อมูล",
-          "dataFlow": "SPECTRUMSALE -> SPECTRUM/PRISM -> GO_HUB -> source owners -> receipt/readback -> SPECTRUM/PRISM -> SPECTRUMSALE หรือ OFFICE",
+          "boundaryRule": "SPECTRUMSALE is customer-facing and customer-safe; PRISM SPECTRUM is BIG-facing and permission-scoped; GO HUB is the shared office authority; common language does not mean shared context or shared authority.",
+          "relationship": "LOGIC_RELATIONSHIP_NOT_RUNTIME_DEPENDENCY",
           "frontOfHouse": {
-            "name": "SPECTRUMSALE",
-            "role": "หน้าร้าน",
+            "role": "พนักงานขายของร้าน",
             "surface": "SHOP_CLIENT",
+            "contextBoundary": "Customer-safe shop context only",
+            "authorityBoundary": "Shop sales/service authority only",
             "does": [
               "รับคำขอขายและบริการ",
-              "แสดงสินค้า ราคา สต็อก และสถานะออเดอร์จาก source owner",
-              "ส่งคำขอและ context เข้า SPECTRUM/GO Hub"
+              "ใช้ Sales Contract / Brief ส่งข้อมูลที่จำเป็นไป GO HUB",
+              "แสดง customer-safe status",
+              "ทำงานต่อได้โดยไม่ต้องมี Personal SPECTRUM session"
             ],
             "doesNot": [
-              "ตัดสิน authority เอง",
-              "แก้ข้อมูลต้นทางเงียบ ๆ",
-              "เป็นศูนย์กลางข้อมูลทั้งหมด"
-            ]
+              "รับหรือเปิดเผย BIG personal context",
+              "รับ stack trace, internal state, private Work details หรือ hidden authority",
+              "รอ PRISM SPECTRUM เป็น runtime dependency",
+              "เปิดเผยข้อมูลภายในให้ลูกค้า"
+            ],
+            "name": "SPECTRUMSALE"
+          },
+          "failureIsolation": {
+            "internalErrorPolicy": "Internal diagnostics stay in GO HUB/Office observability; customer surfaces receive stable status classes only",
+            "prismUnavailable": "SPECTRUMSALE continues in its own bounded mode; no customer request is routed through Personal SPECTRUM",
+            "hubUnavailable": "SPECTRUMSALE exposes only customer-safe status or a safe retry/queue message; never exposes stack trace, internal state, private context, or authority details"
           },
           "prism": {
-            "name": "SPECTRUM",
-            "role": "ผู้ช่วยส่วนตัวและ logic ชั้นประสานงาน",
+            "role": "Personal Copilot ของ BIG",
             "surface": "PRISM_COPILOT",
+            "contextBoundary": "BIG personal context plus Shop/Office/App context ตาม permission ของ BIG",
+            "authorityBoundary": "BIG authority and permitted owner-system actions only",
             "does": [
-              "เข้าใจคำสั่งของ BIG",
-              "รวม context จาก SpectrumSale และ GO Hub",
-              "เสนอแผน ถามยืนยัน และส่งงานผ่าน governed route",
-              "คืนผลพร้อม source, receipt, readback และ conflict"
+              "ใช้ Personal Copilot Contract ติดต่อ GO HUB",
+              "เห็นภาพรวมตาม permission ของ BIG",
+              "เสนอแผน ถามยืนยัน และประสานงานข้ามระบบ"
             ],
             "doesNot": [
-              "แทน GO Hub authority",
-              "แทน source owner",
-              "dispatch นอก route ที่กำกับไว้"
-            ]
+              "เป็นทางผ่านบังคับของ customer request",
+              "ส่ง BIG personal context ไป SPECTRUMSALE",
+              "เผย internal state ให้ลูกค้า"
+            ],
+            "name": "PRISM_SPECTRUM"
+          },
+          "flow": {
+            "customerToOffice": "SPECTRUMSALE -> GO_HUB via Sales Contract / Brief",
+            "bigToOffice": "PRISM_SPECTRUM -> GO_HUB via Personal Copilot Contract",
+            "hubToSurfaces": "GO_HUB -> each surface through audience-filtered response",
+            "relationship": "Both SPECTRUM instances coordinate with GO HUB as peers; neither is a dependency of the other"
           }
         }
       },
@@ -421,12 +465,19 @@
             "clientSplit"
           ],
           "at": "2026-10-03T04:12:47.917Z"
+        },
+        {
+          "op": "SET",
+          "path": [
+            "clientSplit"
+          ],
+          "at": "2026-10-03T04:15:56.024Z"
         }
       ],
       "createdAt": "2026-10-03T03:19:29.386Z",
-      "updatedAt": "2026-10-03T04:12:47.917Z"
+      "updatedAt": "2026-10-03T04:15:56.024Z"
     }
   },
   "error": null,
-  "completedAt": "2026-10-03T04:12:47.949Z"
+  "completedAt": "2026-10-03T04:15:56.063Z"
 }
