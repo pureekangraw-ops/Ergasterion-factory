@@ -4206,5 +4206,101 @@
   "visualDispatches": [],
   "visualReceipts": [],
   "runtimeObservations": [],
-  "runtimeInteractions": []
+  "runtimeInteractions": [],
+  "livingScenes": [],
+  "webExportManifests": [],
+  "visualCrewTasks": [
+    {
+      "schema": "PIXIE_VISUAL_CREW_TASK_V1",
+      "taskId": "VISUAL-CREW-PRISM-THEME-002",
+      "workId": "WORK-PRISM-FULL-SPEC-20261002-001-20261002-001",
+      "checkpointId": "CP-WORK-PRISM-FULL-SPEC-20261002-001-20261002-001",
+      "brief": "Create one PRISM mobile theme asset using the crystalline prism/glassmorphism reference: midnight navy base, electric blue/violet/magenta/cyan iridescent glow, premium luminous glass UI language. Preserve PRISM identity and prepare a production-usable candidate.",
+      "requestedOutput": "One PRISM theme visual candidate suitable as a UI/theme asset for the PRISM mobile app, with traceable artifact/evidence references.",
+      "sourceAssetRefs": [
+        "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003"
+      ],
+      "constraints": [
+        "Do not change PRISM product logic",
+        "Do not grant production authority",
+        "Preserve crystalline prism identity",
+        "Keep source reference immutable"
+      ],
+      "sourceMutationAllowed": false,
+      "phase": "PLAN",
+      "status": "PLANNED",
+      "steps": [
+        {
+          "stepId": "VISUAL-CREW-PRISM-THEME-002::01::ASSET_SCOUT",
+          "workerId": "ASSET_SCOUT",
+          "workerLabel": "Asset Scout",
+          "responsibility": "resolve source and reference assets",
+          "status": "QUEUED",
+          "resultRefs": [],
+          "evidenceRefs": [],
+          "unknowns": [],
+          "note": null,
+          "updatedAt": "2026-10-03T11:03:31.476Z"
+        },
+        {
+          "stepId": "VISUAL-CREW-PRISM-THEME-002::02::IMAGE_PREP",
+          "workerId": "IMAGE_PREP",
+          "workerLabel": "Image Prep",
+          "responsibility": "prepare dimensions, crop, transparency and safe source copies",
+          "status": "QUEUED",
+          "resultRefs": [],
+          "evidenceRefs": [],
+          "unknowns": [],
+          "note": null,
+          "updatedAt": "2026-10-03T11:03:31.476Z"
+        },
+        {
+          "stepId": "VISUAL-CREW-PRISM-THEME-002::03::VISUAL_EDITOR",
+          "workerId": "VISUAL_EDITOR",
+          "workerLabel": "Visual Editor",
+          "responsibility": "apply the requested visual change without overwriting source",
+          "status": "QUEUED",
+          "resultRefs": [],
+          "evidenceRefs": [],
+          "unknowns": [],
+          "note": null,
+          "updatedAt": "2026-10-03T11:03:31.476Z"
+        },
+        {
+          "stepId": "VISUAL-CREW-PRISM-THEME-002::04::RENDERER",
+          "workerId": "RENDERER",
+          "workerLabel": "Renderer",
+          "responsibility": "emit requested output profiles and candidate artifacts",
+          "status": "QUEUED",
+          "resultRefs": [],
+          "evidenceRefs": [],
+          "unknowns": [],
+          "note": null,
+          "updatedAt": "2026-10-03T11:03:31.476Z"
+        },
+        {
+          "stepId": "VISUAL-CREW-PRISM-THEME-002::05::INSPECTOR",
+          "workerId": "INSPECTOR",
+          "workerLabel": "Inspector",
+          "responsibility": "check brief, dimensions, safe area, artifacts and evidence",
+          "status": "QUEUED",
+          "resultRefs": [],
+          "evidenceRefs": [],
+          "unknowns": [],
+          "note": null,
+          "updatedAt": "2026-10-03T11:03:31.476Z"
+        }
+      ],
+      "candidateRefs": [],
+      "selectedCandidateRef": null,
+      "compareRefs": [],
+      "verificationRefs": [],
+      "resultRef": null,
+      "unknowns": [],
+      "createdAt": "2026-10-03T11:03:31.476Z",
+      "updatedAt": "2026-10-03T11:03:31.476Z"
+    }
+  ],
+  "visualCrewCompares": [],
+  "visualCrewVerifications": []
 }
