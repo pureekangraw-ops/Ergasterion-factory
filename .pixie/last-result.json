@@ -1,5 +1,5 @@
 {
-  "requestId": "PIXIE-ADD-GOLDEN-HUB-008-PIXIE-DIRECT-DEBUG-20261004",
+  "requestId": "PIXIE-ADD-GOLDEN-HUB-010-UNKNOWN-FAILS-CLOSED-20261004",
   "command": "add_golden_case",
   "exitCode": 0,
   "ok": true,
@@ -11,26 +11,24 @@
     "mutated": true,
     "externalEffect": false,
     "result": {
-      "goldenCaseId": "GOLDEN-HUB-008-PIXIE-DIRECT-DEBUG",
+      "goldenCaseId": "GOLDEN-HUB-010-UNKNOWN-FAILS-CLOSED",
       "lifecycle": [
         "GOLDEN_CANDIDATE"
       ],
-      "sourceBugId": "BUG-HUB-PIXIE-WRONG-ENTRY",
-      "sourceRunId": "BASELINE-HUB-PIXIE-001",
-      "inputRef": "go-hub://pixie-lab/debug",
+      "sourceBugId": "BUG-HUB-UNKNOWN-FALLBACK",
+      "sourceRunId": "BASELINE-HUB-UNKNOWN-001",
+      "inputRef": "go-hub://unknown-route",
       "expected": {
-        "entry": "PIXIE_LAB_DIRECT",
-        "factoryTaskRequired": false,
-        "maintenanceRequired": false,
-        "readOnly": true
+        "unknownBecomesLegacyFallback": false,
+        "unknownExecutes": false,
+        "result": "STOP_OR_REPORT_UNKNOWN"
       },
       "fixedObserved": {
-        "entry": "PIXIE_LAB_DIRECT",
-        "factoryTaskRequired": false,
-        "maintenanceRequired": false,
-        "readOnly": true
+        "unknownBecomesLegacyFallback": false,
+        "unknownExecutes": false,
+        "result": "STOP_OR_REPORT_UNKNOWN"
       },
-      "replayRecipe": "Start PIXIE debug from its Lab runtime against GO Hub. It must not create a Factory task and must not require Maintenance for read-only debugging.",
+      "replayRecipe": "Present an unresolved/unknown route or identity. System must stop or report UNKNOWN; it must never revive a legacy alias or fallback path.",
       "logicVersions": [
         "GO_HUB_SYSTEM/V4",
         "bc9d1a138773c7884b2eee2d7c40877b2cad52f9"
@@ -39,9 +37,9 @@
       "status": "GOLDEN_CANDIDATE",
       "replayCount": 0,
       "lastReplay": null,
-      "createdAt": "2026-10-03T19:26:04.187Z"
+      "createdAt": "2026-10-03T19:26:17.456Z"
     }
   },
   "error": null,
-  "completedAt": "2026-10-03T19:26:04.227Z"
+  "completedAt": "2026-10-03T19:26:17.498Z"
 }

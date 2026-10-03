@@ -1171,6 +1171,35 @@
       "replayCount": 0,
       "lastReplay": null,
       "createdAt": "2026-10-03T19:26:04.187Z"
+    },
+    {
+      "goldenCaseId": "GOLDEN-HUB-010-UNKNOWN-FAILS-CLOSED",
+      "lifecycle": [
+        "GOLDEN_CANDIDATE"
+      ],
+      "sourceBugId": "BUG-HUB-UNKNOWN-FALLBACK",
+      "sourceRunId": "BASELINE-HUB-UNKNOWN-001",
+      "inputRef": "go-hub://unknown-route",
+      "expected": {
+        "unknownBecomesLegacyFallback": false,
+        "unknownExecutes": false,
+        "result": "STOP_OR_REPORT_UNKNOWN"
+      },
+      "fixedObserved": {
+        "unknownBecomesLegacyFallback": false,
+        "unknownExecutes": false,
+        "result": "STOP_OR_REPORT_UNKNOWN"
+      },
+      "replayRecipe": "Present an unresolved/unknown route or identity. System must stop or report UNKNOWN; it must never revive a legacy alias or fallback path.",
+      "logicVersions": [
+        "GO_HUB_SYSTEM/V4",
+        "bc9d1a138773c7884b2eee2d7c40877b2cad52f9"
+      ],
+      "evidenceRefs": [],
+      "status": "GOLDEN_CANDIDATE",
+      "replayCount": 0,
+      "lastReplay": null,
+      "createdAt": "2026-10-03T19:26:17.456Z"
     }
   ],
   "regressionAlerts": [],
