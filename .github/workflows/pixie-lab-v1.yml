@@ -106,7 +106,8 @@ jobs:
           if (status.result?.counts?.runtimeObservations !== 1) throw new Error('RUNTIME_OBSERVATION_PERSISTENCE_FAILED');
           if (status.result?.counts?.runtimeInteractions !== 1) throw new Error('RUNTIME_INTERACTION_PERSISTENCE_FAILED');
           if (!visualCrewCreate.ok || visualCrewCreate.result?.taskId !== 'CREW-SMOKE') throw new Error('VISUAL_CREW_CREATE_COMMAND_FAILED');
-          if (!visualCrewResult.ok || visualCrewResult.result?.taskId !== 'CREW-SMOKE') throw new Error('VISUAL_CREW_RESULT_COMMAND_FAILED');
+          if (!visualCrewResult.ok || visualCrewResult.result?.task?.taskId !== 'CREW-SMOKE') throw new Error('VISUAL_CREW_RESULT_COMMAND_FAILED');
+          if (status.result?.counts?.visualCrewTasks !== 1) throw new Error('VISUAL_CREW_PERSISTENCE_FAILED');
           if (capabilities.result?.app?.id !== 'ERGASTERION') throw new Error('CAPABILITY_MANIFEST_FAILED');
           if (!floor.ok || floor.mutated !== false) throw new Error('WORKBENCH_FLOOR_COMMAND_FAILED');
           if (floor.result?.schema !== 'ERGASTERION_WORKBENCH_FLOOR_V1') throw new Error('WORKBENCH_FLOOR_SCHEMA_FAILED');
