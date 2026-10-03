@@ -836,6 +836,38 @@
       "replayCount": 0,
       "lastReplay": null,
       "createdAt": "2026-10-03T04:33:32.928Z"
+    },
+    {
+      "goldenCaseId": "GOLDEN-SPECTRUM-CUSTOMER-SAFETY-001",
+      "lifecycle": [
+        "GOLDEN_CANDIDATE"
+      ],
+      "sourceBugId": "BUG-SPECTRUM-INTERNAL-LEAK-001",
+      "sourceRunId": "RUN-SPECTRUM-CONTRACT-SAFETY-001",
+      "inputRef": "fixture://spectrum/hub-failure-customer-safety",
+      "expected": {
+        "statusClass": "TEMPORARILY_UNAVAILABLE",
+        "customerSafeMessage": true,
+        "stackTraceExposed": false,
+        "internalStateExposed": false,
+        "personalContextExposed": false
+      },
+      "fixedObserved": {
+        "statusClass": "TEMPORARILY_UNAVAILABLE",
+        "customerSafeMessage": true,
+        "stackTraceExposed": false,
+        "internalStateExposed": false,
+        "personalContextExposed": false
+      },
+      "replayRecipe": "Simulate GO HUB failure for a storefront request; verify only stable customer-safe status crosses the Sales Contract.",
+      "logicVersions": [
+        "v0.2-lab"
+      ],
+      "evidenceRefs": [],
+      "status": "GOLDEN_CANDIDATE",
+      "replayCount": 0,
+      "lastReplay": null,
+      "createdAt": "2026-10-03T04:34:21.296Z"
     }
   ],
   "regressionAlerts": [],

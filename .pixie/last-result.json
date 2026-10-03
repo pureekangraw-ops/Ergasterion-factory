@@ -1,5 +1,5 @@
 {
-  "requestId": "REQ-SPECTRUM-GOLDEN-ISOLATION-20261003-001",
+  "requestId": "REQ-SPECTRUM-GOLDEN-SAFETY-20261003-001",
   "command": "add_golden_case",
   "exitCode": 0,
   "ok": true,
@@ -11,26 +11,28 @@
     "mutated": true,
     "externalEffect": false,
     "result": {
-      "goldenCaseId": "GOLDEN-SPECTRUM-SALES-PRISM-INDEPENDENCE-001",
+      "goldenCaseId": "GOLDEN-SPECTRUM-CUSTOMER-SAFETY-001",
       "lifecycle": [
         "GOLDEN_CANDIDATE"
       ],
-      "sourceBugId": "BUG-SPECTRUM-CUSTOMER-DEPENDENCY-001",
-      "sourceRunId": "RUN-SPECTRUM-CONTRACT-ISOLATION-001",
-      "inputRef": "fixture://spectrum/sales-prism-independence",
+      "sourceBugId": "BUG-SPECTRUM-INTERNAL-LEAK-001",
+      "sourceRunId": "RUN-SPECTRUM-CONTRACT-SAFETY-001",
+      "inputRef": "fixture://spectrum/hub-failure-customer-safety",
       "expected": {
-        "salesRequestAccepted": true,
-        "prismSessionRequired": false,
-        "salesContextContainsPersonalContext": false,
-        "status": "CUSTOMER_SAFE"
+        "statusClass": "TEMPORARILY_UNAVAILABLE",
+        "customerSafeMessage": true,
+        "stackTraceExposed": false,
+        "internalStateExposed": false,
+        "personalContextExposed": false
       },
       "fixedObserved": {
-        "salesRequestAccepted": true,
-        "prismSessionRequired": false,
-        "salesContextContainsPersonalContext": false,
-        "status": "CUSTOMER_SAFE"
+        "statusClass": "TEMPORARILY_UNAVAILABLE",
+        "customerSafeMessage": true,
+        "stackTraceExposed": false,
+        "internalStateExposed": false,
+        "personalContextExposed": false
       },
-      "replayRecipe": "Run a customer request while PRISM SPECTRUM is unavailable; verify SPECTRUMSALE remains bounded and customer-safe.",
+      "replayRecipe": "Simulate GO HUB failure for a storefront request; verify only stable customer-safe status crosses the Sales Contract.",
       "logicVersions": [
         "v0.2-lab"
       ],
@@ -38,9 +40,9 @@
       "status": "GOLDEN_CANDIDATE",
       "replayCount": 0,
       "lastReplay": null,
-      "createdAt": "2026-10-03T04:33:32.928Z"
+      "createdAt": "2026-10-03T04:34:21.296Z"
     }
   },
   "error": null,
-  "completedAt": "2026-10-03T04:33:32.962Z"
+  "completedAt": "2026-10-03T04:34:21.328Z"
 }
