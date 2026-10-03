@@ -8,7 +8,7 @@ async function read(name) {
   return readFile(new URL(name, root), 'utf8');
 }
 
-test('Factory Eye v0.3.0 targets GO Hub remote bridge rather than localhost', async () => {
+test('Factory Eye v0.3.1 targets GO Hub remote bridge rather than localhost', async () => {
   const background = await read('background.js');
   assert.match(background, /https:\/\/go-hub\.pureekangraw\.workers\.dev/);
   assert.match(background, /\/hub\/api\/factory-eye/);
@@ -73,11 +73,11 @@ test('Factory Eye remote pulse does not expand write capabilities', async () => 
 });
 
 
-test('Factory Eye v0.3.0 rejects stale content generations and verifies the active sender tab', async () => {
+test('Factory Eye v0.3.1 rejects stale content generations and verifies the active sender tab', async () => {
   const background = await read('background.js');
   const content = await read('content-observer.js');
 
-  assert.match(content, /CONTENT_SCRIPT_VERSION = '0\.3\.0'/);
+  assert.match(content, /CONTENT_SCRIPT_VERSION = '0\.3\.1'/);
   assert.match(content, /observerVersion: CONTENT_SCRIPT_VERSION/);
   assert.match(content, /visibilityState: document\.visibilityState/);
   assert.match(content, /documentFocused: document\.hasFocus\(\)/);
@@ -90,7 +90,7 @@ test('Factory Eye v0.3.0 rejects stale content generations and verifies the acti
   assert.doesNotMatch(background, /active:\s*message\?\.visible === true/);
 });
 
-test('Factory Eye v0.3.0 sends freshness evidence without adding page authority', async () => {
+test('Factory Eye v0.3.1 sends freshness evidence without adding page authority', async () => {
   const background = await read('background.js');
   assert.match(background, /evidenceReason:/);
   assert.match(background, /documentVisible:/);
@@ -98,4 +98,18 @@ test('Factory Eye v0.3.0 sends freshness evidence without adding page authority'
   assert.match(background, /navigate:\s*false/);
   assert.match(background, /click:\s*false/);
   assert.match(background, /type:\s*false/);
+});
+
+
+test('Factory Eye processes owner OBSERVE_NOW without adding browser authority', async () => {
+  const background = await read('background.js');
+  assert.match(background, /command\.type !== 'OBSERVE_NOW'/);
+  assert.match(background, /observeActiveTabs\(\)/);
+  assert.match(background, /sendCommandReceipt/);
+  assert.match(background, /followUpObservationId/);
+  assert.match(background, /navigate:\s*false/);
+  assert.match(background, /activateTab:\s*false/);
+  assert.match(background, /click:\s*false/);
+  assert.match(background, /type:\s*false/);
+  assert.match(background, /scroll:\s*false/);
 });

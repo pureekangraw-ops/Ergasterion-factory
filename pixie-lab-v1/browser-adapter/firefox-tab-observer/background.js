@@ -2,7 +2,7 @@ const HUB_ORIGIN = 'https://go-hub.pureekangraw.workers.dev';
 const API_ROOT = '/hub/api/factory-eye';
 const PROTOCOL_VERSION = '2';
 const HOST = 'firefox-addon';
-const VERSION = '0.3.0';
+const VERSION = '0.3.1';
 const PAGE_SCHEMA = 'ERGASTERION_BROWSER_PAGE_SUMMARY_V2';
 const HEARTBEAT_MS = 5000;
 const COMMAND_POLL_MS = 2500;
@@ -187,6 +187,7 @@ async function register() {
         scroll: false,
         receipt: true,
         reconnect: true,
+        observeNow: true,
       },
       limits: [
         'HTTP_HTTPS_CONTENT_ONLY',
@@ -412,8 +413,46 @@ async function observeTab(tabId) {
 
 async function observeActiveTabs() {
   const tabs = await browser.tabs.query({ active: true });
+  const observationIds = [];
   for (const tab of tabs) {
-    if (Number.isInteger(tab.id)) await observeTab(tab.id);
+    if (!Number.isInteger(tab.id)) continue;
+    const observationId = await observeTab(tab.id);
+    if (observationId) observationIds.push(observationId);
+  }
+  return observationIds;
+}
+
+async function sendCommandReceipt(command, { status, followUpObservationId = null, errorCode = null } = {}) {
+  return fetchHub('/receipt', {
+    method: 'POST',
+    body: JSON.stringify({
+      adapterId: await loadAdapterId(),
+      commandId: String(command?.commandId || ''),
+      status,
+      completedAt: new Date().toISOString(),
+      followUpObservationId,
+      errorCode,
+    }),
+  });
+}
+
+async function runCommand(command) {
+  if (!command || command.type !== 'OBSERVE_NOW' || !command.commandId) return;
+  try {
+    const observationIds = await observeActiveTabs();
+    const followUpObservationId = observationIds[0] || null;
+    await sendCommandReceipt(command, {
+      status: followUpObservationId ? 'COMPLETED' : 'FAILED',
+      followUpObservationId,
+      errorCode: followUpObservationId ? null : 'FACTORY_EYE_NO_ACTIVE_OBSERVATION',
+    });
+  } catch (error) {
+    try {
+      await sendCommandReceipt(command, {
+        status: 'FAILED',
+        errorCode: error?.message || 'FACTORY_EYE_OBSERVE_NOW_FAILED',
+      });
+    } catch {}
   }
 }
 
@@ -423,7 +462,9 @@ async function pollCommands() {
   try {
     if (!(await ensureRegistered())) return;
     const id = await loadAdapterId();
-    await fetchHub(`/commands?adapterId=${encodeURIComponent(id)}`, { method: 'GET' });
+    const result = await fetchHub(`/commands?adapterId=${encodeURIComponent(id)}`, { method: 'GET' });
+    const commands = Array.isArray(result?.commands) ? result.commands : [];
+    for (const command of commands) await runCommand(command);
   } catch {
     registered = false;
   } finally {
