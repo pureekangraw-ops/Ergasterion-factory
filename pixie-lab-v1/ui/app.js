@@ -12,6 +12,7 @@ const WORKBENCH_LABELS = {
   GENERAL_IDEA_WORKBENCH: ['General / Idea', 'intent · experiment · variant'],
   LOGIC_WORKBENCH: ['Logic', 'draft · edit · compare'],
   VISUAL_WORKBENCH: ['Visual', 'reference · brief · render'],
+  ARSENAL_WORKBENCH: ['Pixie Arsenal', 'weapon cards · loadouts · proof'],
   BUILD_TEST_WORKBENCH: ['Build / Test', 'matrix · run · regression'],
   DEBUG_INSPECTION_WORKBENCH: ['Debug / Inspection', 'observe · diagnose · verify'],
   PRODUCTION_EVIDENCE_WORKBENCH: ['Production / Evidence', 'candidate · proof · handoff'],
@@ -23,7 +24,7 @@ const SHELL_COMMANDS = [
   'status','capabilities','workbench_floor','workbench_open','checkpoint_dock','reality_screen','big_view','intent_review',
   'idea_create','experiment_create','variant_create','variant_evaluate','experiment_select',
   'logic_create','logic_edit','logic_compare',
-  'visual_create','visual_scan','visual_edit','visual_compare','visual_render_packet','visual_verify','image_request','image_result','visual_dispatch','visual_dispatch_update','visual_receipt','visual_result_import','visual_retry','visual_recover','visual_lineage',
+  'visual_create','visual_scan','visual_edit','visual_compare','visual_render_packet','visual_verify','visual_crew_create','visual_crew_step','visual_crew_compare','visual_crew_verify','visual_crew_result','image_request','image_result','visual_dispatch','visual_dispatch_update','visual_receipt','visual_result_import','visual_retry','visual_recover','visual_lineage',
   'add_matrix','start_matrix','update_matrix','add_test_run','rerun_test_run','add_golden_case','replay_golden',
   'add_bug','add_attention','update_attention','debug_start','debug_step','debug_complete',
   'production_handoff_prepare',
@@ -130,6 +131,7 @@ function toFloorKey(id) {
     GENERAL_IDEA_WORKBENCH:'generalIdea',
     LOGIC_WORKBENCH:'logic',
     VISUAL_WORKBENCH:'visual',
+    ARSENAL_WORKBENCH:'arsenal',
     BUILD_TEST_WORKBENCH:'buildTest',
     DEBUG_INSPECTION_WORKBENCH:'debugInspection',
     PRODUCTION_EVIDENCE_WORKBENCH:'productionEvidence',
@@ -185,10 +187,32 @@ async function renderVisual(view) {
   const freezeSet = Array.isArray(spatial.freezeSet) ? spatial.freezeSet : [];
   const exploreSet = Array.isArray(spatial.exploreSet) ? spatial.exploreSet : [];
   const compareNotes = Array.isArray(spatial.compareNotes) ? spatial.compareNotes : [];
+  const crewResponse = await command('visual_crew_result', contextSelector()).catch(() => ({ result: null }));
+  const crewProjection = crewResponse.result || null;
 
   $('#visual-work-id').textContent = contextSelector().workId || 'UNKNOWN';
   $('#visual-checkpoint-id').textContent = contextSelector().checkpointId || 'UNKNOWN';
   $('#visual-source').textContent = draft?.sourceRef || 'No source yet';
+  const crewTask = crewProjection?.task || null;
+  const crewStatus = $('#visual-crew-status');
+  const crewWorkers = $('#visual-crew-workers');
+  const crewResult = $('#visual-crew-result');
+  if (crewStatus && crewWorkers && crewResult) {
+    crewStatus.textContent = crewTask?.status || 'No crew task';
+    crewStatus.className = `muted ${crewTask?.status === 'VERIFIED' ? 'crew-ok' : ''}`;
+    const workers = crewProjection?.workers || [];
+    crewWorkers.innerHTML = workers.map((worker) => {
+      const step = crewTask?.steps?.find((item) => item.workerId === worker.workerId);
+      return `<div class="crew-worker"><strong>${esc(worker.label)}</strong><span>${esc(step?.status || 'IDLE')}</span><small>${esc(worker.responsibility)}</small></div>`;
+    }).join('');
+    crewResult.textContent = crewProjection ? pretty({
+      phase: crewTask?.phase,
+      selectedCandidateRef: crewTask?.selectedCandidateRef,
+      resultRef: crewProjection.resultRef,
+      ready: crewProjection.ready,
+      unknowns: crewTask?.unknowns || [],
+    }) : 'No crew result yet.';
+  }
   $('#visual-reference-list').innerHTML = references.length
     ? references.map((reference) => `<div class="reference-list-item"><strong>${esc(reference.kind)}</strong><span title="${esc(reference.ref)}">${esc(reference.label)}</span><span class="muted">z${esc(reference.zIndex)}</span></div>`).join('')
     : '<span class="muted">No references placed yet.</span>';
@@ -584,6 +608,89 @@ async function renderVisual(view) {
     await refreshBootstrap();
     await openWorkbench('VISUAL_WORKBENCH');
   });
+
+  $('#visual-crew-plan')?.addEventListener('click', async () => {
+    const { workId, checkpointId } = contextSelector();
+    if (!workId || !checkpointId) { window.alert('Work ID and Checkpoint ID are required for GO Crew.'); return; }
+    const brief = $('#visual-prompt').value.trim() || $('#visual-requested').value.trim();
+    const requestedOutput = $('#visual-requested').value.trim();
+    if (!brief || !requestedOutput) { window.alert('Intent and Requested Result are required before planning helpers.'); return; }
+    const assetRefs = [draft?.sourceRef, ...references.map((item) => item.ref)].filter(Boolean);
+    await command('visual_crew_create', {
+      taskId: `CREW-${Date.now()}`,
+      workId,
+      checkpointId,
+      brief,
+      requestedOutput,
+      assetRefs,
+      constraints: [
+        ...lineList($('#visual-keep').value).map((item) => `KEEP:${item}`),
+        ...lineList($('#visual-remove').value).map((item) => `REMOVE:${item}`),
+      ],
+    });
+    await refreshBootstrap();
+    await openWorkbench('VISUAL_WORKBENCH');
+  });
+}
+
+async function renderArsenal() {
+  const [capabilities, status] = await Promise.all([
+    command('capabilities').catch(() => ({ result: {} })),
+    command('status').catch(() => ({ result: {} })),
+  ]);
+  const manifest = capabilities.result || {};
+  const board = status.result || {};
+  const weapons = [
+    { id:'WPN-001', name:'Visual Compare', category:'VISUAL', version:'v3.2', stage:'VERIFIED', cap:'compare.visual', impl:'visual-workbench.mjs', contract:'COMPARE_V2', scope:'desktop-web', detail:'Compare variants against a locked reference and emit a diff packet.' },
+    { id:'WPN-002', name:'Browser Test', category:'TEST', version:'v1.8', stage:'VERIFIED', cap:'test.browser', impl:'browser-runtime-adapter.mjs', contract:'TEST_V3', scope:'isolated-preview', detail:'Run deterministic browser checks and retain screenshots, traces and console evidence.' },
+    { id:'WPN-003', name:'Regression Replay', category:'REPLAY', version:'v1.4', stage:'VERIFIED', cap:'replay.regression', impl:'core.mjs', contract:'REPLAY_V2', scope:'golden-case', detail:'Replay a known failure recipe without changing the original experiment run.' },
+    { id:'WPN-004', name:'Image Adapter', category:'ADAPTER', version:'v0.9', stage:'EXPERIMENTAL', cap:'adapter.image', impl:'image-tool-adapter.mjs', contract:'IMAGE_V1', scope:'local-only', detail:'Translate a render packet to an image-tool request and preserve the return receipt.' },
+    { id:'WPN-005', name:'Evidence Verify', category:'EVIDENCE', version:'v2.0', stage:'VERIFIED', cap:'evidence.verify', impl:'core.mjs', contract:'EVIDENCE_V2', scope:'all-isolated-rooms', detail:'Verify evidence integrity and keep UNKNOWN from silently becoming PASS.' },
+    { id:'WPN-006', name:'Factory Simulation', category:'SIM', version:'v1.2', stage:'CANDIDATE', cap:'simulate.factory', impl:'production-lane.mjs', contract:'SIM_V1', scope:'cannon-room', detail:'Simulate a candidate through a production-shaped path without production authority.' },
+  ];
+  const laws = ['HANDOFF != AUTHORITY','ARTIFACT != VERIFIED','DO != DONE','UNKNOWN != PASS','CANDIDATE != PRODUCTION','RECIPE != PROOF','WEAPON != PROVEN','LOADOUT_CHANGE != SAME_RUN','PROOF IS SCOPED'];
+  const stageTone = (stage) => stage === 'VERIFIED' ? 'known' : stage === 'CANDIDATE' ? 'warn' : 'unknown';
+  const renderCard = (weapon) => `<article class="arsenal-weapon" data-arsenal-weapon="${weapon.id}">
+    <div class="arsenal-card-top"><span class="weapon-id">${weapon.id} / ${weapon.category}</span><span class="truth ${stageTone(weapon.stage)}">${weapon.stage}</span></div>
+    <h3>${esc(weapon.name)} <small>${esc(weapon.version)}</small></h3>
+    <p>${esc(weapon.detail)}</p>
+    <div class="arsenal-card-tags"><span>${esc(weapon.cap)}</span><span>${esc(weapon.contract)}</span></div>
+    <div class="arsenal-card-foot"><span>${esc(weapon.impl)}</span><span>scope: ${esc(weapon.scope)}</span></div>
+  </article>`;
+  $('#workspace').innerHTML = `<div class="arsenal-shell">
+    <div class="arsenal-summary">
+      <div class="arsenal-stat"><span>REGISTERED WEAPONS</span><strong>${weapons.length}</strong><small>identity records</small></div>
+      <div class="arsenal-stat"><span>PROVEN VERSIONS</span><strong>${weapons.filter((item) => item.stage === 'VERIFIED').length}</strong><small>scoped, not global</small></div>
+      <div class="arsenal-stat"><span>ACTIVE RUNS</span><strong>${board.counts?.runs ?? '—'}</strong><small>immutable loadout binding</small></div>
+      <div class="arsenal-stat accent"><span>AUTHORITY</span><strong>NONE</strong><small>handoff only</small></div>
+    </div>
+    <section class="panel arsenal-pipeline"><div class="panel-head"><span>PROVENANCE PIPELINE</span><span class="muted">LOCKED CONTRACT v1</span></div><div class="arsenal-flow">${['WEAPON','VERSION','LOADOUT','RUN','EVIDENCE','PROVEN UNIT','PROMOTION','HANDOFF'].map((label, index) => `<div class="arsenal-flow-step ${index < 5 ? 'done' : index === 5 ? 'current' : ''}"><b>${String(index + 1).padStart(2,'0')}</b><span>${label}</span></div>`).join('<i>→</i>')}</div></section>
+    <div class="arsenal-columns">
+      <section class="panel arsenal-registry"><div class="panel-head"><span>ARSENAL REGISTRY</span><span class="muted">${weapons.length} operational cards</span></div><div class="arsenal-toolbar"><div class="arsenal-filters"><button class="arsenal-filter active" data-arsenal-filter="ALL">ALL</button><button class="arsenal-filter" data-arsenal-filter="VERIFIED">VERIFIED</button><button class="arsenal-filter" data-arsenal-filter="CANDIDATE">CANDIDATE</button><button class="arsenal-filter" data-arsenal-filter="EXPERIMENTAL">EXPERIMENTAL</button></div><input id="arsenal-search" placeholder="Search weapon, capability or implementation"></div><div id="arsenal-cards" class="arsenal-cards">${weapons.map(renderCard).join('')}</div></section>
+      <aside class="arsenal-side"><section class="panel arsenal-inspector"><div class="panel-head"><span>WEAPON CARD</span><span id="arsenal-inspector-status" class="truth unknown">SELECT</span></div><div id="arsenal-inspector"><div class="arsenal-empty">Select a weapon card to inspect its implementation, contract and scoped proof.</div></div></section><section class="panel arsenal-laws"><div class="panel-head"><span>CAPABILITY LAWS</span><span class="muted">NON-NEGOTIABLE</span></div>${laws.map((law) => `<div class="arsenal-law"><span>◆</span>${law}</div>`).join('')}</section></aside>
+    </div>
+    <section class="panel arsenal-handoff"><div class="panel-head"><span>PROMOTION RACK</span><span class="truth warn">2 READY / 1 UNKNOWN</span></div><div class="promotion-row"><div><strong>Visual Compare v3.2</strong><small>PU-014 · desktop-web / checkout</small></div><span class="arsenal-refs">LOADOUT-07 v1 · RUN-15 · EVID-88A</span><span class="truth known">VERIFIED</span></div><div class="promotion-row"><div><strong>Evidence Verify v2.0</strong><small>PU-013 · all isolated rooms</small></div><span class="arsenal-refs">LOADOUT-06 v2 · RUN-14 · EVID-84C</span><span class="truth warn">READY_FOR_HANDOFF</span></div><div class="handoff-note">Handoff packages artifact + evidence + unknowns. <b>It never transfers production authority.</b></div></section>
+    <section class="panel arsenal-contract"><div class="panel-head"><span>RUNTIME CONTRACT SNAPSHOT</span><span class="muted">source: capabilities</span></div><pre>${esc(pretty({ app: manifest.app || {}, laws, pixieProductionAuthority: false, approval: 'NOT_AN_APPROVAL' }))}</pre></section>
+  </div>`;
+
+  const cards = $('#arsenal-cards');
+  const renderFiltered = () => {
+    const filter = $('.arsenal-filter.active')?.dataset.arsenalFilter || 'ALL';
+    const query = $('#arsenal-search').value.trim().toLowerCase();
+    cards.innerHTML = weapons.filter((item) => (filter === 'ALL' || item.stage === filter) && `${item.name} ${item.cap} ${item.impl}`.toLowerCase().includes(query)).map(renderCard).join('') || '<div class="arsenal-empty">No weapon matches this filter.</div>';
+    $$('[data-arsenal-weapon]', cards).forEach((card) => card.addEventListener('click', () => selectWeapon(card.dataset.arsenalWeapon)));
+  };
+  const selectWeapon = (id) => {
+    const weapon = weapons.find((item) => item.id === id);
+    if (!weapon) return;
+    $('#arsenal-inspector-status').textContent = weapon.stage;
+    $('#arsenal-inspector-status').className = `truth ${stageTone(weapon.stage)}`;
+    $('#arsenal-inspector').innerHTML = `<div class="inspector-id">${weapon.id} · ACTIVE VERSION ${weapon.version}</div><h3>${esc(weapon.name)}</h3><p>${esc(weapon.detail)}</p><dl><dt>capabilityRef</dt><dd>${esc(weapon.cap)}</dd><dt>implementationRef</dt><dd>${esc(weapon.impl)}</dd><dt>contractVersion</dt><dd>${esc(weapon.contract)}</dd><dt>proofStatus</dt><dd>${esc(weapon.stage)} / ${esc(weapon.scope)}</dd><dt>canMutateProduction</dt><dd class="no">false</dd></dl><div class="inspector-rule">WEAPON != PROVEN<br>PROOF IS SCOPED</div>`;
+  };
+  $$('.arsenal-filter').forEach((button) => button.addEventListener('click', () => { $$('.arsenal-filter').forEach((item) => item.classList.remove('active')); button.classList.add('active'); renderFiltered(); }));
+  $('#arsenal-search').addEventListener('input', renderFiltered);
+  $$('[data-arsenal-weapon]', cards).forEach((card) => card.addEventListener('click', () => selectWeapon(card.dataset.arsenalWeapon)));
+  selectWeapon('WPN-001');
 }
 
 async function renderCoding(view) {
@@ -739,6 +846,12 @@ async function openWorkbench(id, { preserveNav = false } = {}) {
   $('#stage-title').textContent = name;
   $('#stage-subtitle').textContent = detail;
   $('#workspace').innerHTML = '<div class="empty-state"><div class="empty-icon">⚙️</div><h2>Opening current state…</h2></div>';
+
+  if (id === 'ARSENAL_WORKBENCH') {
+    $('#stage-badges').innerHTML = [badge('LOCKED CONTRACT v1'), badge('SCOPED PROOF'), badge('NO AUTHORITY')].join('');
+    await renderArsenal();
+    return;
+  }
 
   const response = await command('workbench_open', { workbenchId: id, selector: contextSelector() });
   const view = response.result;

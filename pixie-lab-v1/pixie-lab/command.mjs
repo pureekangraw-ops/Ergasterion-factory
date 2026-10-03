@@ -24,6 +24,7 @@ export const PIXIE_COMMANDS = Object.freeze([
   'examples', 'run_example',
   'logic_create', 'logic_edit', 'logic_compare',
   'visual_create', 'visual_scan', 'visual_edit', 'visual_compare', 'visual_render_packet', 'visual_verify',
+  'visual_crew_create', 'visual_crew_step', 'visual_crew_compare', 'visual_crew_verify', 'visual_crew_result',
   'living_scene_create', 'living_scene_edit', 'living_scene_validate', 'web_export_manifest',
   'image_request', 'image_result', 'visual_dispatch', 'visual_dispatch_update', 'visual_receipt', 'visual_result_import', 'visual_retry', 'visual_recover', 'visual_lineage',
   'production_handoff_prepare',
@@ -44,6 +45,7 @@ const MUTATING = new Set([
   'self_test', 'cross_room', 'run_example',
   'logic_create', 'logic_edit',
   'visual_create', 'visual_scan', 'visual_edit', 'visual_render_packet', 'visual_verify',
+  'visual_crew_create', 'visual_crew_step', 'visual_crew_compare', 'visual_crew_verify',
   'living_scene_create', 'living_scene_edit', 'living_scene_validate', 'web_export_manifest',
   'image_request', 'image_result', 'visual_dispatch', 'visual_dispatch_update', 'visual_receipt', 'visual_result_import', 'visual_retry',
   'production_handoff_prepare',
@@ -261,6 +263,21 @@ export function createPixieCommander({ persistence, evidenceVerifier = null, cod
         break;
       case 'visual_verify':
         result = lab.verifyVisualRender(args.packetId, requireObject(args.verification, 'args.verification'));
+        break;
+      case 'visual_crew_create':
+        result = lab.createVisualCrew(args);
+        break;
+      case 'visual_crew_step':
+        result = lab.stepVisualCrew(args.taskId, requireObject(args.step, 'args.step'));
+        break;
+      case 'visual_crew_compare':
+        result = lab.compareVisualCrew(args.taskId, requireObject(args.compare, 'args.compare'));
+        break;
+      case 'visual_crew_verify':
+        result = lab.verifyVisualCrew(args.taskId, requireObject(args.verification, 'args.verification'));
+        break;
+      case 'visual_crew_result':
+        result = lab.visualCrewResult(args);
         break;
       case 'living_scene_create':
         result = lab.createLivingScene(args);

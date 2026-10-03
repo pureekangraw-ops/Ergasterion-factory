@@ -55,6 +55,10 @@ import {
 } from './visual-workbench.mjs';
 import { createLivingScene, editLivingScene, validateLivingScene, createWebExportManifest } from './living-scene.mjs';
 import {
+  createVisualCrewTask, advanceVisualCrewTask, compareVisualCrewTask, attachVisualCrewCompare,
+  verifyVisualCrewTask, attachVisualCrewVerification, projectVisualCrewResult,
+} from './visual-crew.mjs';
+import {
   createVisualDispatchContract, updateVisualDispatchStatus, createVisualReceipt, importVisualReceipt, isUsableVisualReceipt, buildVisualRecovery,
 } from './visual-transport.mjs';
 
@@ -98,6 +102,7 @@ export class PixieLab {
       imageActions: [], imageReceipts: [],
       visualDispatches: [], visualReceipts: [],
       livingScenes: [], webExportManifests: [],
+      visualCrewTasks: [], visualCrewCompares: [], visualCrewVerifications: [],
       runtimeObservations: [], runtimeInteractions: [],
       archives: [], cleanRuns: [],
     };
@@ -542,6 +547,47 @@ export class PixieLab {
     if (this.state.visualVerifications.some((item) => item.verificationId === result.verificationId)) throw new Error('DUPLICATE_VISUAL_VERIFICATION_ID');
     this.state.visualVerifications.push(result);
     return clone(result);
+  }
+
+  createVisualCrew(input = {}) {
+    if (this.state.visualCrewTasks.some((item) => item.taskId === input.taskId)) throw new Error('DUPLICATE_VISUAL_CREW_TASK_ID');
+    const task = createVisualCrewTask({ ...input, createdAt: this.now() });
+    this.state.visualCrewTasks.push(task);
+    return clone(task);
+  }
+  stepVisualCrew(taskId, input = {}) {
+    const index = this.state.visualCrewTasks.findIndex((item) => item.taskId === taskId);
+    if (index < 0) throw new Error('VISUAL_CREW_TASK_NOT_FOUND');
+    this.state.visualCrewTasks[index] = advanceVisualCrewTask(this.state.visualCrewTasks[index], { ...input, updatedAt: this.now() });
+    return clone(this.state.visualCrewTasks[index]);
+  }
+  compareVisualCrew(taskId, input = {}) {
+    const index = this.state.visualCrewTasks.findIndex((item) => item.taskId === taskId);
+    if (index < 0) throw new Error('VISUAL_CREW_TASK_NOT_FOUND');
+    const compare = compareVisualCrewTask(this.state.visualCrewTasks[index], { ...input, createdAt: this.now() });
+    if (this.state.visualCrewCompares.some((item) => item.compareId === compare.compareId)) throw new Error('DUPLICATE_VISUAL_CREW_COMPARE_ID');
+    this.state.visualCrewCompares.push(compare);
+    this.state.visualCrewTasks[index] = attachVisualCrewCompare(this.state.visualCrewTasks[index], compare);
+    return clone(compare);
+  }
+  verifyVisualCrew(taskId, input = {}) {
+    const index = this.state.visualCrewTasks.findIndex((item) => item.taskId === taskId);
+    if (index < 0) throw new Error('VISUAL_CREW_TASK_NOT_FOUND');
+    const verification = verifyVisualCrewTask(this.state.visualCrewTasks[index], { ...input, verifiedAt: this.now() });
+    if (this.state.visualCrewVerifications.some((item) => item.verificationId === verification.verificationId)) throw new Error('DUPLICATE_VISUAL_CREW_VERIFICATION_ID');
+    this.state.visualCrewVerifications.push(verification);
+    this.state.visualCrewTasks[index] = attachVisualCrewVerification(this.state.visualCrewTasks[index], verification);
+    return clone(verification);
+  }
+  visualCrewResult({ taskId = null, workId = null, checkpointId = null } = {}) {
+    const task = taskId
+      ? this.state.visualCrewTasks.find((item) => item.taskId === taskId)
+      : [...this.state.visualCrewTasks].reverse().find((item) =>
+          (!workId || item.workId === workId) && (!checkpointId || item.checkpointId === checkpointId));
+    return projectVisualCrewResult(task || null, {
+      compares: this.state.visualCrewCompares,
+      verifications: this.state.visualCrewVerifications,
+    });
   }
 
   createLivingScene(input = {}) {
