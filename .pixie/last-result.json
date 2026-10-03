@@ -1,64 +1,46 @@
 {
-  "requestId": "REQ-SPECTRUM-CONTRACT-SELFTEST-20261003-001",
-  "command": "self_test",
+  "requestId": "REQ-SPECTRUM-GOLDEN-ISOLATION-20261003-001",
+  "command": "add_golden_case",
   "exitCode": 0,
   "ok": true,
   "output": {
     "ok": true,
     "pixieId": "PIXIE-01",
     "labId": "PIXIE-LAB",
-    "command": "self_test",
+    "command": "add_golden_case",
     "mutated": true,
     "externalEffect": false,
     "result": {
-      "selfTestId": "SELF-2026-10-03T04:32:34.944Z",
-      "actor": "PIXIE-01",
-      "checks": [
-        {
-          "checkId": "PIPELINE_CONTRACT",
-          "status": "PASS",
-          "evidenceRefs": []
-        },
-        {
-          "checkId": "FAIL_CLOSED_RULES",
-          "status": "PASS",
-          "evidenceRefs": []
-        },
-        {
-          "checkId": "BOUNDARY_CONTRACT",
-          "status": "PASS",
-          "evidenceRefs": []
-        },
-        {
-          "checkId": "RESPONSE_CONTRACT",
-          "status": "PASS",
-          "evidenceRefs": []
-        },
-        {
-          "checkId": "NO_RUNTIME_DEPENDENCY",
-          "status": "PASS",
-          "evidenceRefs": []
-        },
-        {
-          "checkId": "SESSION_CONTEXT_ISOLATION",
-          "status": "PASS",
-          "evidenceRefs": []
-        },
-        {
-          "checkId": "AUDIENCE_FILTER",
-          "status": "PASS",
-          "evidenceRefs": []
-        },
-        {
-          "checkId": "FAILURE_ISOLATION",
-          "status": "PASS",
-          "evidenceRefs": []
-        }
+      "goldenCaseId": "GOLDEN-SPECTRUM-SALES-PRISM-INDEPENDENCE-001",
+      "lifecycle": [
+        "GOLDEN_CANDIDATE"
       ],
-      "status": "PASS",
-      "createdAt": "2026-10-03T04:32:34.944Z"
+      "sourceBugId": "BUG-SPECTRUM-CUSTOMER-DEPENDENCY-001",
+      "sourceRunId": "RUN-SPECTRUM-CONTRACT-ISOLATION-001",
+      "inputRef": "fixture://spectrum/sales-prism-independence",
+      "expected": {
+        "salesRequestAccepted": true,
+        "prismSessionRequired": false,
+        "salesContextContainsPersonalContext": false,
+        "status": "CUSTOMER_SAFE"
+      },
+      "fixedObserved": {
+        "salesRequestAccepted": true,
+        "prismSessionRequired": false,
+        "salesContextContainsPersonalContext": false,
+        "status": "CUSTOMER_SAFE"
+      },
+      "replayRecipe": "Run a customer request while PRISM SPECTRUM is unavailable; verify SPECTRUMSALE remains bounded and customer-safe.",
+      "logicVersions": [
+        "v0.2-lab"
+      ],
+      "evidenceRefs": [],
+      "status": "GOLDEN_CANDIDATE",
+      "replayCount": 0,
+      "lastReplay": null,
+      "createdAt": "2026-10-03T04:33:32.928Z"
     }
   },
   "error": null,
-  "completedAt": "2026-10-03T04:32:34.984Z"
+  "completedAt": "2026-10-03T04:33:32.962Z"
 }
