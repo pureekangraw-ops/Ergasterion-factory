@@ -59,6 +59,8 @@ jobs:
           node cli.mjs '{"command":"visual_render_packet","args":{"visualDraftId":"VIS-SMOKE","packet":{"packetId":"PACK-SMOKE","intent":"smoke render bridge","requestedResult":"one test artifact"}}}' > "$RUNNER_TEMP/packet.json"
           node cli.mjs '{"command":"image_request","args":{"packetId":"PACK-SMOKE","request":{"actionId":"IMG-SMOKE","workId":"WORK-SMOKE","checkpointId":"CP-SMOKE"}}}' > "$RUNNER_TEMP/request.json"
           node cli.mjs '{"command":"image_result","args":{"actionId":"IMG-SMOKE","result":{"status":"ARTIFACT_RETURNED","artifactRef":"image://smoke-result","receiptRef":"receipt://smoke","evidenceRefs":["evidence://smoke"]}}}' > "$RUNNER_TEMP/result.json"
+          node cli.mjs '{"command":"visual_crew_create","args":{"taskId":"CREW-SMOKE","workId":"WORK-SMOKE","checkpointId":"CP-SMOKE","brief":"prepare theme asset","requestedOutput":"one candidate"}}' > "$RUNNER_TEMP/visual-crew-create.json"
+          node cli.mjs '{"command":"visual_crew_result","args":{"taskId":"CREW-SMOKE"}}' > "$RUNNER_TEMP/visual-crew-result.json"
 
           node cli.mjs status > "$RUNNER_TEMP/status.json"
           node cli.mjs workbench_floor > "$RUNNER_TEMP/workbench-floor.json"
@@ -73,7 +75,7 @@ jobs:
           node cli.mjs runtime_status > "$RUNNER_TEMP/runtime-status.json"
           node cli.mjs '{"command":"runtime_view","args":{"selector":{"workId":"WORK-SMOKE","checkpointId":"CP-SMOKE","prototypeId":"APP-SMOKE"}}}' > "$RUNNER_TEMP/runtime-view.json"
 
-          STATUS_FILE="$RUNNER_TEMP/status.json" CAP_FILE="$RUNNER_TEMP/capabilities.json" FLOOR_FILE="$RUNNER_TEMP/workbench-floor.json" OPEN_FILE="$RUNNER_TEMP/workbench-open.json" DOCK_FILE="$RUNNER_TEMP/checkpoint-dock.json" REALITY_FILE="$RUNNER_TEMP/reality-screen.json" BIG_FILE="$RUNNER_TEMP/big-view.json" INTENT_FILE="$RUNNER_TEMP/intent-review.json" CODING_STATUS_FILE="$RUNNER_TEMP/coding-status.json" CODING_READ_FILE="$RUNNER_TEMP/coding-read.json" CODING_SEARCH_FILE="$RUNNER_TEMP/coding-search.json" RUNTIME_STATUS_FILE="$RUNNER_TEMP/runtime-status.json" RUNTIME_VIEW_FILE="$RUNNER_TEMP/runtime-view.json" node --input-type=module <<'NODE'
+          STATUS_FILE="$RUNNER_TEMP/status.json" CAP_FILE="$RUNNER_TEMP/capabilities.json" FLOOR_FILE="$RUNNER_TEMP/workbench-floor.json" OPEN_FILE="$RUNNER_TEMP/workbench-open.json" DOCK_FILE="$RUNNER_TEMP/checkpoint-dock.json" REALITY_FILE="$RUNNER_TEMP/reality-screen.json" BIG_FILE="$RUNNER_TEMP/big-view.json" INTENT_FILE="$RUNNER_TEMP/intent-review.json" CODING_STATUS_FILE="$RUNNER_TEMP/coding-status.json" CODING_READ_FILE="$RUNNER_TEMP/coding-read.json" CODING_SEARCH_FILE="$RUNNER_TEMP/coding-search.json" RUNTIME_STATUS_FILE="$RUNNER_TEMP/runtime-status.json" RUNTIME_VIEW_FILE="$RUNNER_TEMP/runtime-view.json" VISUAL_CREW_CREATE_FILE="$RUNNER_TEMP/visual-crew-create.json" VISUAL_CREW_RESULT_FILE="$RUNNER_TEMP/visual-crew-result.json" node --input-type=module <<'NODE'
           import { readFile } from 'node:fs/promises';
 
           const status = JSON.parse(await readFile(process.env.STATUS_FILE, 'utf8'));
@@ -89,6 +91,8 @@ jobs:
           const codingSearch = JSON.parse(await readFile(process.env.CODING_SEARCH_FILE, 'utf8'));
           const runtimeStatus = JSON.parse(await readFile(process.env.RUNTIME_STATUS_FILE, 'utf8'));
           const runtimeView = JSON.parse(await readFile(process.env.RUNTIME_VIEW_FILE, 'utf8'));
+          const visualCrewCreate = JSON.parse(await readFile(process.env.VISUAL_CREW_CREATE_FILE, 'utf8'));
+          const visualCrewResult = JSON.parse(await readFile(process.env.VISUAL_CREW_RESULT_FILE, 'utf8'));
 
           if (!status.ok) throw new Error('STATUS_NOT_OK');
           if (status.result?.counts?.ideas !== 1) throw new Error('IDEA_PERSISTENCE_FAILED');
@@ -101,6 +105,9 @@ jobs:
           if (status.result?.counts?.imageReceipts !== 1) throw new Error('IMAGE_RECEIPT_PERSISTENCE_FAILED');
           if (status.result?.counts?.runtimeObservations !== 1) throw new Error('RUNTIME_OBSERVATION_PERSISTENCE_FAILED');
           if (status.result?.counts?.runtimeInteractions !== 1) throw new Error('RUNTIME_INTERACTION_PERSISTENCE_FAILED');
+          if (!visualCrewCreate.ok || visualCrewCreate.result?.taskId !== 'CREW-SMOKE') throw new Error('VISUAL_CREW_CREATE_COMMAND_FAILED');
+          if (!visualCrewResult.ok || visualCrewResult.result?.task?.taskId !== 'CREW-SMOKE') throw new Error('VISUAL_CREW_RESULT_COMMAND_FAILED');
+          if (status.result?.counts?.visualCrewTasks !== 1) throw new Error('VISUAL_CREW_PERSISTENCE_FAILED');
           if (capabilities.result?.app?.id !== 'ERGASTERION') throw new Error('CAPABILITY_MANIFEST_FAILED');
           if (!floor.ok || floor.mutated !== false) throw new Error('WORKBENCH_FLOOR_COMMAND_FAILED');
           if (floor.result?.schema !== 'ERGASTERION_WORKBENCH_FLOOR_V1') throw new Error('WORKBENCH_FLOOR_SCHEMA_FAILED');

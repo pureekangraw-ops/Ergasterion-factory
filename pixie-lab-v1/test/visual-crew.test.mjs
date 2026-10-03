@@ -51,3 +51,43 @@ test('compare is creative selection and verification requires evidence', () => {
   assert.equal(result.ready, true);
   assert.equal(result.resultRef, 'artifact://v2');
 });
+
+
+test('PixieLab migrates pre-visual-crew durable state before accepting Hub commands', async () => {
+  const { PixieLab } = await import('../pixie-lab/service.mjs');
+  const seed = new PixieLab();
+  const legacy = structuredClone(seed.state);
+  delete legacy.visualCrewTasks;
+  delete legacy.visualCrewCompares;
+  delete legacy.visualCrewVerifications;
+  delete legacy.livingScenes;
+  delete legacy.webExportManifests;
+
+  let saved = null;
+  const persistence = {
+    async load() { return structuredClone(legacy); },
+    async save(value) { saved = structuredClone(value); },
+  };
+  const lab = new PixieLab({ persistence });
+  await lab.rebuildBoard();
+
+  const task = lab.createVisualCrew({
+    taskId:'CREW-MIGRATION',
+    workId:'WORK-PRISM',
+    checkpointId:'CP-PRISM',
+    brief:'Prepare PRISM theme asset',
+    requestedOutput:'one theme candidate',
+  });
+  assert.equal(task.status, 'PLANNED');
+  assert.deepEqual(lab.state.visualCrewCompares, []);
+  assert.deepEqual(lab.state.visualCrewVerifications, []);
+  assert.deepEqual(lab.state.livingScenes, []);
+  assert.deepEqual(lab.state.webExportManifests, []);
+
+  await lab.persist();
+  assert.equal(saved.visualCrewTasks.length, 1);
+  const board = lab.board();
+  assert.equal(board.zones.visualCrew, 'ACTIVE');
+  assert.equal(board.counts.visualCrewTasks, 1);
+  assert.equal(board.visualCrewTasks[0].taskId, 'CREW-MIGRATION');
+});

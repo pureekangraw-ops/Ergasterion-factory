@@ -68,6 +68,22 @@ const required = (value, label) => { const result = text(value); if (!result) th
 const nowIso = () => new Date().toISOString();
 export const ERGASTERION_STATE_SCHEMA = 'ERGASTERION_STATE_V2';
 
+const DURABLE_ARRAY_KEYS = Object.freeze([
+  'rooms', 'roomReports', 'sessions', 'cycles', 'matrices', 'testRuns', 'proposals', 'bugs', 'attentions',
+  'goldenCases', 'regressionAlerts', 'memory', 'grants', 'snapshots', 'artifacts', 'passports',
+  'factorySimulations', 'evidence', 'debugSessions', 'selfTests', 'crossRoomChecks', 'contradictions',
+  'ideas', 'experiments', 'variants', 'appPrototypes', 'logicDrafts', 'productionHandoffs', 'factoryHandoffs',
+  'visualDrafts', 'visualRenderPackets', 'visualVerifications', 'imageActions', 'imageReceipts',
+  'visualDispatches', 'visualReceipts', 'livingScenes', 'webExportManifests',
+  'visualCrewTasks', 'visualCrewCompares', 'visualCrewVerifications',
+  'runtimeObservations', 'runtimeInteractions', 'archives', 'cleanRuns',
+]);
+
+function normalizeDurableArrays(state) {
+  for (const key of DURABLE_ARRAY_KEYS) state[key] = Array.isArray(state[key]) ? state[key] : [];
+  return state;
+}
+
 function seedRegistry() {
   const registry = createTestTypeRegistry();
   for (const category of TEST_CATEGORIES) {
@@ -828,32 +844,10 @@ export class PixieLab {
   async rebuildBoard() {
     const canonical = await this.persistence.load();
     if (canonical) {
-      this.state = clone(canonical);
+      this.state = normalizeDurableArrays(clone(canonical));
       this.state.schemaVersion = ERGASTERION_STATE_SCHEMA;
       const defaultRooms = createDefaultRooms({ now: this.now }).map(clone);
-      this.state.rooms = Array.isArray(this.state.rooms) ? this.state.rooms : [];
       for (const room of defaultRooms) if (!this.state.rooms.some((item) => item.roomId === room.roomId)) this.state.rooms.push(room);
-      this.state.roomReports = Array.isArray(this.state.roomReports) ? this.state.roomReports : [];
-      this.state.sessions = Array.isArray(this.state.sessions) ? this.state.sessions : [];
-      this.state.crossRoomChecks = Array.isArray(this.state.crossRoomChecks) ? this.state.crossRoomChecks : [];
-      this.state.ideas = Array.isArray(this.state.ideas) ? this.state.ideas : [];
-      this.state.experiments = Array.isArray(this.state.experiments) ? this.state.experiments : [];
-      this.state.variants = Array.isArray(this.state.variants) ? this.state.variants : [];
-      this.state.appPrototypes = Array.isArray(this.state.appPrototypes) ? this.state.appPrototypes : [];
-      this.state.logicDrafts = Array.isArray(this.state.logicDrafts) ? this.state.logicDrafts : [];
-      this.state.productionHandoffs = Array.isArray(this.state.productionHandoffs) ? this.state.productionHandoffs : [];
-      this.state.factoryHandoffs = Array.isArray(this.state.factoryHandoffs) ? this.state.factoryHandoffs : [];
-      this.state.visualDrafts = Array.isArray(this.state.visualDrafts) ? this.state.visualDrafts : [];
-      this.state.visualRenderPackets = Array.isArray(this.state.visualRenderPackets) ? this.state.visualRenderPackets : [];
-      this.state.visualVerifications = Array.isArray(this.state.visualVerifications) ? this.state.visualVerifications : [];
-      this.state.imageActions = Array.isArray(this.state.imageActions) ? this.state.imageActions : [];
-      this.state.imageReceipts = Array.isArray(this.state.imageReceipts) ? this.state.imageReceipts : [];
-      this.state.visualDispatches = Array.isArray(this.state.visualDispatches) ? this.state.visualDispatches : [];
-      this.state.visualReceipts = Array.isArray(this.state.visualReceipts) ? this.state.visualReceipts : [];
-      this.state.runtimeObservations = Array.isArray(this.state.runtimeObservations) ? this.state.runtimeObservations : [];
-      this.state.runtimeInteractions = Array.isArray(this.state.runtimeInteractions) ? this.state.runtimeInteractions : [];
-      this.state.archives = Array.isArray(this.state.archives) ? this.state.archives : [];
-      this.state.cleanRuns = Array.isArray(this.state.cleanRuns) ? this.state.cleanRuns : [];
       this.state.evidence = (this.state.evidence || []).flatMap((value) => {
         const restored = verifyEvidenceRecord(value, { trustProvider: this.evidenceVerifier });
         return restored ? [restored] : [];
@@ -873,6 +867,7 @@ export class PixieLab {
         appPlayground: 'ACTIVE',
         logicWorkbench: 'ACTIVE',
         visualWorkbench: 'ACTIVE',
+        visualCrew: 'ACTIVE',
         imageBridge: 'ACTIVE',
         exampleZone: 'ACTIVE',
         archiveZone: 'ACTIVE',
@@ -897,6 +892,9 @@ export class PixieLab {
       imageReceipts: clone(this.state.imageReceipts || []),
       visualDispatches: clone(this.state.visualDispatches || []),
       visualReceipts: clone(this.state.visualReceipts || []),
+      visualCrewTasks: clone(this.state.visualCrewTasks || []),
+      visualCrewCompares: clone(this.state.visualCrewCompares || []),
+      visualCrewVerifications: clone(this.state.visualCrewVerifications || []),
       runtimeObservations: clone(this.state.runtimeObservations || []),
       runtimeInteractions: clone(this.state.runtimeInteractions || []),
       archives: clone(this.state.archives || []),
@@ -919,6 +917,9 @@ export class PixieLab {
         imageReceipts: (this.state.imageReceipts || []).length,
         visualDispatches: (this.state.visualDispatches || []).length,
         visualReceipts: (this.state.visualReceipts || []).length,
+        visualCrewTasks: (this.state.visualCrewTasks || []).length,
+        visualCrewCompares: (this.state.visualCrewCompares || []).length,
+        visualCrewVerifications: (this.state.visualCrewVerifications || []).length,
         runtimeObservations: (this.state.runtimeObservations || []).length,
         runtimeInteractions: (this.state.runtimeInteractions || []).length,
         archives: (this.state.archives || []).length,
