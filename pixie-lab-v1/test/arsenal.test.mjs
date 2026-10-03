@@ -4,7 +4,7 @@ import {
   createWeapon, createWeaponVersion, createWeaponCard, createLoadoutVersion,
   bindExperimentRun, assertRetestCompatible, createEvidenceBundle,
   createProvenUnit, createPromotionRecord, createHandoffPacket, validateProvenance,
-} from './arsenal.mjs';
+} from '../pixie-lab/arsenal.mjs';
 
 test('weapon card binds implementation and contract to active version', () => {
   const weapon = createWeapon({ weaponId:'WPN-001', name:'Visual Compare', purpose:'compare variants', category:'VISUAL', capabilityRef:'compare.visual' });
