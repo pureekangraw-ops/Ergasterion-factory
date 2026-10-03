@@ -642,6 +642,111 @@ export class PixieLab {
     this.state.imageActions.push(request);
     return clone(request);
   }
+
+  prepareVisualExecution(input = {}) {
+    const visualDraftId = required(input.visualDraftId, 'visualDraftId');
+    const packetInput = input.packet && typeof input.packet === 'object' && !Array.isArray(input.packet) ? input.packet : {};
+    const dispatchInput = input.dispatch && typeof input.dispatch === 'object' && !Array.isArray(input.dispatch) ? input.dispatch : {};
+    const packetId = required(packetInput.packetId || input.packetId, 'packetId');
+    const dispatchId = required(dispatchInput.dispatchId || input.dispatchId, 'dispatchId');
+    const workId = required(input.workId || dispatchInput.workId, 'workId');
+    const checkpointId = required(input.checkpointId || dispatchInput.checkpointId, 'checkpointId');
+
+    let draft = this.state.visualDrafts.find((item) => item.visualDraftId === visualDraftId) || null;
+    if (!draft) {
+      draft = this.createVisualDraft({
+        visualDraftId,
+        sourceRef: required(input.sourceRef, 'sourceRef'),
+        sourceVersion: input.sourceVersion || null,
+        sourceHash: input.sourceHash || null,
+        workId,
+        checkpointId,
+        spec: clone(input.spec || {}),
+      });
+    } else {
+      if (text(draft.workId) !== workId || text(draft.checkpointId) !== checkpointId) throw new Error('VISUAL_WORK_CONTEXT_MISMATCH');
+      if (input.sourceRef && text(draft.sourceRef) !== text(input.sourceRef)) throw new Error('VISUAL_SOURCE_MISMATCH');
+    }
+
+    let packet = this.state.visualRenderPackets.find((item) => item.packetId === packetId) || null;
+    if (!packet) {
+      packet = this.createVisualRenderPacket(visualDraftId, { ...packetInput, packetId });
+    } else if (packet.visualDraftId !== visualDraftId) {
+      throw new Error('VISUAL_RENDER_PACKET_DRAFT_MISMATCH');
+    }
+
+    let dispatch = this.state.visualDispatches.find((item) => item.dispatchId === dispatchId) || null;
+    if (!dispatch) {
+      dispatch = this.createVisualDispatch(visualDraftId, {
+        ...dispatchInput,
+        dispatchId,
+        packetId,
+        branchId: packet.branchId || null,
+        workId,
+        checkpointId,
+        requestedBy: dispatchInput.requestedBy || 'GO',
+      });
+    } else if (dispatch.packetId !== packetId || dispatch.visualDraftId !== visualDraftId) {
+      throw new Error('VISUAL_DISPATCH_REUSE_MISMATCH');
+    }
+
+    const imageAction = this.state.imageActions.find((item) => item.actionId === (dispatch.imageActionId || dispatch.dispatchId)) || null;
+    if (!imageAction) throw new Error('IMAGE_ACTION_NOT_FOUND');
+    return clone({
+      schema: 'PIXIE_GO_VISUAL_EXECUTION_V1',
+      status: imageAction.status,
+      visualDraftId,
+      packetId,
+      dispatchId,
+      targetTool: imageAction.targetTool,
+      externalExecutionRequired: imageAction.externalExecutionRequired === true,
+      draft,
+      packet,
+      dispatch,
+      imageAction,
+    });
+  }
+
+  completeVisualExecution(input = {}) {
+    const dispatchId = required(input.dispatchId, 'dispatchId');
+    const dispatch = this.state.visualDispatches.find((item) => item.dispatchId === dispatchId);
+    if (!dispatch) throw new Error('VISUAL_DISPATCH_NOT_FOUND');
+    const actionId = dispatch.imageActionId || dispatch.dispatchId;
+    const resultInput = input.result && typeof input.result === 'object' && !Array.isArray(input.result) ? input.result : {};
+    const receiptInput = input.receipt && typeof input.receipt === 'object' && !Array.isArray(input.receipt) ? input.receipt : {};
+
+    const imageReceipt = this.acceptImageResult(actionId, resultInput);
+    let visualReceipt = this.state.visualReceipts.find((item) => item.dispatchId === dispatchId) || null;
+    if (!visualReceipt) {
+      visualReceipt = this.createVisualReceipt(dispatchId, {
+        receiptId: receiptInput.receiptId || `VISUAL-${imageReceipt.receiptId}`,
+        artifactRef: imageReceipt.artifactRef,
+        sourceResultRefs: dispatch.sourceResultRefs || [],
+        evidenceRefs: receiptInput.evidenceRefs || imageReceipt.evidenceRefs || [],
+        executorIdentity: 'GO_IMAGE_TOOL',
+        providerJobId: imageReceipt.providerJobId,
+        error: imageReceipt.error,
+        readbackStatus: receiptInput.readbackStatus || 'UNKNOWN',
+        artifactUsable: receiptInput.artifactUsable === true,
+      });
+    }
+
+    let imported = null;
+    if (visualReceipt.status === 'LINKED' && input.placeOnTable !== false) {
+      imported = this.importVisualResult(visualReceipt.receiptId, { placeOnTable: true });
+    }
+    const lineage = this.visualLineage(dispatch.visualDraftId);
+    return clone({
+      schema: 'PIXIE_GO_VISUAL_EXECUTION_V1',
+      status: visualReceipt.status === 'LINKED' ? 'COMPLETE' : 'RECEIVED',
+      dispatchId,
+      actionId,
+      imageReceipt,
+      visualReceipt,
+      imported,
+      lineage,
+    });
+  }
   acceptImageResult(actionId, input = {}) {
     const request = this.state.imageActions.find((item) => item.actionId === actionId);
     if (!request) throw new Error('IMAGE_ACTION_NOT_FOUND');
