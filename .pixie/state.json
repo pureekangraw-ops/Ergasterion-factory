@@ -1140,6 +1140,37 @@
       "replayCount": 0,
       "lastReplay": null,
       "createdAt": "2026-10-03T19:25:49.470Z"
+    },
+    {
+      "goldenCaseId": "GOLDEN-HUB-008-PIXIE-DIRECT-DEBUG",
+      "lifecycle": [
+        "GOLDEN_CANDIDATE"
+      ],
+      "sourceBugId": "BUG-HUB-PIXIE-WRONG-ENTRY",
+      "sourceRunId": "BASELINE-HUB-PIXIE-001",
+      "inputRef": "go-hub://pixie-lab/debug",
+      "expected": {
+        "entry": "PIXIE_LAB_DIRECT",
+        "factoryTaskRequired": false,
+        "maintenanceRequired": false,
+        "readOnly": true
+      },
+      "fixedObserved": {
+        "entry": "PIXIE_LAB_DIRECT",
+        "factoryTaskRequired": false,
+        "maintenanceRequired": false,
+        "readOnly": true
+      },
+      "replayRecipe": "Start PIXIE debug from its Lab runtime against GO Hub. It must not create a Factory task and must not require Maintenance for read-only debugging.",
+      "logicVersions": [
+        "GO_HUB_SYSTEM/V4",
+        "bc9d1a138773c7884b2eee2d7c40877b2cad52f9"
+      ],
+      "evidenceRefs": [],
+      "status": "GOLDEN_CANDIDATE",
+      "replayCount": 0,
+      "lastReplay": null,
+      "createdAt": "2026-10-03T19:26:04.187Z"
     }
   ],
   "regressionAlerts": [],
