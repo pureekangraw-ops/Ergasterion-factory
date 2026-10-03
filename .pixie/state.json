@@ -732,7 +732,9 @@
     {
       "goldenCaseId": "GOLDEN-SPECTRUM-IDEMPOTENCY-001",
       "lifecycle": [
-        "GOLDEN_CANDIDATE"
+        "GOLDEN_CANDIDATE",
+        "VERIFY_REPLAY",
+        "GOLDEN_ACTIVE"
       ],
       "sourceBugId": "BUG-SPECTRUM-DUPLICATE-DISPATCH-001",
       "sourceRunId": "RUN-SPECTRUM-RECOVERY-001",
@@ -752,9 +754,22 @@
         "v0.2-lab"
       ],
       "evidenceRefs": [],
-      "status": "GOLDEN_CANDIDATE",
-      "replayCount": 0,
-      "lastReplay": null,
+      "status": "GOLDEN_ACTIVE",
+      "replayCount": 1,
+      "lastReplay": {
+        "runId": "RUN-SPECTRUM-REPLAY-IDEMPOTENCY-001",
+        "logicVersion": "v0.2-lab",
+        "observed": {
+          "status": "NO_DUPLICATE_DISPATCH",
+          "receiptChecked": true,
+          "dispatchCount": 1
+        },
+        "evidenceRefs": [
+          "fixture://spectrum/idempotency-retry"
+        ],
+        "status": "GOLDEN_ACTIVE",
+        "at": "2026-10-03T03:52:07.717Z"
+      },
       "createdAt": "2026-10-03T03:51:24.052Z"
     }
   ],
