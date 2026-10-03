@@ -4594,7 +4594,25 @@
       "approval": "NOT_AN_APPROVAL"
     }
   ],
-  "imageReceipts": [],
+  "imageReceipts": [
+    {
+      "receiptId": "RECEIPT-IMG-PRISM-THEME-TEST-002",
+      "actionId": "IMG-PRISM-THEME-TEST-002",
+      "packetId": "PACK-PRISM-THEME-TEST-002",
+      "providerJobId": "95180c59-1cae-44cf-9eae-d7edef07f1d8",
+      "artifactRef": "chatgpt-image://95180c59-1cae-44cf-9eae-d7edef07f1d8",
+      "receiptRef": "chatgpt-file://file_00000000f49881fa80e00c79c284d03b",
+      "status": "ARTIFACT_RETURNED",
+      "evidenceRefs": [
+        "USER_REFERENCE:PRISM_ICON_THEME_BOARD_20261003",
+        "chatgpt-image://95180c59-1cae-44cf-9eae-d7edef07f1d8"
+      ],
+      "unknowns": [],
+      "error": null,
+      "returnedAt": "2026-10-03T11:23:12.290Z",
+      "approval": "NOT_AN_APPROVAL"
+    }
+  ],
   "visualDispatches": [],
   "visualReceipts": [],
   "runtimeObservations": [],
